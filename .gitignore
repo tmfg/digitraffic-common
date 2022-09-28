@@ -1,0 +1,10 @@
+*
+
+!.editorconfig
+!.gitignore
+!LICENSE
+
+!.github/
+!.github/**/
+!.github/workflows/**/**.yml
+!.github/CODEOWNERS
