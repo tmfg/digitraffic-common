@@ -1,5 +1,5 @@
-import {Asserter} from "../../test/asserter";
-import * as Geometry from '../../utils/geometry';
+import {Asserter} from "../../src/test/asserter";
+import * as Geometry from '../../src/utils/geometry';
 
 const TAMPERE_WGS84_X = 23.761290078;
 const TAMPERE_WGS84_Y = 61.497742570;

@@ -1,10 +1,10 @@
 module.exports = {
-    "roots": [
-        "<rootDir>/test"
+    roots: [
+        '<rootDir>/test',
     ],
-    testMatch: ['**/*.test.ts'],
-    "transform": {
-        "^.+\\.tsx?$": "ts-jest"
-    },
-    testResultsProcessor: "jest-junit"
+    testMatch: [
+        '**/*.test.ts',
+    ],
+    testResultsProcessor: 'jest-junit',
+    preset: 'ts-jest',
 }

@@ -1,4 +1,4 @@
-import * as CommonUtils from "../../utils/utils";
+import * as CommonUtils from "../../src/utils/utils";
 
 describe('CommonUtilsTest', () => {
 

@@ -1,5 +1,5 @@
-import {getRandomInteger} from "../../test/testutils";
-import {retry, RetryLogError} from "../../utils/retry";
+import {getRandomInteger} from "../../src/test/testutils";
+import {retry, RetryLogError} from "../../src/utils/retry";
 
 describe('Promise utils tests', () => {
 

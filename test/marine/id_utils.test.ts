@@ -1,5 +1,5 @@
-import * as IdUtils from '../../marine/id_utils';
-import {getRandomNumber} from "../../test/testutils";
+import * as IdUtils from '../../src/marine/id_utils';
+import {getRandomNumber} from "../../src/test/testutils";
 
 describe('IdUtils tests', () => {
 

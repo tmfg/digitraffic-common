@@ -1,4 +1,4 @@
-import {mockSecret, stubSecretsManager} from "../../test/secrets-manager";
+import {mockSecret, stubSecretsManager} from "../../src/test/secrets-manager";
 
 import * as sinon from 'sinon';
 
@@ -12,7 +12,7 @@ const SECRET_EMPTY = {};
 
 stubSecretsManager();
 
-import {GenericSecret, withSecret, withSecretAndPrefix} from "../../aws/runtime/secrets/secret";
+import {GenericSecret, withSecret, withSecretAndPrefix} from "../../src/aws/runtime/secrets/secret";
 
 describe('secret - test', () => {
     afterEach(() => {

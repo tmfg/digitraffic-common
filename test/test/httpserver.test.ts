@@ -1,4 +1,4 @@
-import {TestHttpServer, ListenProperties, ERROR_NO_MATCH, ERRORCODE_NOT_FOUND} from "../../test/httpserver";
+import {TestHttpServer, ListenProperties, ERROR_NO_MATCH, ERRORCODE_NOT_FOUND} from "../../src/test/httpserver";
 import {IncomingMessage} from "http";
 import http = require('http');
 

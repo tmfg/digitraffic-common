@@ -11,8 +11,10 @@
     "@types/aws-lambda": "*",
     "@types/jest": "^29.0.3",
     "@types/node": "*",
+    "@types/sinon": "^10.0.13",
     "jest": "^29.1.1",
     "jest-junit": "^14.0.1",
+    "sinon": "^14.0.0",
     "ts-jest": "^29.0.2",
     "ts-node": "^10.9.1",
     "typescript": "*"
@@ -29,8 +31,7 @@
     "moment": "*",
     "node-ttl": "^0.2.0",
     "pg-native": "*",
-    "pg-promise": "*",
-    "sinon": "^11.1.2"
+    "pg-promise": "*"
   },
   "externals": [
     "aws-sdk",

@@ -1,4 +1,4 @@
-import {mockSecret, stubSecretsManager} from "../../test/secrets-manager";
+import {mockSecret, stubSecretsManager} from "../../src/test/secrets-manager";
 
 import * as sinon from 'sinon';
 
@@ -12,8 +12,8 @@ const SECRET_EMPTY = {};
 
 const stubSM = stubSecretsManager();
 
-import {SecretHolder} from "../../aws/runtime/secrets/secret-holder";
-import {DatabaseEnvironmentKeys} from "../../aws/runtime/secrets/dbsecret";
+import {SecretHolder} from "../../src/aws/runtime/secrets/secret-holder";
+import {DatabaseEnvironmentKeys} from "../../src/aws/runtime/secrets/dbsecret";
 
 describe('SecretHolder - tests', () => {
     afterEach(() => {
