@@ -2,7 +2,19 @@
 
 !.editorconfig
 !.gitignore
+!jest.config.js
 !LICENSE
+!package.json
+!tsconfig.json
+!yarn.lock
+
+!src/
+!src/**/
+!src/**/*.ts
+
+!test/
+!test/**/
+!test/**/*.ts
 
 !.github/
 !.github/**/

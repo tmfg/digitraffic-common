@@ -1,0 +1,39 @@
+{
+  "name": "digitraffic-common",
+  "version": "0.1.0",
+  "description": "",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint **/*.ts test/**/*.ts --fix",
+    "test": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "*",
+    "@types/jest": "^29.0.3",
+    "@types/node": "*",
+    "jest": "^29.1.1",
+    "jest-junit": "^14.0.1",
+    "ts-jest": "^29.0.2",
+    "ts-node": "^10.9.1",
+    "typescript": "*"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-synthetics-alpha": "^2.27.0-alpha.0",
+    "@types/geojson": "^7946.0.7",
+    "aws-cdk-lib": "*",
+    "aws-sdk": "*",
+    "axios": "^0.21.1",
+    "change-case": "4.1.2",
+    "constructs": "*",
+    "geojson-validation": "^1.0.2",
+    "moment": "*",
+    "node-ttl": "^0.2.0",
+    "pg-native": "*",
+    "pg-promise": "*",
+    "sinon": "^11.1.2"
+  },
+  "externals": [
+    "aws-sdk",
+    "Synthetics"
+  ]
+}
