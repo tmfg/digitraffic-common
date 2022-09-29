@@ -1,7 +1,11 @@
 {
-  "name": "digitraffic-common",
+  "name": "@tmfg/digitraffic-common",
   "version": "0.1.0",
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tmfg/digitraffic-common.git"
+  },
   "scripts": {
     "build": "tsc",
     "lint": "eslint **/*.ts test/**/*.ts --fix",
