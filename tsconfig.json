@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
+    "outDir": "./dist",
     "baseUrl": ".",
     "target":"ES2021",
     "module": "commonjs",
     "lib": ["es2021"],
-    "declaration": false,
+    "declaration": true,
     "strict": true,
     "noImplicitAny": true,
     "resolveJsonModule": true,
@@ -23,5 +24,7 @@
     "moduleResolution": "node",
     "preserveSymlinks": true
   },
-  "exclude": ["cdk.out", "tsd"]
+  "include": [
+    "src/**/*"
+  ]
 }

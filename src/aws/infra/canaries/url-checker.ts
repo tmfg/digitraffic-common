@@ -1,6 +1,6 @@
 import {constants} from "http2";
 import {IncomingMessage, RequestOptions} from "http";
-import {Asserter} from "digitraffic-common/test/asserter";
+import {Asserter} from "../../../test/asserter";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const synthetics = require('Synthetics');
