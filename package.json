@@ -10,6 +10,9 @@
     "node": ">=16 <17",
     "yarn": ">1.2 <2"
   },
+  "publishConfig": {
+    "@tmfg:registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "tsc",
     "lint": "eslint **/*.ts test/**/*.ts --fix",

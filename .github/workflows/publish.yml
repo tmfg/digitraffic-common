@@ -6,17 +6,17 @@ on:
     branches:
       - 'feature/**'
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+      contents: read
     steps:
       - uses: actions/checkout@v3
-      # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '16'
           registry-url: 'https://npm.pkg.github.com'
-          # Defaults to the user or organization that owns the workflow file
-          scope: '@octocat'
       - run: yarn install --immutable
       - run: yarn build
       - run: yarn publish --tag $GITHUB_REF
