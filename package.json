@@ -1,7 +1,11 @@
 {
   "name": "digitraffic-common",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "",
+  "engines": {
+    "node": ">=16 <17",
+    "yarn": ">1.2 <2"
+  },
   "scripts": {
     "build": "tsc",
     "lint": "eslint **/*.ts test/**/*.ts --fix",

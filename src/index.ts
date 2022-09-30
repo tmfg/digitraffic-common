@@ -1,1 +1,1 @@
-export * from "./aws/infra/api/response";
+export * from "./aws/infra/api/responses";
