@@ -20,6 +20,6 @@ jobs:
       - run: sed -i 's#tmfg/digitraffic-common#'${{ github.repository }}'#g' package.json
       - run: yarn install --immutable
       - run: yarn build
-      - run: yarn publish --tag ${{ github.ref }}
+      - run: yarn publish --tag ${{ github.ref_name }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
