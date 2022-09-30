@@ -17,8 +17,8 @@ jobs:
         with:
           node-version: '16'
           registry-url: 'https://npm.pkg.github.com'
-      - run: sed -i 's#tmfg/digitraffic-common#'${{ github.repository }}'#g' package.json
-      - run: sed -i '/version/ s#version_tag#'${{ github.ref_name }}'#' package.json
+      - run: sed -i 's#tmfg/digitraffic-common#${{ github.repository }}#g' package.json
+      - run: sed -i '/version/ s#version_tag#${{ github.ref_name }}#' package.json
       - run: yarn install --immutable
       - run: yarn build
       - run: yarn publish
