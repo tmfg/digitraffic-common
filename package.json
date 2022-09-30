@@ -1,7 +1,11 @@
 {
-  "name": "digitraffic-common",
+  "name": "@tmfg/digitraffic-common",
   "version": "0.0.1",
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tmfg/digitraffic-common.git"
+  },
   "engines": {
     "node": ">=16 <17",
     "yarn": ">1.2 <2"
