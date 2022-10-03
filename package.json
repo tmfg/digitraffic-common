@@ -18,10 +18,10 @@
     "lint": "eslint **/*.ts test/**/*.ts --fix",
     "test": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "files": [
-    "/dist"
+    "."
   ],
   "devDependencies": {
     "@aws-cdk/aws-synthetics-alpha": "^2.27.0-alpha.0",

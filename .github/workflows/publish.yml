@@ -21,6 +21,7 @@ jobs:
       - run: sed -i '/version/ s#versio_tag#${{ github.ref_name }}#' package.json
       - run: yarn install --immutable
       - run: yarn build
-      - run: yarn publish
+      - run: cp package.json dist
+      - run: cd dist && yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
