@@ -13,12 +13,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '16'
-          registry-url: 'https://npm.pkg.github.com'
-#      - run: sed -i 's#tmfg/digitraffic-common#${{ github.repository }}#g' package.json
+          registry-url: 'https://registry.npmjs.com'
       - run: sed -i '/version/ s#versio_tag#${{ github.ref_name }}#' package.json
-      - run: yarn install --immutable
-      - run: yarn build
+      - run: yarn install --immutable && yarn build
       - run: cp LICENSE package.json dist
       - run: cd dist && yarn publish --access=public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
