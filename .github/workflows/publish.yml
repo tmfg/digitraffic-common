@@ -2,9 +2,6 @@ name: Publish Package to Github Packages
 on:
   release:
     types: [created]
-  push:
-    branches:
-      - 'feature/**'
 jobs:
   build-and-publish:
     runs-on: ubuntu-22.04
@@ -22,6 +19,6 @@ jobs:
       - run: yarn install --immutable
       - run: yarn build
       - run: cp LICENSE package.json dist
-      - run: cd dist && yarn publish
+      - run: cd dist && yarn publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
