@@ -1,13 +1,13 @@
 {
   "name": "@digitraffic/common",
-  "version": "versio_tag",
+  "version": "2022.10.05-1",
   "description": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/tmfg/digitraffic-common.git"
   },
   "engines": {
-    "node": ">=16 <17",
+    "node": ">=14 <17",
     "yarn": ">1.2 <2"
   },
   "publishConfig": {
