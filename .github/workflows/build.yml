@@ -30,6 +30,7 @@ jobs:
         id: coverage
         with:
           coverage-file: output/coverage/jest/coverage-final.json
+          base-coverage-file: output/coverage/jest/coverage-final.json
           output: report-markdown
       - name: Output coverage report
         run: |
