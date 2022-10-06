@@ -22,9 +22,9 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          reported: jest-junit
-          path: output/coverage/jest/*.xml
+          name: Jest test report
           reporter: jest-junit
+          path: output/coverage/jest/*.xml
       - name: Notify Slack
         if: failure()
         uses: 8398a7/action-slack@v3
