@@ -1,0 +1,20 @@
+name: Build
+on: [push]
+jobs:
+  build:
+    if: github.event.repo.name != 'tmfg/digitraffic-common'
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Compile
+        run: |
+          yarn
+          yarn build
+      - name: Run tests
+        run: |
+          yarn test
