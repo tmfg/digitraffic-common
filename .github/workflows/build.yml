@@ -17,7 +17,7 @@ jobs:
           yarn build
       - name: Run tests
         run: |
-          yarn test
+          yarn test >> $GITHUB_STEP_SUMMARY
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()
@@ -25,16 +25,6 @@ jobs:
           name: Jest test report
           reporter: jest-junit
           path: junit.xml
-      - name: Generate coverage report
-        uses: ArtiomTr/jest-coverage-report-action@v2
-        id: coverage
-        with:
-          coverage-file: output/coverage/jest/coverage-final.json
-          base-coverage-file: output/coverage/jest/coverage-final.json
-          output: report-markdown
-      - name: Output coverage report
-        run: |
-          echo "${{ steps.coverage.outputs.report }}" >> $GITHUB_STEP_SUMMARY
       - name: Notify Slack
         if: failure()
         uses: 8398a7/action-slack@v3
