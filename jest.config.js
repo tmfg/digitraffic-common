@@ -9,7 +9,7 @@ module.exports = {
     preset: 'ts-jest',
     coverageThreshold: {
         global: {
-            lines: 80,
+            lines: 70,
         },
     },
 }
