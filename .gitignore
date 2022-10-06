@@ -1,13 +1,17 @@
 *
 
-!.editorconfig
-!.gitignore
-!jest.config.js
-!LICENSE
-!package.json
-!README.md
-!tsconfig.json
-!yarn.lock
+!.husky/
+!.husky/pre-commit
+!/.editorconfig
+!/.eslintrc.json
+!/.gitignore
+!/.prettierrc.json
+!/jest.config.js
+!/LICENSE
+!/package.json
+!/README.md
+!/tsconfig.json
+!/yarn.lock
 
 !src/
 !src/**/
