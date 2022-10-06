@@ -24,7 +24,7 @@ jobs:
         with:
           name: Jest test report
           reporter: jest-junit
-          path: output/coverage/jest/*.xml
+          path: junit.xml
       - name: Notify Slack
         if: failure()
         uses: 8398a7/action-slack@v3
