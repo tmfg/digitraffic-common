@@ -19,23 +19,27 @@ export const SSM_KEY_WARNING_TOPIC = `${SSM_ROOT}${MONITORING_ROOT}/warning-topi
 export const SSM_KEY_ALARM_TOPIC = `${SSM_ROOT}${MONITORING_ROOT}/alarm-topic`;
 
 export type StackConfiguration = {
-    readonly shortName?: string;
-    readonly secretId?: string;
-    readonly alarmTopicArn: string;
-    readonly warningTopicArn: string;
-    readonly enableCanaries: boolean;
-    readonly logsDestinationArn?: string;
+    readonly shortName?: string
+    readonly secretId?: string
+    readonly alarmTopicArn: string
+    readonly warningTopicArn: string
+    readonly logsDestinationArn?: string
 
-    readonly vpcId?: string;
-    readonly lambdaDbSgId?: string;
-    readonly privateSubnetIds?: string[];
-    readonly availabilityZones?: string[];
+    readonly vpcId?: string
+    readonly lambdaDbSgId?: string
+    readonly privateSubnetIds?: string[]
+    readonly availabilityZones?: string[]
 
-    readonly trafficType: TrafficType;
-    readonly production: boolean;
-    readonly stackProps: StackProps;
+    readonly trafficType: TrafficType
+    readonly production: boolean
+    readonly stackProps: StackProps
 
-    readonly whitelistedResources?: string[];
+    readonly stackFeatures?: {
+        readonly enableCanaries?: boolean
+        readonly enableDocumentation?: boolean
+    }
+
+    readonly whitelistedResources?: string[]
 }
 
 export class DigitrafficStack extends Stack {

@@ -19,6 +19,7 @@ import R = require('ramda');
 
 export class DigitrafficRestApi extends RestApi {
     readonly apiKeyIds: string[];
+    readonly enableDocumentation: boolean;
 
     constructor(
         stack: DigitrafficStack, apiId: string, apiName: string, allowFromIpAddresses?: string[] | undefined, config?: Partial<RestApiProps>,
@@ -38,6 +39,7 @@ export class DigitrafficRestApi extends RestApi {
         super(stack, apiId, apiConfig);
 
         this.apiKeyIds = [];
+        this.enableDocumentation = stack.configuration.stackFeatures?.enableDocumentation ?? true;
 
         add404Support(this, stack);
     }
@@ -99,9 +101,13 @@ export class DigitrafficRestApi extends RestApi {
     }
 
     documentResource(resource: Resource, ...documentationPart: DocumentationPart[]) {
-        documentationPart.forEach(dp => this.addDocumentationPart(
-            resource, dp.parameterName, `${resource.path}.${dp.parameterName}.Documentation`, dp.type, dp.documentationProperties,
-        ));
+        if(this.enableDocumentation) {
+            documentationPart.forEach(dp => this.addDocumentationPart(
+                resource, dp.parameterName, `${resource.path}.${dp.parameterName}.Documentation`, dp.type, dp.documentationProperties,
+            ));
+        } else {
+            console.info("Skipping documentation for %s", resource.path);
+        }
     }
 }
 
