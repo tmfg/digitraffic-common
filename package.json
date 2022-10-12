@@ -63,7 +63,6 @@
     "Synthetics"
   ],
   "lint-staged": {
-    "*.{js,ts}": "eslint --cache --fix",
     "*.{js,ts,css,md,yml,yaml,json}": "prettier --write"
   }
 }
