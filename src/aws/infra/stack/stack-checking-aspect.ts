@@ -1,12 +1,12 @@
-import {Annotations, IAspect, Stack} from "aws-cdk-lib";
-import {CfnFunction, Runtime} from 'aws-cdk-lib/aws-lambda';
-import {CfnBucket} from "aws-cdk-lib/aws-s3";
-import {DigitrafficStack, SOLUTION_KEY, StackConfiguration} from "./stack";
-import {IConstruct} from "constructs";
-import {CfnMethod, CfnResource} from "aws-cdk-lib/aws-apigateway";
-import {paramCase, snakeCase} from "change-case";
-import {CfnQueue} from "aws-cdk-lib/aws-sqs";
-import {LogRetention} from "aws-cdk-lib/aws-logs";
+import { Annotations, IAspect, Stack } from "aws-cdk-lib";
+import { CfnFunction, Runtime } from "aws-cdk-lib/aws-lambda";
+import { CfnBucket } from "aws-cdk-lib/aws-s3";
+import { DigitrafficStack, SOLUTION_KEY } from "./stack";
+import { IConstruct } from "constructs";
+import { CfnMethod, CfnResource } from "aws-cdk-lib/aws-apigateway";
+import { paramCase, snakeCase } from "change-case";
+import { CfnQueue } from "aws-cdk-lib/aws-sqs";
+import { LogRetention } from "aws-cdk-lib/aws-logs";
 import IntegrationProperty = CfnMethod.IntegrationProperty;
 
 const MAX_CONCURRENCY_LIMIT = 100;
@@ -27,14 +27,19 @@ enum ResourceType {
 }
 
 export class StackCheckingAspect implements IAspect {
-    private readonly configuration?: StackConfiguration;
+    private readonly stackShortName?: string;
+    private readonly whitelistedResources?: string[];
 
-    constructor(configuration?: StackConfiguration) {
-        this.configuration = configuration;
+    constructor(stackShortName?: string, whitelistedResources?: string[]) {
+        this.stackShortName = stackShortName;
+        this.whitelistedResources = whitelistedResources;
     }
 
     static create(stack: DigitrafficStack) {
-        return new StackCheckingAspect(stack.configuration);
+        return new StackCheckingAspect(
+            stack.configuration.shortName,
+            stack.configuration.whitelistedResources
+        );
     }
 
     public visit(node: IConstruct): void {
@@ -50,12 +55,17 @@ export class StackCheckingAspect implements IAspect {
     }
 
     private isWhitelisted(key: string) {
-        return this?.configuration?.whitelistedResources?.some(wl => {
-            return key.matchAll(new RegExp(wl, 'g'));
+        return this.whitelistedResources?.some((wl) => {
+            return key.matchAll(new RegExp(wl, "g"));
         });
     }
 
-    private addAnnotation(node: IConstruct, key: ResourceType | string, message: string, isError = true) {
+    private addAnnotation(
+        node: IConstruct,
+        key: ResourceType | string,
+        message: string,
+        isError = true
+    ) {
         const resourceKey = `${node.node.path}/${key}`;
         const isWhiteListed = this.isWhitelisted(resourceKey);
         const annotationMessage = `${resourceKey}:${message}`;
@@ -71,12 +81,28 @@ export class StackCheckingAspect implements IAspect {
 
     private checkStack(node: IConstruct) {
         if (node instanceof DigitrafficStack) {
-            if ((node.stackName.includes('Test') || node.stackName.includes('Tst')) && node.configuration?.production) {
-                this.addAnnotation(node, ResourceType.stackName, 'Production is set for Test-stack');
+            if (
+                (node.stackName.includes("Test") ||
+                    node.stackName.includes("Tst")) &&
+                node.configuration.production
+            ) {
+                this.addAnnotation(
+                    node,
+                    ResourceType.stackName,
+                    "Production is set for Test-stack"
+                );
             }
 
-            if ((node.stackName.includes('Prod') || node.stackName.includes('Prd')) && !node.configuration?.production) {
-                this.addAnnotation(node, ResourceType.stackName, 'Production is not set for Production-stack');
+            if (
+                (node.stackName.includes("Prod") ||
+                    node.stackName.includes("Prd")) &&
+                !node.configuration.production
+            ) {
+                this.addAnnotation(
+                    node,
+                    ResourceType.stackName,
+                    "Production is not set for Production-stack"
+                );
             }
         }
     }
@@ -84,25 +110,55 @@ export class StackCheckingAspect implements IAspect {
     private checkFunction(node: IConstruct) {
         if (node instanceof CfnFunction) {
             if (!node.reservedConcurrentExecutions) {
-                this.addAnnotation(node, ResourceType.reservedConcurrentConcurrency, 'Function must have reservedConcurrentConcurrency');
-            } else if (node.reservedConcurrentExecutions > MAX_CONCURRENCY_LIMIT) {
-                this.addAnnotation(node, ResourceType.reservedConcurrentConcurrency, 'Function reservedConcurrentConcurrency too high!');
+                this.addAnnotation(
+                    node,
+                    ResourceType.reservedConcurrentConcurrency,
+                    "Function must have reservedConcurrentConcurrency"
+                );
+            } else if (
+                node.reservedConcurrentExecutions > MAX_CONCURRENCY_LIMIT
+            ) {
+                this.addAnnotation(
+                    node,
+                    ResourceType.reservedConcurrentConcurrency,
+                    "Function reservedConcurrentConcurrency too high!"
+                );
             }
 
             if (!node.timeout) {
-                this.addAnnotation(node, ResourceType.functionTimeout, 'Function must have timeout');
+                this.addAnnotation(
+                    node,
+                    ResourceType.functionTimeout,
+                    "Function must have timeout"
+                );
             }
 
             if (!node.memorySize) {
-                this.addAnnotation(node, ResourceType.functionMemorySize, 'Function must have memorySize');
+                this.addAnnotation(
+                    node,
+                    ResourceType.functionMemorySize,
+                    "Function must have memorySize"
+                );
             }
 
             if (node.runtime !== NODE_RUNTIME) {
-                this.addAnnotation(node, ResourceType.functionRuntime,'wrong runtime ' + node.runtime);
+                this.addAnnotation(
+                    node,
+                    ResourceType.functionRuntime,
+                    `Function has wrong runtime ${node.runtime!}`
+                );
             }
 
-            if (this.configuration?.shortName && node.functionName && node.functionName.indexOf(this.configuration.shortName) !== 0) {
-                this.addAnnotation(node, ResourceType.functionName, 'Function name does not begin with ' + this.configuration.shortName);
+            if (
+                this.stackShortName &&
+                node.functionName &&
+                !node.functionName.startsWith(this.stackShortName)
+            ) {
+                this.addAnnotation(
+                    node,
+                    ResourceType.functionName,
+                    `Function name does not begin with ${this.stackShortName}`
+                );
             }
         }
     }
@@ -110,18 +166,32 @@ export class StackCheckingAspect implements IAspect {
     private checkTags(node: IConstruct) {
         if (node instanceof Stack) {
             if (!node.tags.tagValues()[SOLUTION_KEY]) {
-                this.addAnnotation(node, ResourceType.tagSolution, 'Solution tag is missing');
+                this.addAnnotation(
+                    node,
+                    ResourceType.tagSolution,
+                    "Solution tag is missing"
+                );
             }
         }
     }
 
     private checkBucket(node: IConstruct) {
         if (node instanceof CfnBucket) {
-            const c = node.publicAccessBlockConfiguration as CfnBucket.PublicAccessBlockConfigurationProperty;
+            const c =
+                node.publicAccessBlockConfiguration as CfnBucket.PublicAccessBlockConfigurationProperty;
 
             if (c) {
-                if (!c.blockPublicAcls || !c.blockPublicPolicy || !c.ignorePublicAcls || !c.restrictPublicBuckets) {
-                    this.addAnnotation(node, ResourceType.bucketPublicity, 'Check bucket publicity');
+                if (
+                    !c.blockPublicAcls ||
+                    !c.blockPublicPolicy ||
+                    !c.ignorePublicAcls ||
+                    !c.restrictPublicBuckets
+                ) {
+                    this.addAnnotation(
+                        node,
+                        ResourceType.bucketPublicity,
+                        "Check bucket publicity"
+                    );
                 }
             }
         }
@@ -129,12 +199,12 @@ export class StackCheckingAspect implements IAspect {
 
     private static isValidPath(path: string): boolean {
         // if path includes . or { check only the trailing part of path
-        if (path.includes('.')) {
-            return this.isValidPath(path.split('.')[0]);
+        if (path.includes(".")) {
+            return this.isValidPath(path.split(".")[0]);
         }
 
-        if (path.includes('{')) {
-            return this.isValidPath(path.split('{')[0]);
+        if (path.includes("{")) {
+            return this.isValidPath(path.split("{")[0]);
         }
 
         return paramCase(path) === path;
@@ -147,19 +217,30 @@ export class StackCheckingAspect implements IAspect {
     private checkResourceCasing(node: IConstruct) {
         if (node instanceof CfnResource) {
             if (!StackCheckingAspect.isValidPath(node.pathPart)) {
-                this.addAnnotation(node, ResourceType.resourcePath, 'Path part should be in kebab-case');
+                this.addAnnotation(
+                    node,
+                    ResourceType.resourcePath,
+                    "Path part should be in kebab-case"
+                );
             }
         } else if (node instanceof CfnMethod) {
             const integration = node.integration as IntegrationProperty;
 
             if (integration && integration.requestParameters) {
-                Object.keys(integration.requestParameters).forEach(key => {
-                    const split = key.split('.');
+                Object.keys(integration.requestParameters).forEach((key) => {
+                    const split = key.split(".");
                     const type = split[2];
                     const name = split[3];
 
-                    if (type === 'querystring' && !StackCheckingAspect.isValidQueryString(name)) {
-                        this.addAnnotation(node, name, 'Querystring should be in snake_case');
+                    if (
+                        type === "querystring" &&
+                        !StackCheckingAspect.isValidQueryString(name)
+                    ) {
+                        this.addAnnotation(
+                            node,
+                            name,
+                            "Querystring should be in snake_case"
+                        );
                     }
                 });
             }
@@ -169,18 +250,29 @@ export class StackCheckingAspect implements IAspect {
     private checkQueueEncryption(node: IConstruct) {
         if (node instanceof CfnQueue) {
             if (!node.kmsMasterKeyId) {
-                this.addAnnotation(node, ResourceType.queueEncryption, 'Queue must have encryption enabled');
+                this.addAnnotation(
+                    node,
+                    ResourceType.queueEncryption,
+                    "Queue must have encryption enabled"
+                );
             }
         }
     }
 
     private checkLogGroupRetention(node: IConstruct) {
         if (node instanceof LogRetention) {
-            const child = node.node.defaultChild as unknown as Record<string, Record<string, string>>;
+            const child = node.node.defaultChild as unknown as Record<
+                string,
+                Record<string, string>
+            >;
             const retention = child._cfnProperties.RetentionInDays;
 
             if (!retention) {
-                this.addAnnotation(node, ResourceType.logGroupRetention, 'Log group must define log group retention');
+                this.addAnnotation(
+                    node,
+                    ResourceType.logGroupRetention,
+                    "Log group must define log group retention"
+                );
             }
         }
     }
