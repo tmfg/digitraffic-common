@@ -1,10 +1,16 @@
-import {Duration} from "aws-cdk-lib";
-import {AssetCode, Canary, Runtime, Schedule, Test} from "@aws-cdk/aws-synthetics-alpha";
-import {Role} from "aws-cdk-lib/aws-iam";
-import {CanaryAlarm} from "./canary-alarm";
-import {CanaryParameters} from "./canary-parameters";
-import {Construct} from "constructs";
-import {LambdaEnvironment} from "../stack/lambda-configs";
+import { Duration } from "aws-cdk-lib";
+import {
+    AssetCode,
+    Canary,
+    Runtime,
+    Schedule,
+    Test,
+} from "@aws-cdk/aws-synthetics-alpha";
+import { Role } from "aws-cdk-lib/aws-iam";
+import { CanaryAlarm } from "./canary-alarm";
+import { CanaryParameters } from "./canary-parameters";
+import { Construct } from "constructs";
+import { LambdaEnvironment } from "../stack/lambda-configs";
 
 export class DigitrafficCanary extends Canary {
     constructor(
@@ -12,10 +18,10 @@ export class DigitrafficCanary extends Canary {
         canaryName: string,
         role: Role,
         params: CanaryParameters,
-        environmentVariables: LambdaEnvironment,
+        environmentVariables: LambdaEnvironment
     ) {
         super(scope, canaryName, {
-            runtime: Runtime.SYNTHETICS_NODEJS_PUPPETEER_3_5,
+            runtime: Runtime.SYNTHETICS_NODEJS_PUPPETEER_3_6,
             role,
             test: Test.custom({
                 code: new AssetCode("dist", {
@@ -23,7 +29,10 @@ export class DigitrafficCanary extends Canary {
                 }),
                 handler: params.handler,
             }),
-            environmentVariables: { ...environmentVariables, ...params?.canaryEnv },
+            environmentVariables: {
+                ...environmentVariables,
+                ...params?.canaryEnv,
+            },
             canaryName,
             schedule: params.schedule ?? Schedule.rate(Duration.minutes(15)),
         });
