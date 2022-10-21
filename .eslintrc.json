@@ -6,15 +6,22 @@
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": ["./tsconfig.json"]
+    "project": ["./tsconfig.eslint.json"]
   },
   "plugins": ["@typescript-eslint"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:@typescript-eslint/strict",
+    //    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    //    "plugin:@typescript-eslint/strict",
     "prettier"
-  ]
+  ],
+  "rules": {
+    "@typescript-eslint/no-extraneous-class": "off",
+    "@typescript-eslint/no-non-null-assertion": "error",
+    //    "@typescript-eslint/non-nullable-type-assertion-style": "error",
+    "@typescript-eslint/no-throw-literal": "error",
+    "@typescript-eslint/no-explicit-any": "error"
+  }
 }

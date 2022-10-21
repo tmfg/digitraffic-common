@@ -28,7 +28,7 @@
   ],
   "dependencies": {
     "@aws-cdk/aws-synthetics-alpha": "2.46.0-alpha.0",
-    "@types/geojson": "^7946.0.7",
+    "@types/geojson": "^7946.0.10",
     "aws-cdk-lib": "2.46.0",
     "aws-sdk": "2.1232.0",
     "axios": "^0.21.1",

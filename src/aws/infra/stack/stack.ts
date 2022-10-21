@@ -19,7 +19,7 @@ export const SSM_KEY_WARNING_TOPIC = `${SSM_ROOT}${MONITORING_ROOT}/warning-topi
 export const SSM_KEY_ALARM_TOPIC = `${SSM_ROOT}${MONITORING_ROOT}/alarm-topic`;
 
 export interface StackConfiguration {
-    readonly shortName?: string;
+    readonly shortName: string;
     readonly secretId?: string;
     readonly alarmTopicArn: string;
     readonly warningTopicArn: string;
@@ -75,7 +75,7 @@ export class DigitrafficStack extends Stack {
             this.vpc = Vpc.fromVpcAttributes(this, "vpc", {
                 vpcId: configuration.vpcId,
                 privateSubnetIds: configuration.privateSubnetIds,
-                availabilityZones: configuration.availabilityZones!,
+                availabilityZones: configuration.availabilityZones ?? [],
             });
         }
 
@@ -116,7 +116,7 @@ export class DigitrafficStack extends Stack {
 
     createLambdaEnvironment(): DBLambdaEnvironment {
         return this.createDefaultLambdaEnvironment(
-            this.configuration.shortName!
+            this.configuration.shortName
         );
     }
 

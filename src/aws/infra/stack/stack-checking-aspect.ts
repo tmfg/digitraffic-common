@@ -145,7 +145,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.functionRuntime,
-                    `Function has wrong runtime ${node.runtime!}`
+                    `Function has wrong runtime ${node.runtime}!`
                 );
             }
 
