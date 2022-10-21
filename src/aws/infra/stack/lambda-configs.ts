@@ -204,4 +204,4 @@ export type MonitoredFunctionParameters = {
     readonly durationWarningProps?: MonitoredFunctionAlarmProps;
     readonly errorAlarmProps?: MonitoredFunctionAlarmProps;
     readonly throttleAlarmProps?: MonitoredFunctionAlarmProps;
-};
+} & FunctionParameters;
