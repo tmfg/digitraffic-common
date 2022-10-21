@@ -38,7 +38,8 @@ export function createSubscription(
 
 export class DigitrafficLogSubscriptions {
     constructor(stack: DigitrafficStack, ...lambdas: MonitoredFunction[]) {
-        if (stack.configuration.logsDestinationArn) {
+        const destinationArn = stack.configuration.logsDestinationArn;
+        if (destinationArn !== undefined) {
             lambdas.forEach((lambda) => {
                 const filter = new CfnSubscriptionFilter(
                     stack,
@@ -46,8 +47,7 @@ export class DigitrafficLogSubscriptions {
                     {
                         logGroupName: `/aws/lambda/${lambda.givenName}`,
                         filterPattern: "",
-                        destinationArn: stack.configuration
-                            .logsDestinationArn as string,
+                        destinationArn,
                     }
                 );
 

@@ -1,13 +1,18 @@
-import {GenericSecret, getSecret} from "./secret";
-import {checkExpectedSecretKeys, DatabaseEnvironmentKeys, DbSecret} from "./dbsecret";
+import { GenericSecret, getSecret } from "./secret";
+import {
+    checkExpectedSecretKeys,
+    DatabaseEnvironmentKeys,
+    DbSecret,
+} from "./dbsecret";
+import { getEnvVariable } from "../../../utils/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const NodeTtl = require('node-ttl');
+const NodeTtl = require("node-ttl");
 
-const DEFAULT_PREFIX = '';
-const DEFAULT_SECRET_KEY = 'SECRET';
+const DEFAULT_PREFIX = "";
+const DEFAULT_SECRET_KEY = "SECRET";
 const DEFAULT_CONFIGURATION = {
-    ttl: 5*60, // timeout secrets in 5 minutes
+    ttl: 5 * 60, // timeout secrets in 5 minutes
 };
 
 /**
@@ -25,7 +30,12 @@ export class SecretHolder<Secret> {
 
     private readonly secretCache;
 
-    constructor(secretId: string, prefix = '', expectedKeys: string[] = [], configuration = DEFAULT_CONFIGURATION) {
+    constructor(
+        secretId: string,
+        prefix = "",
+        expectedKeys: string[] = [],
+        configuration = DEFAULT_CONFIGURATION
+    ) {
         this.secretId = secretId;
         this.prefix = prefix;
         this.expectedKeys = expectedKeys;
@@ -41,13 +51,26 @@ export class SecretHolder<Secret> {
         this.secretCache.push(DEFAULT_SECRET_KEY, secretValue);
     }
 
-    public static create<S>(prefix = DEFAULT_PREFIX, expectedKeys: string[] = []) {
-        return new SecretHolder<S>(process.env.SECRET_ID as string, prefix, expectedKeys);
+    public static create<S>(
+        prefix = DEFAULT_PREFIX,
+        expectedKeys: string[] = []
+    ) {
+        return new SecretHolder<S>(
+            getEnvVariable("SECRET_ID"),
+            prefix,
+            expectedKeys
+        );
     }
 
     public async get(): Promise<Secret> {
         const secret = await this.getSecret<Secret>();
-        const parsedSecret = this.prefix === DEFAULT_PREFIX ? secret : this.parseSecret(secret as unknown as GenericSecret,  `${this.prefix}.`);
+        const parsedSecret =
+            this.prefix === DEFAULT_PREFIX
+                ? secret
+                : this.parseSecret(
+                      secret as unknown as GenericSecret,
+                      `${this.prefix}.`
+                  );
 
         if (this.expectedKeys.length > 0) {
             checkExpectedSecretKeys(this.expectedKeys, parsedSecret);
@@ -68,7 +91,6 @@ export class SecretHolder<Secret> {
 
         return parsed as unknown as Secret;
     }
-
 
     private async getSecret<S>(): Promise<S> {
         const secret = this.secretCache.get(DEFAULT_SECRET_KEY);

@@ -1,8 +1,9 @@
-import {IDatabase, ITask} from "pg-promise";
-import {DatabaseEnvironmentKeys} from "../aws/runtime/secrets/dbsecret";
+import { IDatabase, ITask } from "pg-promise";
+import { DatabaseEnvironmentKeys } from "../aws/runtime/secrets/dbsecret";
+import { getEnvVariable, getEnvVariableSafe } from "../utils/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const pgp = require('pg-promise')();
+const pgp = require("pg-promise")();
 
 // convert numeric types to number instead of string
 pgp.pg.types.setTypeParser(pgp.pg.types.builtins.INT8, (value: string) => {
@@ -19,7 +20,7 @@ pgp.pg.types.setTypeParser(pgp.pg.types.builtins.NUMERIC, (value: string) => {
 
 export type DTDatabase = IDatabase<unknown>;
 
-export type DTTransaction = ITask<unknown>
+export type DTTransaction = ITask<unknown>;
 
 /**
  * Creates a non-pooling database connection primarily used by Lambdas.
@@ -38,36 +39,53 @@ export function initDbConnection(
     password: string,
     applicationName: string,
     url: string,
-    options?: object,
+    options?: object
 ): DTDatabase {
     const finalUrl = `postgresql://${username}:${password}@${url}?application_name=${applicationName}`;
 
     return pgp(finalUrl, options);
 }
 
-export function inTransaction<T> (fn: (db: DTTransaction) => Promise<T>): Promise<T> {
-    return inDatabase(db => db.tx((t: DTTransaction) => fn(t)));
+export function inTransaction<T>(
+    fn: (db: DTTransaction) => Promise<T>
+): Promise<T> {
+    return inDatabase((db) => db.tx((t: DTTransaction) => fn(t)));
 }
 
 export function inDatabase<T>(fn: (db: DTDatabase) => Promise<T>): Promise<T> {
     return doInDatabase(false, fn);
 }
 
-export function inDatabaseReadonly<T>(fn: (db: DTDatabase) => Promise<T>): Promise<T> {
-
+export function inDatabaseReadonly<T>(
+    fn: (db: DTDatabase) => Promise<T>
+): Promise<T> {
     return doInDatabase(true, fn);
 }
 
-async function doInDatabase<T>(readonly: boolean,
-    fn: (db: DTDatabase) => Promise<T>): Promise<T> {
-    const db = initDbConnection(process.env[DatabaseEnvironmentKeys.DB_USER] as string,
-        process.env[DatabaseEnvironmentKeys.DB_PASS] as string,
-        process.env[DatabaseEnvironmentKeys.DB_APPLICATION] || 'unknown-cdk-application',
-        (readonly ? process.env[DatabaseEnvironmentKeys.DB_RO_URI] : process.env[DatabaseEnvironmentKeys.DB_URI]) as string);
+async function doInDatabase<T>(
+    readonly: boolean,
+    fn: (db: DTDatabase) => Promise<T>
+): Promise<T> {
+    const db_application = getEnvVariableSafe(
+        DatabaseEnvironmentKeys.DB_APPLICATION
+    );
+    const db_ro_uri = getEnvVariableSafe(DatabaseEnvironmentKeys.DB_RO_URI);
+    const db_uri =
+        db_ro_uri.result === "ok"
+            ? db_ro_uri.value
+            : getEnvVariable(DatabaseEnvironmentKeys.DB_URI);
+    const db = initDbConnection(
+        getEnvVariable(DatabaseEnvironmentKeys.DB_USER),
+        getEnvVariable(DatabaseEnvironmentKeys.DB_PASS),
+        db_application.result === "ok"
+            ? db_application.value
+            : "unknown-cdk-application",
+        db_uri
+    );
     try {
         // deallocate all prepared statements to allow for connection pooling
         // DISCARD instead of DEALLOCATE as it didn't always clean all prepared statements
-        await db.none('DISCARD ALL');
+        await db.none("DISCARD ALL");
         return await fn(db);
     } catch (e) {
         console.error("Error in db:", e);

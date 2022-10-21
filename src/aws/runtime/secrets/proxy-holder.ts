@@ -1,5 +1,10 @@
-import {SecretHolder} from "./secret-holder";
-import {DatabaseEnvironmentKeys, RdsProxySecretKey, RdsProxySecret} from "./dbsecret";
+import { SecretHolder } from "./secret-holder";
+import {
+    DatabaseEnvironmentKeys,
+    RdsProxySecretKey,
+    RdsProxySecret,
+} from "./dbsecret";
+import { getEnvVariable } from "../../../utils/utils";
 
 const RDS_PROXY_SECRET_KEYS = Object.values(RdsProxySecretKey);
 
@@ -10,11 +15,15 @@ export class ProxyHolder {
     private readonly secretHolder;
 
     constructor(secretId: string) {
-        this.secretHolder = new SecretHolder<RdsProxySecret>(secretId, '', RDS_PROXY_SECRET_KEYS);
+        this.secretHolder = new SecretHolder<RdsProxySecret>(
+            secretId,
+            "",
+            RDS_PROXY_SECRET_KEYS
+        );
     }
 
     static create() {
-        return new ProxyHolder(process.env.SECRET_ID as string);
+        return new ProxyHolder(getEnvVariable("SECRET_ID"));
     }
 
     public async setCredentials() {

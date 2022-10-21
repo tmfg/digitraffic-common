@@ -1,31 +1,36 @@
-import {constants} from "http2";
-import {IncomingMessage, RequestOptions} from "http";
-import {Asserter} from "../../../test/asserter";
+import { constants } from "http2";
+import { IncomingMessage, RequestOptions } from "http";
+import { Asserter } from "../../../test/asserter";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const synthetics = require('Synthetics');
-import zlib = require('zlib');
-import {MediaType} from "../../types/mediatypes";
-import {getApiKeyFromAPIGateway} from "../../runtime/apikey";
-import {FeatureCollection} from "geojson";
-import {isValidGeoJson} from "../../../utils/geometry";
+const synthetics = require("Synthetics");
+import zlib = require("zlib");
+import { MediaType } from "../../types/mediatypes";
+import { getApiKeyFromAPIGateway } from "../../runtime/apikey";
+import { FeatureCollection } from "geojson";
+import { isValidGeoJson } from "../../../utils/geometry";
+import { getEnvVariable } from "../../../utils/utils";
 
 export const API_KEY_HEADER = "x-api-key";
 
 const baseHeaders = {
-    "Digitraffic-User" : "internal-digitraffic-canary",
-    "Accept-Encoding" : "gzip",
-    "Accept": "*/*",
+    "Digitraffic-User": "internal-digitraffic-canary",
+    "Accept-Encoding": "gzip",
+    Accept: "*/*",
 } as Record<string, string>;
 
 type CheckerFunction = (Res: IncomingMessage) => void;
-type JsonCheckerFunction<T> = (json: T, body: string, message: IncomingMessage) => void;
+type JsonCheckerFunction<T> = (
+    json: T,
+    body: string,
+    message: IncomingMessage
+) => void;
 
 export class UrlChecker {
     private readonly requestOptions: RequestOptions;
 
     constructor(hostname: string, apiKey?: string) {
-        const headers = {...baseHeaders};
+        const headers = { ...baseHeaders };
 
         if (apiKey) {
             headers[API_KEY_HEADER] = apiKey;
@@ -33,15 +38,15 @@ export class UrlChecker {
 
         this.requestOptions = {
             hostname,
-            method: 'GET',
-            protocol: 'https:',
+            method: "GET",
+            protocol: "https:",
             headers,
         };
 
-        synthetics.getConfiguration()
-            .disableRequestMetrics();
+        synthetics.getConfiguration().disableRequestMetrics();
 
-        synthetics.getConfiguration()
+        synthetics
+            .getConfiguration()
             .withIncludeRequestBody(false)
             .withIncludeRequestHeaders(false)
             .withIncludeResponseBody(false)
@@ -50,62 +55,106 @@ export class UrlChecker {
     }
 
     static create(hostname: string, apiKeyId: string): Promise<UrlChecker> {
-        return getApiKeyFromAPIGateway(apiKeyId).then(apiKey => {
+        return getApiKeyFromAPIGateway(apiKeyId).then((apiKey) => {
             return new UrlChecker(hostname, apiKey.value);
         });
     }
 
     static createV2(): Promise<UrlChecker> {
-        return this.create(process.env.hostname as string, process.env.apiKeyId as string);
+        return this.create(
+            getEnvVariable("hostname"),
+            getEnvVariable("apiKeyId")
+        );
     }
 
-    expectStatus<T>(statusCode: number, url: string, callback: JsonCheckerFunction<T>): Promise<void> {
-        const requestOptions = {...this.requestOptions, ...{
-            path: url,
-        }};
+    expectStatus<T>(
+        statusCode: number,
+        url: string,
+        callback: JsonCheckerFunction<T>
+    ): Promise<void> {
+        const requestOptions = {
+            ...this.requestOptions,
+            ...{
+                path: url,
+            },
+        };
 
-        return synthetics.executeHttpStep(`Verify ${statusCode} for ${url.replace(/auth=.*/, '')}`,
+        return synthetics.executeHttpStep(
+            `Verify ${statusCode} for ${url.replace(/auth=.*/, "")}`,
             requestOptions,
-            callback);
+            callback
+        );
     }
 
-    expect200<T>(url: string, ...callbacks: JsonCheckerFunction<T>[]): Promise<void> {
-        const callback = async (json: T, body: string, res: IncomingMessage) => {
-            await Promise.allSettled(callbacks.map(c => c(json, body, res)));
+    expect200<T>(
+        url: string,
+        ...callbacks: JsonCheckerFunction<T>[]
+    ): Promise<void> {
+        const callback = async (
+            json: T,
+            body: string,
+            res: IncomingMessage
+        ) => {
+            await Promise.allSettled(callbacks.map((c) => c(json, body, res)));
         };
 
         return this.expectStatus(200, url, callback);
     }
 
     expect404(url: string): Promise<void> {
-        const requestOptions = {...this.requestOptions, ...{
-            path: url,
-        }};
+        const requestOptions = {
+            ...this.requestOptions,
+            ...{
+                path: url,
+            },
+        };
 
-        return synthetics.executeHttpStep(`Verify 404 for ${url}`, requestOptions, validateStatusCodeAndContentType(404, MediaType.TEXT_PLAIN));
+        return synthetics.executeHttpStep(
+            `Verify 404 for ${url}`,
+            requestOptions,
+            validateStatusCodeAndContentType(404, MediaType.TEXT_PLAIN)
+        );
     }
 
     expect400(url: string): Promise<void> {
-        const requestOptions = {...this.requestOptions, ...{
-            path: url,
-        }};
+        const requestOptions = {
+            ...this.requestOptions,
+            ...{
+                path: url,
+            },
+        };
 
-        return synthetics.executeHttpStep(`Verify 400 for ${url}`, requestOptions, validateStatusCodeAndContentType(400, MediaType.TEXT_PLAIN));
+        return synthetics.executeHttpStep(
+            `Verify 400 for ${url}`,
+            requestOptions,
+            validateStatusCodeAndContentType(400, MediaType.TEXT_PLAIN)
+        );
     }
 
     expect403WithoutApiKey(url: string, mediaType?: MediaType): Promise<void> {
-        if (!this.requestOptions.headers || !this.requestOptions.headers[API_KEY_HEADER]) {
+        if (
+            !this.requestOptions.headers ||
+            !this.requestOptions.headers[API_KEY_HEADER]
+        ) {
             console.error("No api key defined");
         }
 
-        const requestOptions = {...this.requestOptions, ...{
-            path: url,
-            headers: baseHeaders,
-        }};
+        const requestOptions = {
+            ...this.requestOptions,
+            ...{
+                path: url,
+                headers: baseHeaders,
+            },
+        };
 
-        return synthetics.executeHttpStep(`Verify 403 for ${url}`,
+        return synthetics.executeHttpStep(
+            `Verify 403 for ${url}`,
             requestOptions,
-            validateStatusCodeAndContentType(403, mediaType || MediaType.APPLICATION_JSON));
+            validateStatusCodeAndContentType(
+                403,
+                mediaType || MediaType.APPLICATION_JSON
+            )
+        );
     }
 
     done(): string {
@@ -116,7 +165,7 @@ export class UrlChecker {
 async function getResponseBody(response: IncomingMessage): Promise<string> {
     const body = await getBodyFromResponse(response);
 
-    if (response.headers[constants.HTTP2_HEADER_CONTENT_ENCODING] === 'gzip') {
+    if (response.headers[constants.HTTP2_HEADER_CONTENT_ENCODING] === "gzip") {
         try {
             return zlib.gunzipSync(body).toString();
         } catch (e) {
@@ -128,14 +177,14 @@ async function getResponseBody(response: IncomingMessage): Promise<string> {
 }
 
 function getBodyFromResponse(response: IncomingMessage): Promise<string> {
-    return new Promise((resolve: ((value: string) => void)) => {
+    return new Promise((resolve: (value: string) => void) => {
         const buffers: Buffer[] = [];
 
-        response.on('data', (data: Buffer) => {
+        response.on("data", (data: Buffer) => {
             buffers.push(data);
         });
 
-        response.on('end', () => {
+        response.on("end", () => {
             resolve(Buffer.concat(buffers).toString());
         });
     });
@@ -146,15 +195,23 @@ function getBodyFromResponse(response: IncomingMessage): Promise<string> {
  * @param statusCode
  * @param contentType
  */
-function validateStatusCodeAndContentType(statusCode: number, contentType: MediaType): (Res: IncomingMessage) => Promise<void> {
+function validateStatusCodeAndContentType(
+    statusCode: number,
+    contentType: MediaType
+): (Res: IncomingMessage) => Promise<void> {
     return (res: IncomingMessage) => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             if (res.statusCode !== statusCode) {
                 throw new Error(`${res.statusCode} ${res.statusMessage}`);
             }
 
-            if (res.headers[constants.HTTP2_HEADER_CONTENT_TYPE] !== contentType) {
-                throw new Error('Wrong content-type ' + res.headers[constants.HTTP2_HEADER_CONTENT_TYPE]);
+            if (
+                res.headers[constants.HTTP2_HEADER_CONTENT_TYPE] !== contentType
+            ) {
+                throw new Error(
+                    "Wrong content-type " +
+                        res.headers[constants.HTTP2_HEADER_CONTENT_TYPE]
+                );
             }
 
             resolve();
@@ -193,28 +250,41 @@ export class ResponseChecker {
         });
     }
 
-    checkJson<T>(fn: (json: T, body: string, res: IncomingMessage) => void): CheckerFunction {
+    checkJson<T>(
+        fn: (json: T, body: string, res: IncomingMessage) => void
+    ): CheckerFunction {
         return this.responseChecker((body: string, res: IncomingMessage) => {
             fn(JSON.parse(body), body, res);
         });
     }
 
-    responseChecker(fn: (body: string, res: IncomingMessage) => void): CheckerFunction {
+    responseChecker(
+        fn: (body: string, res: IncomingMessage) => void
+    ): CheckerFunction {
         return async (res: IncomingMessage): Promise<void> => {
             if (!res.statusCode) {
-                throw new Error('statusCode missing');
+                throw new Error("statusCode missing");
             }
 
             if (res.statusCode < 200 || res.statusCode > 299) {
                 throw new Error(`${res.statusCode} ${res.statusMessage}`);
             }
 
-            if (this.checkCors && !res.headers[constants.HTTP2_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN]) {
-                throw new Error('CORS missing');
+            if (
+                this.checkCors &&
+                !res.headers[constants.HTTP2_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN]
+            ) {
+                throw new Error("CORS missing");
             }
 
-            if (res.headers[constants.HTTP2_HEADER_CONTENT_TYPE] !== this.contentType) {
-                throw new Error('Wrong content-type ' + res.headers[constants.HTTP2_HEADER_CONTENT_TYPE]);
+            if (
+                res.headers[constants.HTTP2_HEADER_CONTENT_TYPE] !==
+                this.contentType
+            ) {
+                throw new Error(
+                    "Wrong content-type " +
+                        res.headers[constants.HTTP2_HEADER_CONTENT_TYPE]
+                );
             }
 
             const body = await getResponseBody(res);
@@ -225,7 +295,9 @@ export class ResponseChecker {
 }
 
 export class ContentChecker {
-    static checkJson<T>(fn: (json: T, body: string, res: IncomingMessage) => void): CheckerFunction {
+    static checkJson<T>(
+        fn: (json: T, body: string, res: IncomingMessage) => void
+    ): CheckerFunction {
         return async (res: IncomingMessage): Promise<void> => {
             const body = await getResponseBody(res);
 
@@ -233,7 +305,9 @@ export class ContentChecker {
         };
     }
 
-    static checkResponse(fn: (body: string, res: IncomingMessage) => void): CheckerFunction {
+    static checkResponse(
+        fn: (body: string, res: IncomingMessage) => void
+    ): CheckerFunction {
         return async (res: IncomingMessage): Promise<void> => {
             const body = await getResponseBody(res);
 
@@ -246,34 +320,45 @@ export class ContentTypeChecker {
     static checkContentType(contentType: MediaType) {
         return (res: IncomingMessage) => {
             if (!res.statusCode) {
-                throw new Error('statusCode missing');
+                throw new Error("statusCode missing");
             }
 
             if (res.statusCode < 200 || res.statusCode > 299) {
                 throw new Error(`${res.statusCode} ${res.statusMessage}`);
             }
 
-            if (!res.headers[constants.HTTP2_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN]) {
-                throw new Error('CORS missing');
+            if (
+                !res.headers[constants.HTTP2_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN]
+            ) {
+                throw new Error("CORS missing");
             }
 
-            if (res.headers[constants.HTTP2_HEADER_CONTENT_TYPE] !== contentType) {
-                throw new Error('Wrong content-type ' + res.headers[constants.HTTP2_HEADER_CONTENT_TYPE]);
+            if (
+                res.headers[constants.HTTP2_HEADER_CONTENT_TYPE] !== contentType
+            ) {
+                throw new Error(
+                    "Wrong content-type " +
+                        res.headers[constants.HTTP2_HEADER_CONTENT_TYPE]
+                );
             }
         };
     }
 }
 
 export class GeoJsonChecker {
-    static validFeatureCollection(fn?: (json: FeatureCollection) => void): CheckerFunction {
-        return ResponseChecker.forGeojson().checkJson((json: FeatureCollection) => {
-            Asserter.assertEquals(json.type, 'FeatureCollection');
-            Asserter.assertTrue(isValidGeoJson(json));
+    static validFeatureCollection(
+        fn?: (json: FeatureCollection) => void
+    ): CheckerFunction {
+        return ResponseChecker.forGeojson().checkJson(
+            (json: FeatureCollection) => {
+                Asserter.assertEquals(json.type, "FeatureCollection");
+                Asserter.assertTrue(isValidGeoJson(json));
 
-            if (fn) {
-                fn(json);
+                if (fn) {
+                    fn(json);
+                }
             }
-        });
+        );
     }
 }
 
@@ -281,7 +366,7 @@ export class HeaderChecker {
     static checkHeaderExists(headerName: string): CheckerFunction {
         return (res: IncomingMessage) => {
             if (!res.headers[headerName]) {
-                throw new Error('Missing header: ' + headerName);
+                throw new Error("Missing header: " + headerName);
             }
         };
     }
@@ -289,7 +374,7 @@ export class HeaderChecker {
     static checkHeaderMissing(headerName: string): CheckerFunction {
         return (res: IncomingMessage) => {
             if (res.headers[headerName]) {
-                throw new Error('Header should not exist: ' + headerName);
+                throw new Error("Header should not exist: " + headerName);
             }
         };
     }

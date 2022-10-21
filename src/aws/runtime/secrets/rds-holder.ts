@@ -1,5 +1,6 @@
-import {SecretHolder} from "./secret-holder";
-import {DatabaseEnvironmentKeys, RdsSecret, RdsSecretKey} from "./dbsecret";
+import { SecretHolder } from "./secret-holder";
+import { DatabaseEnvironmentKeys, RdsSecret, RdsSecretKey } from "./dbsecret";
+import { getEnvVariable } from "../../../utils/utils";
 
 const RDS_SECRET_KEYS = Object.values(RdsSecretKey);
 
@@ -10,11 +11,15 @@ export class RdsHolder {
     private readonly secretHolder;
 
     constructor(secretId: string) {
-        this.secretHolder = new SecretHolder<RdsSecret>(secretId, '', RDS_SECRET_KEYS);
+        this.secretHolder = new SecretHolder<RdsSecret>(
+            secretId,
+            "",
+            RDS_SECRET_KEYS
+        );
     }
 
     static create() {
-        return new RdsHolder(process.env.SECRET_ID as string);
+        return new RdsHolder(getEnvVariable("SECRET_ID"));
     }
 
     public async setCredentials() {

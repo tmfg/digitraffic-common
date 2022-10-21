@@ -1,6 +1,7 @@
 import { DTDatabase, inDatabaseReadonly } from "../../../database/database";
 import { ProxyHolder } from "../../runtime/secrets/proxy-holder";
 import { RdsHolder } from "../../runtime/secrets/rds-holder";
+import { getEnvVariable } from "../../../utils/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const synthetics = require("Synthetics");
@@ -98,13 +99,13 @@ export class DatabaseChecker {
 
     static createForProxy() {
         return new DatabaseChecker(() =>
-            new ProxyHolder(process.env.SECRET_ID as string).setCredentials()
+            new ProxyHolder(getEnvVariable("SECRET_ID")).setCredentials()
         );
     }
 
     static createForRds() {
         return new DatabaseChecker(() =>
-            new RdsHolder(process.env.SECRET_ID as string).setCredentials()
+            new RdsHolder(getEnvVariable("SECRET_ID")).setCredentials()
         );
     }
 
