@@ -1,26 +1,37 @@
 import {
     InternalServerErrorResponseTemplate,
     createResponses,
-    XmlResponseTemplate, NotFoundResponseTemplate, BadRequestResponseTemplate,
+    XmlResponseTemplate,
+    NotFoundResponseTemplate,
+    BadRequestResponseTemplate,
 } from "./response";
-import {LambdaIntegration, MethodResponse, IntegrationResponse, PassthroughBehavior} from "aws-cdk-lib/aws-apigateway";
-import {Function} from 'aws-cdk-lib/aws-lambda';
-import {IModel} from "aws-cdk-lib/aws-apigateway/lib/model";
-import {BAD_REQUEST_MESSAGE, ERROR_MESSAGE, NOT_FOUND_MESSAGE} from "../../types/errors";
-import {MediaType} from "../../types/mediatypes";
+import {
+    LambdaIntegration,
+    MethodResponse,
+    IntegrationResponse,
+    PassthroughBehavior,
+} from "aws-cdk-lib/aws-apigateway";
+import { Function as AWSFunction } from "aws-cdk-lib/aws-lambda";
+import { IModel } from "aws-cdk-lib/aws-apigateway/lib/model";
+import {
+    BAD_REQUEST_MESSAGE,
+    ERROR_MESSAGE,
+    NOT_FOUND_MESSAGE,
+} from "../../types/errors";
+import { MediaType } from "../../types/mediatypes";
 
 export const RESPONSE_200_OK: IntegrationResponse = {
-    statusCode: '200',
+    statusCode: "200",
 };
 
 export const RESPONSE_400_BAD_REQUEST: IntegrationResponse = {
-    statusCode: '400',
+    statusCode: "400",
     selectionPattern: BAD_REQUEST_MESSAGE,
     responseTemplates: BadRequestResponseTemplate,
 };
 
 export const RESPONSE_500_SERVER_ERROR: IntegrationResponse = {
-    statusCode: '500',
+    statusCode: "500",
     selectionPattern: ERROR_MESSAGE,
     responseTemplates: InternalServerErrorResponseTemplate,
 };
@@ -31,40 +42,47 @@ const RESPONSE_XML = {
 
 export const RESPONSE_CORS_INTEGRATION = {
     responseParameters: {
-        'method.response.header.Access-Control-Allow-Origin': "'*'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
     },
 };
 
 export const RESPONSE_404_NOT_FOUND = {
-    statusCode: '404',
+    statusCode: "404",
     selectionPattern: NOT_FOUND_MESSAGE,
     responseTemplates: NotFoundResponseTemplate,
 };
 
-export function methodResponse(status: string, contentType: MediaType, model: IModel, parameters?: Record<string, boolean>): MethodResponse {
-    return  {
+export function methodResponse(
+    status: string,
+    contentType: MediaType,
+    model: IModel,
+    parameters?: Record<string, boolean>
+): MethodResponse {
+    return {
         statusCode: status,
         responseModels: createResponses(contentType, model),
         responseParameters: parameters || {},
     };
-
 }
 
 export function corsMethod(response: MethodResponse): MethodResponse {
-    return {...response, ...{
-        responseParameters: {
-            'method.response.header.Access-Control-Allow-Origin': true,
+    return {
+        ...response,
+        ...{
+            responseParameters: {
+                "method.response.header.Access-Control-Allow-Origin": true,
+            },
         },
-    }};
+    };
 }
 
 interface IntegrationOptions {
-    requestParameters?: {[dest: string]: string}
-    requestTemplates?: {[contentType: string]: string},
-    responses?: IntegrationResponse[],
-    disableCors?: boolean,
-    xml?: boolean,
-    passthroughBehavior?: PassthroughBehavior
+    requestParameters?: { [dest: string]: string };
+    requestTemplates?: { [contentType: string]: string };
+    responses?: IntegrationResponse[];
+    disableCors?: boolean;
+    xml?: boolean;
+    passthroughBehavior?: PassthroughBehavior;
 }
 
 /**
@@ -72,8 +90,10 @@ interface IntegrationOptions {
  * @param lambdaFunction The Lambda function
  * @param options Options
  */
-export function defaultIntegration(lambdaFunction: Function,
-    options?: IntegrationOptions): LambdaIntegration {
+export function defaultIntegration(
+    lambdaFunction: AWSFunction,
+    options?: IntegrationOptions
+): LambdaIntegration {
     return new LambdaIntegration(lambdaFunction, {
         proxy: false,
         integrationResponses: options?.responses || [
@@ -84,16 +104,20 @@ export function defaultIntegration(lambdaFunction: Function,
         ],
         requestParameters: options?.requestParameters || {},
         requestTemplates: options?.requestTemplates || {},
-        passthroughBehavior: options?.passthroughBehavior ?? PassthroughBehavior.WHEN_NO_MATCH,
+        passthroughBehavior:
+            options?.passthroughBehavior ?? PassthroughBehavior.WHEN_NO_MATCH,
     });
 }
 
-export function getResponse(response: IntegrationResponse, options?: IntegrationOptions): IntegrationResponse {
+export function getResponse(
+    response: IntegrationResponse,
+    options?: IntegrationOptions
+): IntegrationResponse {
     if (options?.xml) {
-        response = {...response, ...RESPONSE_XML};
+        response = { ...response, ...RESPONSE_XML };
     }
     if (!options?.disableCors) {
-        response = {...response, ...RESPONSE_CORS_INTEGRATION};
+        response = { ...response, ...RESPONSE_CORS_INTEGRATION };
     }
 
     return response;
