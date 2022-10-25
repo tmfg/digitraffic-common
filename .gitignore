@@ -3,6 +3,7 @@
 !.husky/
 !.husky/pre-commit
 !/.editorconfig
+!/.eslintignore
 !/.eslintrc.json
 !/.gitignore
 !/.prettierrc.json
@@ -11,6 +12,7 @@
 !/package.json
 !/README.md
 !/tsconfig.json
+!/tsconfig.eslint.json
 !/yarn.lock
 
 !src/

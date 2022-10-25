@@ -19,7 +19,7 @@ export const SSM_KEY_WARNING_TOPIC = `${SSM_ROOT}${MONITORING_ROOT}/warning-topi
 export const SSM_KEY_ALARM_TOPIC = `${SSM_ROOT}${MONITORING_ROOT}/alarm-topic`;
 
 export interface StackConfiguration {
-    readonly shortName?: string;
+    readonly shortName: string;
     readonly secretId?: string;
     readonly alarmTopicArn: string;
     readonly warningTopicArn: string;
@@ -44,11 +44,11 @@ export interface StackConfiguration {
 }
 
 export class DigitrafficStack extends Stack {
-    readonly vpc: IVpc;
-    readonly lambdaDbSg: ISecurityGroup;
+    readonly vpc?: IVpc;
+    readonly lambdaDbSg?: ISecurityGroup;
     readonly alarmTopic: ITopic;
     readonly warningTopic: ITopic;
-    readonly secret: ISecret;
+    readonly secret?: ISecret;
 
     readonly configuration: StackConfiguration;
 
@@ -75,7 +75,7 @@ export class DigitrafficStack extends Stack {
             this.vpc = Vpc.fromVpcAttributes(this, "vpc", {
                 vpcId: configuration.vpcId,
                 privateSubnetIds: configuration.privateSubnetIds,
-                availabilityZones: configuration.availabilityZones!,
+                availabilityZones: configuration.availabilityZones ?? [],
             });
         }
 
@@ -116,7 +116,7 @@ export class DigitrafficStack extends Stack {
 
     createLambdaEnvironment(): DBLambdaEnvironment {
         return this.createDefaultLambdaEnvironment(
-            this.configuration.shortName!
+            this.configuration.shortName
         );
     }
 
@@ -131,7 +131,15 @@ export class DigitrafficStack extends Stack {
               };
     }
 
+    getSecret(): ISecret {
+        if (this.secret === undefined) {
+            throw new Error("Secret is undefined");
+        }
+        return this.secret;
+    }
+
     grantSecret(...lambdas: AWSFunction[]) {
-        lambdas.forEach((l: AWSFunction) => this.secret.grantRead(l));
+        const secret = this.getSecret();
+        lambdas.forEach((l: AWSFunction) => secret.grantRead(l));
     }
 }

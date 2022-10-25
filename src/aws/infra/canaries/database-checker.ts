@@ -1,10 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-import {DTDatabase, inDatabaseReadonly} from "../../../database/database";
-import {ProxyHolder} from "../../runtime/secrets/proxy-holder";
-import {RdsHolder} from "../../runtime/secrets/rds-holder";
+import { DTDatabase, inDatabaseReadonly } from "../../../database/database";
+import { ProxyHolder } from "../../runtime/secrets/proxy-holder";
+import { RdsHolder } from "../../runtime/secrets/rds-holder";
+import { getEnvVariable } from "../../../utils/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const synthetics = require('Synthetics');
+const synthetics = require("Synthetics");
 
 abstract class DatabaseCheck<T> {
     readonly name: string;
@@ -20,24 +20,28 @@ abstract class DatabaseCheck<T> {
     abstract check(value: T): void;
 }
 
-class BaseResponse {}
+// For backwards compatibility disable following rule for BaseResponse.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface BaseResponse {}
 
-class CountResponse extends BaseResponse {
+interface CountResponse extends BaseResponse {
     count: number;
 }
 
 class CountDatabaseCheck extends DatabaseCheck<CountResponse> {
-    readonly minCount: number|null;
-    readonly maxCount: number|null;
+    readonly minCount: number | null;
+    readonly maxCount: number | null;
 
-    constructor(name: string,
+    constructor(
+        name: string,
         sql: string,
-        minCount: number|null,
-        maxCount: number|null) {
+        minCount: number | null,
+        maxCount: number | null
+    ) {
         super(name, sql);
 
         if (minCount == null && maxCount == null) {
-            throw new Error('no max or min given!');
+            throw new Error("no max or min given!");
         }
 
         this.minCount = minCount;
@@ -47,88 +51,85 @@ class CountDatabaseCheck extends DatabaseCheck<CountResponse> {
     check(value: CountResponse) {
         if (!value) {
             this.failed = true;
-            throw new Error('no return value');
+            throw new Error("no return value");
         } else {
-            if ('count' in value) {
+            if ("count" in value) {
                 if (this.minCount && value.count < this.minCount) {
                     this.failed = true;
-                    throw new Error(`count was ${value.count}, minimum is ${this.minCount}`);
+                    throw new Error(
+                        `count was ${value.count}, minimum is ${this.minCount}`
+                    );
                 }
                 if (this.maxCount && value.count > this.maxCount) {
                     this.failed = true;
-                    throw new Error(`count was ${value.count}, max is ${this.maxCount}`);
+                    throw new Error(
+                        `count was ${value.count}, max is ${this.maxCount}`
+                    );
                 }
             } else {
                 this.failed = true;
 
                 console.info("received " + JSON.stringify(value));
 
-                throw new Error('no count available');
+                throw new Error("no count available");
             }
         }
     }
 }
 
 const stepConfig = {
-    'continueOnStepFailure': true,
-    'screenshotOnStepStart': false,
-    'screenshotOnStepSuccess': false,
-    'screenshotOnStepFailure': false,
+    continueOnStepFailure: true,
+    screenshotOnStepStart: false,
+    screenshotOnStepSuccess: false,
+    screenshotOnStepFailure: false,
 };
 
 export class DatabaseChecker {
-    credentialsFunction: (() => Promise<void>);
+    credentialsFunction: () => Promise<void>;
     checks: DatabaseCheck<BaseResponse>[];
 
-    private constructor(credentialsFunction: (() => Promise<void>)) {
+    private constructor(credentialsFunction: () => Promise<void>) {
         this.credentialsFunction = credentialsFunction;
         this.checks = [];
 
-        synthetics.getConfiguration()
-            .disableRequestMetrics();
+        synthetics.getConfiguration().disableRequestMetrics();
 
-        synthetics.getConfiguration()
-            .withFailedCanaryMetric(true);
+        synthetics.getConfiguration().withFailedCanaryMetric(true);
     }
 
     static createForProxy() {
-        return new DatabaseChecker(() => new ProxyHolder(process.env.SECRET_ID as string).setCredentials());
+        return new DatabaseChecker(() =>
+            new ProxyHolder(getEnvVariable("SECRET_ID")).setCredentials()
+        );
     }
 
     static createForRds() {
-        return new DatabaseChecker(() => new RdsHolder(process.env.SECRET_ID as string).setCredentials());
+        return new DatabaseChecker(() =>
+            new RdsHolder(getEnvVariable("SECRET_ID")).setCredentials()
+        );
     }
 
     one(name: string, sql: string) {
-        this.checks.push(new CountDatabaseCheck(name,
-            sql,
-            1,
-            1));
+        this.checks.push(new CountDatabaseCheck(name, sql, 1, 1));
 
         return this;
     }
 
     empty(name: string, sql: string) {
-        this.checks.push(new CountDatabaseCheck(name,
-            sql,
-            null,
-            0));
+        this.checks.push(new CountDatabaseCheck(name, sql, null, 0));
 
         return this;
     }
 
     notEmpty(name: string, sql: string) {
-        this.checks.push(new CountDatabaseCheck(name,
-            sql,
-            1,
-            null));
+        this.checks.push(new CountDatabaseCheck(name, sql, 1, null));
 
         return this;
     }
 
     async expect() {
         if (!this.checks.length) {
-            throw new Error('No checks');
+            throw new Error("No checks");
         }
 
         await this.credentialsFunction();
@@ -141,16 +142,14 @@ export class DatabaseChecker {
                     check.check(value);
                 };
 
-                synthetics.executeStep(check.name,
-                    checkFunction,
-                    stepConfig);
+                synthetics.executeStep(check.name, checkFunction, stepConfig);
             }
         });
 
-        if (this.checks.some(check => check.failed)) {
-            throw new Error('Failed');
+        if (this.checks.some((check) => check.failed)) {
+            throw new Error("Failed");
         }
 
-        return 'OK';
+        return "OK";
     }
 }

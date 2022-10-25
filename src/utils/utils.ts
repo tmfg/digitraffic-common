@@ -19,6 +19,8 @@
  * @param a first array to compare
  * @param b second array to compare
  */
+import { Either } from "../types/either";
+
 export function bothArraysHasSameValues(
     a: null | undefined | unknown[],
     b: null | undefined | unknown[]
@@ -68,4 +70,36 @@ function getFirstOrLast<T>(
     }
 
     return array[index];
+}
+
+/**
+ * Gets environment variable. Throws error if variable is not found.
+ *
+ * @param key Environment key
+ * @return string
+ */
+export function getEnvVariable(key: string): string {
+    const either = getEnvVariableSafe(key);
+    if (either.result === "error") {
+        throw new Error(either.message);
+    }
+    return either.value;
+}
+
+/**
+ * Gets environment variable. Safe version returns object with either ok or error status.
+ * Easier to use for recovery than catching an error.
+ *
+ * @param key Environment key
+ * @return Either<string>
+ */
+export function getEnvVariableSafe(key: string): Either<string> {
+    const value = process.env[key];
+    if (value === undefined) {
+        return {
+            result: "error",
+            message: `Error: environment variable "${key}" is undefined.`,
+        };
+    }
+    return { result: "ok", value };
 }
