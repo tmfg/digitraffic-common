@@ -16,6 +16,7 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint --cache .",
+    "eslint-report": "eslint . --format html",
     "clean": "rimraf dist output",
     "test": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest",
     "prepare": "husky install",

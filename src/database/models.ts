@@ -5,7 +5,3 @@ export interface Countable {
 export interface Identifiable<T> {
     id: T;
 }
-
-interface UpdatedDate {
-    updated_date: Date;
-}
