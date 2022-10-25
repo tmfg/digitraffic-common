@@ -1,28 +1,64 @@
-import * as CommonUtils from "../../src/utils/utils";
+import * as ArrayUtils from "../../src/utils/utils";
 
-describe('CommonUtilsTest', () => {
+describe("ArrayUtils", () => {
+    test("bothArraysHasSameValues", () => {
+        expect(ArrayUtils.bothArraysHasSameValues([], [])).toEqual(true);
+        expect(ArrayUtils.bothArraysHasSameValues(["a"], ["a"])).toEqual(true);
+        expect(ArrayUtils.bothArraysHasSameValues(["a"], ["a", "a"])).toEqual(
+            true
+        );
+        expect(
+            ArrayUtils.bothArraysHasSameValues(["a", "a"], ["a", "a"])
+        ).toEqual(true);
 
-    test('bothArraysHasSameValues', () => {
-        expect(CommonUtils.bothArraysHasSameValues([], [])).toEqual(true);
-        expect(CommonUtils.bothArraysHasSameValues(['a'], ['a'])).toEqual(true);
-        expect(CommonUtils.bothArraysHasSameValues(['a'], ['a', 'a'])).toEqual(true);
-        expect(CommonUtils.bothArraysHasSameValues(['a', 'a'], ['a', 'a'])).toEqual(true);
-
-        expect(CommonUtils.bothArraysHasSameValues(null, null)).toEqual(true);
-        expect(CommonUtils.bothArraysHasSameValues(undefined, undefined)).toEqual(true);
-        expect(CommonUtils.bothArraysHasSameValues(null, undefined)).toEqual(true);
-        expect(CommonUtils.bothArraysHasSameValues(['a'], undefined)).toEqual(false);
-        expect(CommonUtils.bothArraysHasSameValues(['a'], null)).toEqual(false);
+        expect(ArrayUtils.bothArraysHasSameValues(null, null)).toEqual(true);
+        expect(
+            ArrayUtils.bothArraysHasSameValues(undefined, undefined)
+        ).toEqual(true);
+        expect(ArrayUtils.bothArraysHasSameValues(null, undefined)).toEqual(
+            true
+        );
+        expect(ArrayUtils.bothArraysHasSameValues(["a"], undefined)).toEqual(
+            false
+        );
+        expect(ArrayUtils.bothArraysHasSameValues(["a"], null)).toEqual(false);
         /* eslint-enable */
-        expect(CommonUtils.bothArraysHasSameValues(['a', 'b'], ['a', 'a'])).toEqual(false);
-        expect(CommonUtils.bothArraysHasSameValues(['a', 'a', 'a'], ['a', 'b', 'c'])).toEqual(false);
+        expect(
+            ArrayUtils.bothArraysHasSameValues(["a", "b"], ["a", "a"])
+        ).toEqual(false);
+        expect(
+            ArrayUtils.bothArraysHasSameValues(["a", "a", "a"], ["a", "b", "c"])
+        ).toEqual(false);
 
-        const o1 = {a: 1, b: 2};
-        const o2 = {a: 1, b: 2};
+        const o1 = { a: 1, b: 2 };
+        const o2 = { a: 1, b: 2 };
         // Objects are references to same
-        expect(CommonUtils.bothArraysHasSameValues([o1], [o1])).toEqual(true);
+        expect(ArrayUtils.bothArraysHasSameValues([o1], [o1])).toEqual(true);
         // Object's are not the same but the contents are the same
-        expect(CommonUtils.bothArraysHasSameValues([o1], [o2])).toEqual(false);
+        expect(ArrayUtils.bothArraysHasSameValues([o1], [o2])).toEqual(false);
+    });
 
+    test("getFirst - empty throws", () => {
+        expect(() => {
+            ArrayUtils.getFirst([]);
+        }).toThrow();
+    });
+
+    test("getFirst - two objects", () => {
+        expect(ArrayUtils.getFirst([1, 2])).toEqual(1);
+    });
+
+    test("getFirst - two objects with sort function", () => {
+        expect(ArrayUtils.getFirst([1, 2], (a) => -a)).toEqual(2);
+    });
+
+    test("getLast - empty throws", () => {
+        expect(() => {
+            ArrayUtils.getLast([]);
+        }).toThrow();
+    });
+
+    test("getLast - two objects", () => {
+        expect(ArrayUtils.getLast([1, 2])).toEqual(2);
     });
 });

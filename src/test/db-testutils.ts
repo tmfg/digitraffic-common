@@ -1,22 +1,25 @@
-import {DTDatabase, initDbConnection} from "../database/database";
-import {DatabaseEnvironmentKeys} from "../aws/runtime/secrets/dbsecret";
+import { DTDatabase, initDbConnection } from "../database/database";
+import { DatabaseEnvironmentKeys } from "../aws/runtime/secrets/dbsecret";
 
 export function dbTestBase(
     fn: (db: DTDatabase) => void,
-    truncateFn: (db: DTDatabase) => void,
+    truncateFn: (db: DTDatabase) => Promise<void>,
     dbUser: string,
     dbPass: string,
-    dbUri: string,
+    dbUri: string
 ): () => void {
-
     const theDbUri = process.env.DB_URI ?? dbUri;
     console.log(`Test database URI: ${theDbUri}`);
 
     return () => {
         const db: DTDatabase = initDbConnection(
-            dbUser, dbPass, 'test', theDbUri, {
+            dbUser,
+            dbPass,
+            "test",
+            theDbUri,
+            {
                 noWarnings: true, // ignore duplicate connection warning for tests
-            },
+            }
         );
 
         beforeAll(async () => {
