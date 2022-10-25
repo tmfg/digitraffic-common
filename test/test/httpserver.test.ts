@@ -77,9 +77,9 @@ describe("TestHttpServer - test", () => {
         });
     }
 
-    test("no calls", async () => {
-        await withServer((server: TestHttpServer) => {
-            expect(server.getCallCount()).toEqual(0);
+    test("no calls", () => {
+        return withServer(async (server: TestHttpServer) => {
+            await expect(server.getCallCount()).toEqual(0);
         });
     });
 
