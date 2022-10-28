@@ -4,6 +4,8 @@
     "module": "commonjs",
     "lib": ["es2020"],
     "outDir": "dist",
+    "declaration": true,
+    "sourceMap": true,
     "moduleResolution": "node",
     "strict": true,
     "exactOptionalPropertyTypes": false,
@@ -13,7 +15,7 @@
 
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": true
   },
   "include": ["src/**/*.ts"],
   "$schema": "https://json.schemastore.org/tsconfig"
