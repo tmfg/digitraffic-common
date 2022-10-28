@@ -10,9 +10,6 @@
     "node": ">=14 <17",
     "yarn": ">1.2 <2"
   },
-  "publishConfig": {
-    "@tmfg:registry": "https://npm.pkg.github.com"
-  },
   "scripts": {
     "build": "tsc",
     "lint": "eslint --cache .",
@@ -20,12 +17,13 @@
     "clean": "rimraf dist output",
     "test": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest",
     "prepare": "husky install",
-    "pub": "cp package.json README.md LICENSE dist/ && cd dist && yarn publish"
+    "prepublishOnly": "yarn clean && yarn build && yarn test"
   },
-  "main": "index.js",
-  "types": "index.d.ts",
+  "license": "EUPL-1.2",
+  "private": false,
   "files": [
-    "."
+    "dist/**/*.js",
+    "src/**/*.ts"
   ],
   "dependencies": {
     "@aws-cdk/aws-synthetics-alpha": "2.46.0-alpha.0",
