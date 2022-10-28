@@ -44,7 +44,7 @@ export function databaseFunctionProps(
     environment: LambdaEnvironment,
     lambdaName: string,
     simpleLambdaName: string,
-    config?: FunctionParameters
+    config?: Partial<FunctionParameters>
 ): FunctionProps {
     const vpcSubnets = stack.vpc
         ? {
@@ -73,18 +73,18 @@ export function lambdaFunctionProps(
     environment: LambdaEnvironment,
     lambdaName: string,
     simpleLambdaName: string,
-    config?: FunctionParameters
+    config?: Partial<FunctionParameters>
 ): FunctionProps {
     return {
-        runtime: config?.runtime || Runtime.NODEJS_14_X,
-        architecture: config?.architecture || Architecture.ARM_64,
-        memorySize: config?.memorySize || 128,
+        runtime: config?.runtime ?? Runtime.NODEJS_14_X,
+        architecture: config?.architecture ?? Architecture.ARM_64,
+        memorySize: config?.memorySize ?? 128,
         functionName: lambdaName,
         role: config?.role,
-        timeout: Duration.seconds(config?.timeout || 60),
+        timeout: Duration.seconds(config?.timeout ?? 60),
         logRetention: RetentionDays.ONE_YEAR,
-        reservedConcurrentExecutions: config?.reservedConcurrentExecutions || 2,
-        code: getAssetCode(simpleLambdaName, config),
+        reservedConcurrentExecutions: config?.reservedConcurrentExecutions ?? 2,
+        code: getAssetCode(simpleLambdaName, config?.singleLambda ?? false),
         handler: `${simpleLambdaName}.handler`,
         environment,
     };
@@ -92,9 +92,9 @@ export function lambdaFunctionProps(
 
 function getAssetCode(
     simpleLambdaName: string,
-    config?: FunctionParameters
+    isSingleLambda: boolean
 ): AssetCode {
-    const lambdaPath = config?.singleLambda
+    const lambdaPath = isSingleLambda
         ? `dist/lambda/`
         : `dist/lambda/${simpleLambdaName}`;
 
@@ -190,7 +190,7 @@ export interface FunctionParameters {
     singleLambda?: boolean;
 }
 
-export type MonitoredFunctionParameters = {
+export type MonitoredFunctionParameters = FunctionParameters & {
     readonly memorySize?: number;
     readonly timeout?: number;
     readonly functionName?: string;
@@ -204,4 +204,4 @@ export type MonitoredFunctionParameters = {
     readonly durationWarningProps?: MonitoredFunctionAlarmProps;
     readonly errorAlarmProps?: MonitoredFunctionAlarmProps;
     readonly throttleAlarmProps?: MonitoredFunctionAlarmProps;
-} & FunctionParameters;
+};

@@ -75,7 +75,7 @@ export class MonitoredFunction extends Function {
         stack: DigitrafficStack,
         id: string,
         functionProps: FunctionProps,
-        props?: MonitoredFunctionProps
+        props?: Partial<MonitoredFunctionProps>
     ): MonitoredFunction {
         if (
             props === MonitoredFunction.DISABLE_ALARMS &&
@@ -112,7 +112,7 @@ export class MonitoredFunction extends Function {
         stack: DigitrafficStack,
         name: string,
         environment: LambdaEnvironment,
-        functionParameters?: MonitoredFunctionParameters
+        functionParameters?: Partial<MonitoredFunctionParameters>
     ): MonitoredFunction {
         const functionName =
             functionParameters?.functionName ||
@@ -310,7 +310,7 @@ export class MonitoredDBFunction {
         stack: DigitrafficStack,
         name: string,
         environment?: LambdaEnvironment,
-        functionParameters?: MonitoredFunctionParameters
+        functionParameters?: Partial<MonitoredFunctionParameters>
     ): MonitoredFunction {
         const functionName =
             functionParameters?.functionName ||
