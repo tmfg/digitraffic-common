@@ -25,7 +25,7 @@ export class DigitrafficCanary extends Canary {
             role,
             test: Test.custom({
                 code: new AssetCode("dist", {
-                    exclude: ["lambda"],
+                    exclude: ["lambda", "out", "canaries"],
                 }),
                 handler: params.handler,
             }),

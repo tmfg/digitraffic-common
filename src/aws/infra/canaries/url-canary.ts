@@ -1,15 +1,12 @@
-import {Construct} from "constructs";
-import {CanaryParameters} from "./canary-parameters";
-import {Role} from "aws-cdk-lib/aws-iam";
-import {DigitrafficCanary} from "./canary";
-import {ISecret} from "aws-cdk-lib/aws-secretsmanager";
-import {DigitrafficStack} from "../stack/stack";
-import {LambdaEnvironment} from "../stack/lambda-configs";
-import {DigitrafficRestApi} from "../stack/rest_apis";
-
-export const ENV_API_KEY = "apiKeyId";
-export const ENV_HOSTNAME = "hostname";
-export const ENV_SECRET = "secret";
+import { Construct } from "constructs";
+import { CanaryParameters } from "./canary-parameters";
+import { Role } from "aws-cdk-lib/aws-iam";
+import { DigitrafficCanary } from "./canary";
+import { ISecret } from "aws-cdk-lib/aws-secretsmanager";
+import { DigitrafficStack } from "../stack/stack";
+import { LambdaEnvironment } from "../stack/lambda-configs";
+import { DigitrafficRestApi } from "../stack/rest_apis";
+import { ENV_API_KEY, ENV_HOSTNAME, ENV_SECRET } from "./canary-keys";
 
 export interface UrlCanaryParameters extends CanaryParameters {
     readonly hostname: string;
@@ -17,10 +14,12 @@ export interface UrlCanaryParameters extends CanaryParameters {
 }
 
 export class UrlCanary extends DigitrafficCanary {
-    constructor(stack: Construct,
+    constructor(
+        stack: Construct,
         role: Role,
         params: UrlCanaryParameters,
-        secret?: ISecret) {
+        secret?: ISecret
+    ) {
         const canaryName = `${params.name}-url`;
         const environmentVariables: LambdaEnvironment = {};
         environmentVariables[ENV_HOSTNAME] = params.hostname;
@@ -38,20 +37,23 @@ export class UrlCanary extends DigitrafficCanary {
         }
 
         // the handler code is defined at the actual project using this
-        super(
-            stack, canaryName, role, params, environmentVariables,
-        );
+        super(stack, canaryName, role, params, environmentVariables);
     }
 
-    static create(stack: DigitrafficStack,
+    static create(
+        stack: DigitrafficStack,
         role: Role,
         publicApi: DigitrafficRestApi,
-        params: Partial<UrlCanaryParameters>): UrlCanary {
-        return new UrlCanary(stack, role, {...{
-            handler: `${params.name}.handler`,
-            hostname: publicApi.hostname(),
-            apiKeyId: this.getApiKey(publicApi),
-        }, ...params} as UrlCanaryParameters);
+        params: Partial<UrlCanaryParameters>
+    ): UrlCanary {
+        return new UrlCanary(stack, role, {
+            ...{
+                handler: `${params.name}.handler`,
+                hostname: publicApi.hostname(),
+                apiKeyId: this.getApiKey(publicApi),
+            },
+            ...params,
+        } as UrlCanaryParameters);
     }
 
     static getApiKey(publicApi: DigitrafficRestApi): string | undefined {

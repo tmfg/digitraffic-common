@@ -1,4 +1,3 @@
-import { constants } from "http2";
 import { IncomingMessage, RequestOptions } from "http";
 import { Asserter } from "../../../test/asserter";
 
@@ -10,6 +9,7 @@ import { getApiKeyFromAPIGateway } from "../../runtime/apikey";
 import { FeatureCollection } from "geojson";
 import { isValidGeoJson } from "../../../utils/geometry";
 import { getEnvVariable } from "../../../utils/utils";
+import { ENV_API_KEY, ENV_HOSTNAME } from "./canary-keys";
 
 export const API_KEY_HEADER = "x-api-key";
 
@@ -62,8 +62,8 @@ export class UrlChecker {
 
     static createV2(): Promise<UrlChecker> {
         return this.create(
-            getEnvVariable("hostname"),
-            getEnvVariable("apiKeyId")
+            getEnvVariable(ENV_HOSTNAME),
+            getEnvVariable(ENV_API_KEY)
         );
     }
 
@@ -165,7 +165,7 @@ export class UrlChecker {
 async function getResponseBody(response: IncomingMessage): Promise<string> {
     const body = await getBodyFromResponse(response);
 
-    if (response.headers[constants.HTTP2_HEADER_CONTENT_ENCODING] === "gzip") {
+    if (response.headers["content-encoding"] === "gzip") {
         try {
             return zlib.gunzipSync(body).toString();
         } catch (e) {
@@ -205,12 +205,9 @@ function validateStatusCodeAndContentType(
                 throw new Error(`${res.statusCode} ${res.statusMessage}`);
             }
 
-            if (
-                res.headers[constants.HTTP2_HEADER_CONTENT_TYPE] !== contentType
-            ) {
+            if (res.headers["content-type"] !== contentType) {
                 throw new Error(
-                    "Wrong content-type " +
-                        res.headers[constants.HTTP2_HEADER_CONTENT_TYPE]
+                    "Wrong content-type " + res.headers["content-type"]
                 );
             }
 
@@ -270,20 +267,13 @@ export class ResponseChecker {
                 throw new Error(`${res.statusCode} ${res.statusMessage}`);
             }
 
-            if (
-                this.checkCors &&
-                !res.headers[constants.HTTP2_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN]
-            ) {
+            if (this.checkCors && !res.headers["access-control-allow-origin"]) {
                 throw new Error("CORS missing");
             }
 
-            if (
-                res.headers[constants.HTTP2_HEADER_CONTENT_TYPE] !==
-                this.contentType
-            ) {
+            if (res.headers["content-type"] !== this.contentType) {
                 throw new Error(
-                    "Wrong content-type " +
-                        res.headers[constants.HTTP2_HEADER_CONTENT_TYPE]
+                    "Wrong content-type " + res.headers["content-type"]
                 );
             }
 
@@ -327,18 +317,13 @@ export class ContentTypeChecker {
                 throw new Error(`${res.statusCode} ${res.statusMessage}`);
             }
 
-            if (
-                !res.headers[constants.HTTP2_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN]
-            ) {
+            if (!res.headers["access-control-allow-origin"]) {
                 throw new Error("CORS missing");
             }
 
-            if (
-                res.headers[constants.HTTP2_HEADER_CONTENT_TYPE] !== contentType
-            ) {
+            if (res.headers["content-type"] !== contentType) {
                 throw new Error(
-                    "Wrong content-type " +
-                        res.headers[constants.HTTP2_HEADER_CONTENT_TYPE]
+                    "Wrong content-type " + res.headers["content-type"]
                 );
             }
         };
