@@ -10,7 +10,7 @@ import { LogRetention } from "aws-cdk-lib/aws-logs";
 import IntegrationProperty = CfnMethod.IntegrationProperty;
 
 const MAX_CONCURRENCY_LIMIT = 100;
-const NODE_RUNTIME = Runtime.NODEJS_14_X.name;
+const NODE_RUNTIMES = [Runtime.NODEJS_14_X.name, Runtime.NODEJS_16_X.name];
 
 enum ResourceType {
     stackName = "STACK_NAME",
@@ -141,7 +141,10 @@ export class StackCheckingAspect implements IAspect {
                 );
             }
 
-            if (node.runtime !== NODE_RUNTIME) {
+            if (
+                node.runtime !== undefined &&
+                !NODE_RUNTIMES.includes(node.runtime)
+            ) {
                 this.addAnnotation(
                     node,
                     ResourceType.functionRuntime,
