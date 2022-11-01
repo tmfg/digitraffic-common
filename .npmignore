@@ -1,0 +1,15 @@
+*
+
+!/LICENSE
+!/README.md
+!/package.json
+
+!/dist/
+!/dist/**/
+!/dist/**/*.json
+!/dist/**/*.js
+!/dist/**/*.d.ts
+
+!/src/
+!/src/**/
+!/src/**/*.ts
