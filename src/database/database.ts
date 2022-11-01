@@ -1,6 +1,7 @@
 import { IDatabase, ITask } from "pg-promise";
 import { DatabaseEnvironmentKeys } from "../aws/runtime/secrets/dbsecret";
 import { getEnvVariable, getEnvVariableSafe } from "../utils/utils";
+import { envValue } from "../aws/runtime/environment";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pgp = require("pg-promise")();
@@ -66,20 +67,18 @@ async function doInDatabase<T>(
     readonly: boolean,
     fn: (db: DTDatabase) => Promise<T>
 ): Promise<T> {
-    const db_application = getEnvVariableSafe(
-        DatabaseEnvironmentKeys.DB_APPLICATION
+    const db_application = envValue(
+        DatabaseEnvironmentKeys.DB_APPLICATION,
+        "unknown-cdk-application"
     );
-    const db_ro_uri = getEnvVariableSafe(DatabaseEnvironmentKeys.DB_RO_URI);
-    const db_uri =
-        db_ro_uri.result === "ok"
-            ? db_ro_uri.value
-            : getEnvVariable(DatabaseEnvironmentKeys.DB_URI);
+    const db_uri = readonly
+        ? envValue(DatabaseEnvironmentKeys.DB_RO_URI)
+        : envValue(DatabaseEnvironmentKeys.DB_URI);
+
     const db = initDbConnection(
         getEnvVariable(DatabaseEnvironmentKeys.DB_USER),
         getEnvVariable(DatabaseEnvironmentKeys.DB_PASS),
-        db_application.result === "ok"
-            ? db_application.value
-            : "unknown-cdk-application",
+        db_application,
         db_uri
     );
     try {

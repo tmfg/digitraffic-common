@@ -1,5 +1,10 @@
 import { DTDatabase, initDbConnection } from "../database/database";
 import { DatabaseEnvironmentKeys } from "../aws/runtime/secrets/dbsecret";
+import { Countable } from "../database/models";
+
+export async function assertCount(db: DTDatabase, sql: string, count: number) {
+    await db.one(sql).then((x: Countable) => expect(x.count).toEqual(count));
+}
 
 export function dbTestBase(
     fn: (db: DTDatabase) => void,
