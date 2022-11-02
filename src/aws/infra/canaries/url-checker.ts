@@ -152,7 +152,7 @@ export class UrlChecker {
             requestOptions,
             validateStatusCodeAndContentType(
                 403,
-                mediaType || MediaType.APPLICATION_JSON
+                mediaType ?? MediaType.APPLICATION_JSON
             )
         );
     }
