@@ -149,7 +149,7 @@ export class DbStack extends Stack {
 
         // this workaround should prevent stack failing on version upgrade
         const cfnInstances = cluster.node.children.filter(
-            (child) => child instanceof CfnDBInstance
+            (child): child is CfnDBInstance => child instanceof CfnDBInstance
         );
         if (cfnInstances.length === 0) {
             throw new Error(
