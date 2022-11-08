@@ -1,6 +1,6 @@
 import { Environment } from "aws-cdk-lib";
 
 export interface InfraStackConfiguration {
-    env: Environment;
-    environmentName: string;
+    readonly env: Environment;
+    readonly environmentName: string;
 }

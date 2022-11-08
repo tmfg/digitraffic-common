@@ -4,8 +4,8 @@ import { SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
 
 export interface NetworkConfiguration {
-    vpcName: string;
-    cidr: string;
+    readonly vpcName: string;
+    readonly cidr: string;
 }
 
 export class NetworkStack extends Stack {

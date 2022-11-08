@@ -1,6 +1,6 @@
 import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { IVpc, SecurityGroup, SubnetType } from "aws-cdk-lib/aws-ec2";
+import { SecurityGroup, SubnetType } from "aws-cdk-lib/aws-ec2";
 import {
     AuroraPostgresEngineVersion,
     CfnDBInstance,
@@ -17,16 +17,16 @@ import { InstanceType } from "aws-cdk-lib/aws-ec2";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
 
 export interface DbConfiguration {
-    secretArn: string;
+    readonly secretArn: string;
 
-    dbVersion: AuroraPostgresEngineVersion;
-    dbInstanceType: InstanceType;
-    snapshotIdentifier: string;
-    instances: number;
-    customParameterGroup: boolean;
-    securityGroupId: string;
+    readonly dbVersion: AuroraPostgresEngineVersion;
+    readonly dbInstanceType: InstanceType;
+    readonly snapshotIdentifier: string;
+    readonly instances: number;
+    readonly customParameterGroup: boolean;
+    readonly securityGroupId: string;
 
-    dbProxyName?: string;
+    readonly dbProxyName?: string;
 }
 
 /**
