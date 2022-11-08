@@ -27,10 +27,17 @@ export function importVpc(scope: Construct, environmentName: string): IVpc {
     });
 }
 
+/**
+ * Import value from other stack output.  Stack outputs are named with
+ * digitraffic-${environmentName}-${name} pattern and this function takes care of it
+ */
 export function importValue(environmentName: string, name: string): string {
     return Fn.importValue(outputName(environmentName, name));
 }
 
+/**
+ * Export value as stack output.  Use same naming pattern as importValue.
+ */
 export function exportValue(
     stack: Stack,
     environmentName: string,

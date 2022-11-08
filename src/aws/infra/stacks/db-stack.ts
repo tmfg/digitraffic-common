@@ -25,6 +25,8 @@ export interface DbConfiguration {
     instances: number;
     customParameterGroup: boolean;
     securityGroupId: string;
+
+    dbProxyName?: string;
 }
 
 /**

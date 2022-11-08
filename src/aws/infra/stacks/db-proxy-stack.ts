@@ -13,6 +13,9 @@ import { InfraStackConfiguration } from "./intra-stack-configuration";
 import { DbConfiguration, DbStack } from "./db-stack";
 import { exportValue, importValue, importVpc } from "../import-util";
 
+/**
+ * A stack that creates a Database proxy.
+ */
 export class DbProxyStack extends Stack {
     public static PROXY_READER_EXPORT_NAME = "db-reader-endpoint";
     public static PROXY_WRITER_EXPORT_NAME = "db-writer-endpoint";
@@ -35,11 +38,7 @@ export class DbProxyStack extends Stack {
         const secret = Secret.fromSecretAttributes(this, "proxy-secret", {
             secretCompleteArn: configuration.secretArn,
         });
-        const proxy = this.createProxy(
-            vpc,
-            secret,
-            configuration.securityGroupId
-        );
+        const proxy = this.createProxy(vpc, secret, configuration);
         const readerEndpoint = this.createProxyEndpoints(
             vpc,
             proxy,
@@ -48,12 +47,12 @@ export class DbProxyStack extends Stack {
         this.setOutputs(configuration, proxy, readerEndpoint);
     }
 
-    createProxy(vpc: IVpc, secret: ISecret, securityGroupId: string) {
+    createProxy(vpc: IVpc, secret: ISecret, configuration: DbConfiguration) {
         const proxyId = `${this.isc.environmentName}-proxy`;
         const securityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             "securitygroup",
-            securityGroupId
+            configuration.securityGroupId
         );
 
         const cluster = DatabaseCluster.fromDatabaseClusterAttributes(
@@ -76,7 +75,7 @@ export class DbProxyStack extends Stack {
         };
 
         return new DatabaseProxy(this, proxyId, {
-            dbProxyName: "AuroraProxy",
+            dbProxyName: configuration.dbProxyName ?? "AuroraProxy",
             securityGroups: [securityGroup],
             proxyTarget: ProxyTarget.fromCluster(cluster),
             idleClientTimeout: Duration.seconds(1800),
