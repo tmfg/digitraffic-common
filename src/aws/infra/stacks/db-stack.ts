@@ -157,7 +157,7 @@ export class DbStack extends Stack {
             );
         }
         cfnInstances.forEach(
-            (cfnInstance) => delete (cfnInstance as CfnDBInstance).engineVersion
+            (cfnInstance) => delete cfnInstance.engineVersion
         );
 
         return cluster;
