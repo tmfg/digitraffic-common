@@ -20,11 +20,7 @@ abstract class DatabaseCheck<T> {
     abstract check(value: T): void;
 }
 
-// For backwards compatibility disable following rule for BaseResponse.
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface BaseResponse {}
-
-interface CountResponse extends BaseResponse {
+interface CountResponse {
     count: number;
 }
 
@@ -40,8 +36,12 @@ class CountDatabaseCheck extends DatabaseCheck<CountResponse> {
     ) {
         super(name, sql);
 
+        if (!sql.toLowerCase().includes("select count(*)")) {
+            throw new Error("sql must contain select count(*)");
+        }
+
         if (minCount == null && maxCount == null) {
-            throw new Error("no max or min given!");
+            throw new Error("no max or min given");
         }
 
         this.minCount = minCount;
@@ -49,30 +49,23 @@ class CountDatabaseCheck extends DatabaseCheck<CountResponse> {
     }
 
     check(value: CountResponse) {
-        if (!value) {
-            this.failed = true;
-            throw new Error("no return value");
-        } else {
-            if ("count" in value) {
-                if (this.minCount && value.count < this.minCount) {
-                    this.failed = true;
-                    throw new Error(
-                        `count was ${value.count}, minimum is ${this.minCount}`
-                    );
-                }
-                if (this.maxCount && value.count > this.maxCount) {
-                    this.failed = true;
-                    throw new Error(
-                        `count was ${value.count}, max is ${this.maxCount}`
-                    );
-                }
-            } else {
+        if ("count" in value) {
+            if (this.minCount && value.count < this.minCount) {
                 this.failed = true;
-
-                console.info("received " + JSON.stringify(value));
-
-                throw new Error("no count available");
+                throw new Error(
+                    `count was ${value.count}, minimum is ${this.minCount}`
+                );
             }
+            if (this.maxCount && value.count > this.maxCount) {
+                this.failed = true;
+                throw new Error(
+                    `count was ${value.count}, max is ${this.maxCount}`
+                );
+            }
+        } else {
+            this.failed = true;
+
+            throw new Error("no count available");
         }
     }
 }
@@ -84,9 +77,13 @@ const stepConfig = {
     screenshotOnStepFailure: false,
 };
 
-export class DatabaseChecker {
+/**
+ * Checker for sql that checks the count.  Meaning that the
+ * sql must be structured as select(*) from table where something.
+ */
+export class DatabaseCountChecker {
     credentialsFunction: () => Promise<void>;
-    checks: DatabaseCheck<BaseResponse>[];
+    checks: DatabaseCheck<CountResponse>[];
 
     private constructor(credentialsFunction: () => Promise<void>) {
         this.credentialsFunction = credentialsFunction;
@@ -98,30 +95,39 @@ export class DatabaseChecker {
     }
 
     static createForProxy() {
-        return new DatabaseChecker(() =>
+        return new DatabaseCountChecker(() =>
             new ProxyHolder(getEnvVariable("SECRET_ID")).setCredentials()
         );
     }
 
     static createForRds() {
-        return new DatabaseChecker(() =>
+        return new DatabaseCountChecker(() =>
             new RdsHolder(getEnvVariable("SECRET_ID")).setCredentials()
         );
     }
 
-    one(name: string, sql: string) {
+    /**
+     * Expect that the count is 1
+     */
+    expectOne(name: string, sql: string) {
         this.checks.push(new CountDatabaseCheck(name, sql, 1, 1));
 
         return this;
     }
 
-    empty(name: string, sql: string) {
+    /**
+     * Expect that the count is 0
+     */
+    expectZero(name: string, sql: string) {
         this.checks.push(new CountDatabaseCheck(name, sql, null, 0));
 
         return this;
     }
 
-    notEmpty(name: string, sql: string) {
+    /**
+     * Expect that the count is 1 or more
+     */
+    expectOneOrMore(name: string, sql: string) {
         this.checks.push(new CountDatabaseCheck(name, sql, 1, null));
 
         return this;
@@ -137,7 +143,7 @@ export class DatabaseChecker {
             for (const check of this.checks) {
                 console.info("canary checking sql " + check.sql);
 
-                const value = await db.oneOrNone(check.sql);
+                const value = await db.one<CountResponse>(check.sql);
                 const checkFunction = () => {
                     check.check(value);
                 };
