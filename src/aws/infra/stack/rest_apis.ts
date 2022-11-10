@@ -78,8 +78,8 @@ export class DigitrafficRestApi extends RestApi {
         return newKeyId;
     }
 
-    createUsagePlanV2(apiName: string): string {
-        const newKeyId = createDefaultUsagePlan(this, apiName).keyId;
+    createUsagePlanV2(apiName: string, apiKey?: string): string {
+        const newKeyId = createDefaultUsagePlan(this, apiName, apiKey).keyId;
 
         this.apiKeyIds.push(newKeyId);
 
