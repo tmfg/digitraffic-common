@@ -2,6 +2,7 @@ import { DTDatabase, inDatabaseReadonly } from "../../../database/database";
 import { ProxyHolder } from "../../runtime/secrets/proxy-holder";
 import { RdsHolder } from "../../runtime/secrets/rds-holder";
 import { getEnvVariable } from "../../../utils/utils";
+import { Countable } from "../../../database/models";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const synthetics = require("Synthetics");
@@ -20,11 +21,7 @@ abstract class DatabaseCheck<T> {
     abstract check(value: T): void;
 }
 
-interface CountResponse {
-    count: number;
-}
-
-class CountDatabaseCheck extends DatabaseCheck<CountResponse> {
+class CountDatabaseCheck extends DatabaseCheck<Countable> {
     readonly minCount: number | null;
     readonly maxCount: number | null;
 
@@ -36,7 +33,10 @@ class CountDatabaseCheck extends DatabaseCheck<CountResponse> {
     ) {
         super(name, sql);
 
-        if (!sql.toLowerCase().includes("select count(*)")) {
+        if (
+            !sql.toLowerCase().includes("select") ||
+            !sql.toLowerCase().includes("count")
+        ) {
             throw new Error("sql must contain select count(*)");
         }
 
@@ -48,7 +48,7 @@ class CountDatabaseCheck extends DatabaseCheck<CountResponse> {
         this.maxCount = maxCount;
     }
 
-    check(value: CountResponse) {
+    check(value: Countable) {
         if ("count" in value) {
             if (this.minCount && value.count < this.minCount) {
                 this.failed = true;
@@ -79,18 +79,16 @@ const stepConfig = {
 
 /**
  * Checker for sql that checks the count.  Meaning that the
- * sql must be structured as select(*) from table where something.
+ * sql must be structured as "select count(*) from <table> where <something>".
  */
 export class DatabaseCountChecker {
-    credentialsFunction: () => Promise<void>;
-    checks: DatabaseCheck<CountResponse>[];
+    readonly credentialsFunction: () => Promise<void>;
+    readonly checks: DatabaseCheck<Countable>[] = [];
 
     private constructor(credentialsFunction: () => Promise<void>) {
         this.credentialsFunction = credentialsFunction;
-        this.checks = [];
 
         synthetics.getConfiguration().disableRequestMetrics();
-
         synthetics.getConfiguration().withFailedCanaryMetric(true);
     }
 
@@ -143,7 +141,7 @@ export class DatabaseCountChecker {
             for (const check of this.checks) {
                 console.info("canary checking sql " + check.sql);
 
-                const value = await db.one<CountResponse>(check.sql);
+                const value = await db.one<Countable>(check.sql);
                 const checkFunction = () => {
                     check.check(value);
                 };
