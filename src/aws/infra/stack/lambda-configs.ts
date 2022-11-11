@@ -76,7 +76,7 @@ export function lambdaFunctionProps(
     config?: Partial<FunctionParameters>
 ): FunctionProps {
     return {
-        runtime: config?.runtime ?? Runtime.NODEJS_14_X,
+        runtime: config?.runtime ?? Runtime.NODEJS_16_X,
         architecture: config?.architecture ?? Architecture.ARM_64,
         memorySize: config?.memorySize ?? 128,
         functionName: lambdaName,
@@ -115,16 +115,16 @@ export function dbLambdaConfiguration(
     config: FunctionParameters
 ): FunctionProps {
     return {
-        runtime: props.runtime || Runtime.NODEJS_14_X,
-        memorySize: props.memorySize || config.memorySize || 1024,
+        runtime: props.runtime ?? Runtime.NODEJS_16_X,
+        memorySize: props.memorySize ?? config.memorySize ?? 1024,
         functionName: config.functionName,
         code: config.code,
         role: config.role,
         handler: config.handler,
         timeout: Duration.seconds(
-            config.timeout || props.defaultLambdaDurationSeconds || 60
+            config.timeout ?? props.defaultLambdaDurationSeconds ?? 60
         ),
-        environment: config.environment || {
+        environment: config.environment ?? {
             DB_USER: props.dbProps?.username ?? "",
             DB_PASS: props.dbProps?.password ?? "",
             DB_URI:
@@ -138,7 +138,7 @@ export function dbLambdaConfiguration(
             subnets: vpc.privateSubnets,
         },
         securityGroups: [lambdaDbSg],
-        reservedConcurrentExecutions: config.reservedConcurrentExecutions || 3,
+        reservedConcurrentExecutions: config.reservedConcurrentExecutions ?? 3,
     };
 }
 
@@ -146,7 +146,7 @@ export function defaultLambdaConfiguration(
     config: FunctionParameters
 ): FunctionProps {
     const props: FunctionProps = {
-        runtime: Runtime.NODEJS_14_X,
+        runtime: Runtime.NODEJS_16_X,
         memorySize: config.memorySize ?? 128,
         functionName: config.functionName,
         handler: config.handler,
@@ -191,15 +191,6 @@ export interface FunctionParameters {
 }
 
 export type MonitoredFunctionParameters = FunctionParameters & {
-    readonly memorySize?: number;
-    readonly timeout?: number;
-    readonly functionName?: string;
-    readonly reservedConcurrentExecutions?: number;
-    readonly role?: Role;
-    readonly runtime?: Runtime;
-    readonly architecture?: Architecture;
-    readonly singleLambda?: boolean;
-
     readonly durationAlarmProps?: MonitoredFunctionAlarmProps;
     readonly durationWarningProps?: MonitoredFunctionAlarmProps;
     readonly errorAlarmProps?: MonitoredFunctionAlarmProps;
