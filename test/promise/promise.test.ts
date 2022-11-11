@@ -1,9 +1,8 @@
-import {getRandomInteger} from "../../src/test/testutils";
-import {retry, RetryLogError} from "../../src/utils/retry";
+import { getRandomInteger } from "../../src/test/testutils";
+import { retry, RetryLogError } from "../../src/utils/retry";
 
-describe('Promise utils tests', () => {
-
-    test('retry - no retries', async () => {
+describe("Promise utils tests", () => {
+    test("retry - no retries", async () => {
         const fn = jest.fn().mockResolvedValue(1);
 
         const ret = await retry(fn, 0, RetryLogError.NO_LOGGING);
@@ -12,8 +11,8 @@ describe('Promise utils tests', () => {
         expect(fn.mock.calls.length).toBe(1);
     });
 
-    test('retry - error with n+1 retries', async () => {
-        const fn = jest.fn().mockRejectedValue('error');
+    test("retry - error with n+1 retries", async () => {
+        const fn = jest.fn().mockRejectedValue("error");
         const retries = getRandomInteger(1, 10);
 
         try {
@@ -25,7 +24,7 @@ describe('Promise utils tests', () => {
         }
     });
 
-    test('retry - no error with n+1 retries', async () => {
+    test("retry - no error with n+1 retries", async () => {
         const fn = jest.fn().mockResolvedValue(1);
         const retries = getRandomInteger(1, 10);
 
@@ -35,9 +34,11 @@ describe('Promise utils tests', () => {
         expect(fn.mock.calls.length).toBe(1);
     });
 
-    test('retry - errors with no error logging', async () => {
-        const fn = jest.fn().mockRejectedValue('error');
-        const consoleErrorSpy = jest.spyOn(global.console, 'error').mockImplementation();
+    test("retry - errors with no error logging", async () => {
+        const fn = jest.fn().mockRejectedValue("error");
+        const consoleErrorSpy = jest
+            .spyOn(global.console, "error")
+            .mockImplementation();
 
         try {
             await retry(fn, getRandomInteger(0, 10), RetryLogError.NO_LOGGING);
@@ -49,9 +50,11 @@ describe('Promise utils tests', () => {
         }
     });
 
-    test('retry - no retries with error logging', async () => {
-        const fn = jest.fn().mockRejectedValue('error');
-        const consoleErrorSpy = jest.spyOn(global.console, 'error').mockImplementation();
+    test("retry - no retries with error logging", async () => {
+        const fn = jest.fn().mockRejectedValue("error");
+        const consoleErrorSpy = jest
+            .spyOn(global.console, "error")
+            .mockImplementation();
 
         try {
             await retry(fn, 0, RetryLogError.LOG_ALL_AS_ERRORS);
@@ -63,10 +66,12 @@ describe('Promise utils tests', () => {
         }
     });
 
-    test('retry - retries with error logging', async () => {
-        const fn = jest.fn().mockRejectedValue('error');
+    test("retry - retries with error logging", async () => {
+        const fn = jest.fn().mockRejectedValue("error");
         const retries = getRandomInteger(1, 10);
-        const consoleErrorSpy = jest.spyOn(global.console, 'error').mockImplementation();
+        const consoleErrorSpy = jest
+            .spyOn(global.console, "error")
+            .mockImplementation();
 
         try {
             await retry(fn, retries, RetryLogError.LOG_ALL_AS_ERRORS);
@@ -78,15 +83,19 @@ describe('Promise utils tests', () => {
         }
     });
 
-    test('retry - exceeded retry count throws error', async () => {
-        const fn = jest.fn().mockRejectedValue('error');
+    test("retry - exceeded retry count throws error", async () => {
+        const fn = jest.fn().mockRejectedValue("error");
 
-        await expect(() => retry(fn, 3, RetryLogError.LOG_ALL_AS_ERRORS)).rejects.toThrow();
+        await expect(() =>
+            retry(fn, 3, RetryLogError.LOG_ALL_AS_ERRORS)
+        ).rejects.toThrow();
     });
 
-    test('retry - defaults', async () => {
-        const fn = jest.fn().mockRejectedValue('error');
-        const consoleErrorSpy = jest.spyOn(global.console, 'error').mockImplementation();
+    test("retry - defaults", async () => {
+        const fn = jest.fn().mockRejectedValue("error");
+        const consoleErrorSpy = jest
+            .spyOn(global.console, "error")
+            .mockImplementation();
 
         try {
             await retry(fn);
@@ -98,25 +107,31 @@ describe('Promise utils tests', () => {
         }
     });
 
-    test('retry - NaN throws error', async () => {
+    test("retry - NaN throws error", async () => {
         const fn = jest.fn();
 
-        await expect(() => retry(fn, NaN, RetryLogError.NO_LOGGING)).rejects.toThrow();
+        await expect(() =>
+            retry(fn, NaN, RetryLogError.NO_LOGGING)
+        ).rejects.toThrow();
     });
 
-    test('retry - Infinity throws error', async () => {
+    test("retry - Infinity throws error", async () => {
         const fn = jest.fn();
 
-        await expect(() => retry(fn, Infinity, RetryLogError.NO_LOGGING)).rejects.toThrow();
+        await expect(() =>
+            retry(fn, Infinity, RetryLogError.NO_LOGGING)
+        ).rejects.toThrow();
     });
 
-    test('retry - exceeded maximum retry count throws error', async () => {
+    test("retry - exceeded maximum retry count throws error", async () => {
         const fn = jest.fn();
 
-        await expect(() => retry(fn, getRandomInteger(101, 1000000), RetryLogError.NO_LOGGING)).rejects.toThrow();
+        await expect(() =>
+            retry(fn, getRandomInteger(101, 1000000), RetryLogError.NO_LOGGING)
+        ).rejects.toThrow();
     });
 
-    test('retry - use without mocks without retry', async () => {
+    test("retry - use without mocks without retry", async () => {
         const val = 1;
         const fn = () => Promise.resolve(val);
 
@@ -125,13 +140,13 @@ describe('Promise utils tests', () => {
         expect(ret).toBe(val);
     });
 
-    test('retry - use without mocks with retry', async () => {
+    test("retry - use without mocks with retry", async () => {
         let i = 0;
         const val = 1;
         const fn = () => {
             if (i < 3) {
                 i++;
-                throw new Error('not yet');
+                throw new Error("not yet");
             }
             return Promise.resolve(val);
         };
