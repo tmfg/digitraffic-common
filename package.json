@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2022.11.23-1",
+  "version": "2022.11.22-1",
   "description": "",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "clean": "rimraf dist output",
     "test": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest",
     "prepare": "husky install",
-    "prepublishOnly": "yarn clean && yarn build && yarn test"
+    "prepublishOnly": "pnpm clean && pnpm build && pnpm test"
   },
   "license": "EUPL-1.2",
   "private": false,
@@ -26,21 +26,34 @@
     "dist/**/*.d.ts",
     "src/**/*.ts"
   ],
-  "dependencies": {
+  "peerDependencies": {
+    "pg-promise": "^10.12.0",
+    "spex": "^3.0.0",
+    "constructs": "^10.1.131",
+    "@aws-cdk/aws-synthetics-alpha": "^2.50.0-alpha.0",
+    "@types/geojson": "^7946.0.10",
+    "aws-cdk-lib": "^2.51.1",
+    "aws-sdk": "^2.1241.0",
+    "axios": "^0.21.1",
+    "change-case": "^4.1.2",
+    "geojson-validation": "^1.0.2",
+    "moment": "^2.29.4",
+    "node-ttl": "^0.2.0",
+    "pg-native": "^3.0.1"
+  },
+  "devDependencies": {
     "@aws-cdk/aws-synthetics-alpha": "2.50.0-alpha.0",
     "@types/geojson": "^7946.0.10",
-    "aws-cdk-lib": "2.51.1",
-    "aws-sdk": "2.1241.0",
+    "aws-cdk-lib": "^2.50.0",
+    "aws-sdk": "^2.1241.0",
     "axios": "^0.21.1",
-    "change-case": "4.1.2",
-    "constructs": "10.1.131",
+    "change-case": "^4.1.2",
+    "constructs": "^10.1.131",
     "geojson-validation": "^1.0.2",
     "moment": "^2.29.4",
     "node-ttl": "^0.2.0",
     "pg-native": "^3.0.1",
-    "pg-promise": "^10.12.0"
-  },
-  "devDependencies": {
+    "pg-promise": "^10.12.0",
     "@types/aws-lambda": "^8.10.106",
     "@types/jest": "^29.0.3",
     "@types/node": "^18.7.23",
@@ -59,8 +72,8 @@
     "ramda": "^0.28.0",
     "rimraf": "^3.0.2",
     "sinon": "^14.0.0",
-    "ts-jest": "^29.0.3",
-    "typescript": "^4.8.4"
+    "typescript": "^4.7.4",
+    "ts-jest": "^29.0.3"
   },
   "externals": [
     "aws-sdk",
