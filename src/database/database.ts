@@ -1,6 +1,6 @@
 import { IDatabase, ITask } from "pg-promise";
 import { DatabaseEnvironmentKeys } from "../aws/runtime/secrets/dbsecret";
-import { getEnvVariable, getEnvVariableSafe } from "../utils/utils";
+import { getEnvVariable } from "../utils/utils";
 import { envValue } from "../aws/runtime/environment";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
