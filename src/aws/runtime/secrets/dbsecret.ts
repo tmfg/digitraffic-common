@@ -1,18 +1,24 @@
-import {withSecret, withSecretAndPrefix} from "./secret";
+import { GenericSecret, withSecret, withSecretAndPrefix } from "./secret";
 
 export type DbSecret = {
-    readonly username: string
-    readonly password: string
-    readonly host: string
-    readonly ro_host: string
+    readonly username: string;
+    readonly password: string;
+    readonly host: string;
+    readonly ro_host: string;
 };
 
 export enum RdsProxySecretKey {
-    username = "username", password = "password", proxy_host = "proxy_host", proxy_ro_host = "proxy_ro_host"
+    username = "username",
+    password = "password",
+    proxy_host = "proxy_host",
+    proxy_ro_host = "proxy_ro_host",
 }
 
 export enum RdsSecretKey {
-    username = "username", password = "password", host = "host", ro_host = "ro_host"
+    username = "username",
+    password = "password",
+    host = "host",
+    ro_host = "ro_host",
 }
 
 export type RdsProxySecret = Record<RdsProxySecretKey, string>;
@@ -37,7 +43,7 @@ function setDbSecret(secret: DbSecret) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let cachedSecret: any;
 
-const missingSecretErrorText = 'Missing or empty secretId';
+const missingSecretErrorText = "Missing or empty secretId";
 
 /**
  * You can give the following options for retrieving a secret:
@@ -48,13 +54,22 @@ const missingSecretErrorText = 'Missing or empty secretId';
 
  */
 export type SecretOptions = {
-    readonly expectedKeys?: string[],
-    readonly prefix?: string
-}
+    readonly expectedKeys?: string[];
+    readonly prefix?: string;
+};
 
-export type SecretToPromiseFunction<Secret, Response = void> = (secret: Secret) => Promise<Response> | void;
-export type SecretFunction<Secret, Response = void> = (secretId: string, fn: SecretToPromiseFunction<Secret, Response>, options?: SecretOptions) => Promise<Response | void>;
-export type EmptySecretFunction<Response = void> = SecretFunction<DbSecret, Response>;
+export type SecretToPromiseFunction<Secret, Response = void> = (
+    secret: Secret
+) => Promise<Response> | void;
+export type SecretFunction<Secret, Response = void> = (
+    secretId: string,
+    fn: SecretToPromiseFunction<Secret, Response>,
+    options?: SecretOptions
+) => Promise<Response | void>;
+export type EmptySecretFunction<Response = void> = SecretFunction<
+    DbSecret,
+    Response
+>;
 
 /**
  * Run the given function with secret retrieved from Secrets Manager.  Also injects database-credentials into environment.
@@ -66,7 +81,11 @@ export type EmptySecretFunction<Response = void> = SecretFunction<DbSecret, Resp
  * @param {function} fn
  * @param {SecretOptions} options
  */
-export async function withDbSecret<Secret, Response>(secretId: string, fn: SecretToPromiseFunction<Secret, Response>, options?: SecretOptions): Promise<Response | void> {
+export async function withDbSecret<Secret, Response>(
+    secretId: string,
+    fn: SecretToPromiseFunction<Secret, Response>,
+    options?: SecretOptions
+): Promise<Response | void> {
     if (!secretId) {
         console.error(missingSecretErrorText);
         return Promise.reject(missingSecretErrorText);
@@ -81,9 +100,13 @@ export async function withDbSecret<Secret, Response>(secretId: string, fn: Secre
             });
 
             // then actual secret
-            await withSecretAndPrefix(secretId, options.prefix, (fetchedSecret: Secret) => {
-                cachedSecret = fetchedSecret;
-            });
+            await withSecretAndPrefix(
+                secretId,
+                options.prefix,
+                (fetchedSecret: Secret) => {
+                    cachedSecret = fetchedSecret;
+                }
+            );
         } else {
             await withSecret(secretId, (fetchedSecret: DbSecret) => {
                 setDbSecret(fetchedSecret);
@@ -97,7 +120,10 @@ export async function withDbSecret<Secret, Response>(secretId: string, fn: Secre
         }
         return fn(cachedSecret);
     } catch (error) {
-        console.error('method=withDbSecret Caught an error, refreshing secret', error);
+        console.error(
+            "method=withDbSecret Caught an error, refreshing secret",
+            error
+        );
         // try to refetch secret in case it has changed
         await withSecret(secretId, (fetchedSecret: DbSecret) => {
             setDbSecret(fetchedSecret);
@@ -107,10 +133,15 @@ export async function withDbSecret<Secret, Response>(secretId: string, fn: Secre
     }
 }
 
-export function checkExpectedSecretKeys<Secret>(keys: string[], secret: Secret) {
-    const missingKeys = keys.filter(key => !(key in secret));
+export function checkExpectedSecretKeys<Secret extends GenericSecret>(
+    keys: string[],
+    secret: Secret
+) {
+    const missingKeys = keys.filter((key) => !(key in secret));
     if (missingKeys.length) {
-        console.error(`method=checkExpectedSecretKeys secret didn't contain the key(s) ${missingKeys}`);
-        throw new Error('Expected keys were not found');
+        console.error(
+            `method=checkExpectedSecretKeys secret didn't contain the key(s) ${missingKeys}`
+        );
+        throw new Error("Expected keys were not found");
     }
 }
