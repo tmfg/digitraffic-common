@@ -7,17 +7,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.2.4
         with:
-          node-version: '14'
+          version: 7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+          cache: "pnpm"
+
       - name: Compile
         run: |
-          yarn
-          yarn build
+          pnpm install
+          pnpm build
+
       - name: Run tests
         run: |
-          yarn test >> $GITHUB_STEP_SUMMARY
+          pnpm test >> $GITHUB_STEP_SUMMARY
+
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()
@@ -25,6 +35,7 @@ jobs:
           name: Jest test report
           reporter: jest-junit
           path: junit.xml
+
       - name: Notify Slack
         if: failure()
         uses: 8398a7/action-slack@v3

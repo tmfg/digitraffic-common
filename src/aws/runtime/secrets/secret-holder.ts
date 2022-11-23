@@ -23,7 +23,7 @@ const DEFAULT_CONFIGURATION = {
  *
  * Supports setting the database environment paramaters from the secret too.
  */
-export class SecretHolder<Secret> {
+export class SecretHolder<Secret extends GenericSecret> {
     private readonly secretId: string;
     private readonly prefix: string;
     private readonly expectedKeys: string[];
@@ -51,7 +51,7 @@ export class SecretHolder<Secret> {
         this.secretCache.push(DEFAULT_SECRET_KEY, secretValue);
     }
 
-    public static create<S>(
+    public static create<S extends GenericSecret>(
         prefix = DEFAULT_PREFIX,
         expectedKeys: string[] = []
     ) {
@@ -67,10 +67,7 @@ export class SecretHolder<Secret> {
         const parsedSecret =
             this.prefix === DEFAULT_PREFIX
                 ? secret
-                : this.parseSecret(
-                      secret as unknown as GenericSecret,
-                      `${this.prefix}.`
-                  );
+                : this.parseSecret(secret, `${this.prefix}.`);
 
         if (this.expectedKeys.length > 0) {
             checkExpectedSecretKeys(this.expectedKeys, parsedSecret);
