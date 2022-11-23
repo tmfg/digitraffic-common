@@ -1,6 +1,11 @@
-import apigateway = require("aws-cdk-lib/aws-apigateway");
 import { MediaType } from "../../types/mediatypes";
-import { MethodResponse, Model } from "aws-cdk-lib/aws-apigateway";
+import {
+    JsonSchemaType,
+    JsonSchemaVersion,
+    JsonSchema,
+    MethodResponse,
+    Model,
+} from "aws-cdk-lib/aws-apigateway";
 import { IModel } from "aws-cdk-lib/aws-apigateway/lib/model";
 
 /**
@@ -26,13 +31,13 @@ $inputRoot.body
 const BODY_FROM_INPUT_PATH = "$input.path('$').body";
 
 /// @deprecated
-const messageSchema: apigateway.JsonSchema = {
-    schema: apigateway.JsonSchemaVersion.DRAFT4,
-    type: apigateway.JsonSchemaType.OBJECT,
+const messageSchema: JsonSchema = {
+    schema: JsonSchemaVersion.DRAFT4,
+    type: JsonSchemaType.OBJECT,
     description: "Response with message",
     properties: {
         message: {
-            type: apigateway.JsonSchemaType.STRING,
+            type: JsonSchemaType.STRING,
             description: "Response message",
         },
     },
