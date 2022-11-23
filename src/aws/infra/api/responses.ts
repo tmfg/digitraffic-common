@@ -53,7 +53,7 @@ export const RESPONSE_404_NOT_FOUND = {
 };
 
 /**
- * @Deprecated Use DigitrafficMethodResponse
+ * @deprecated Use DigitrafficMethodResponse
  */
 export function methodResponse(
     status: string,
@@ -69,7 +69,7 @@ export function methodResponse(
 }
 
 /**
- * @Deprecated Use DigitrafficMethodResponse
+ * @deprecated Use DigitrafficMethodResponse
  */
 export function corsMethod(response: MethodResponse): MethodResponse {
     return {

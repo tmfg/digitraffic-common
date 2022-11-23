@@ -25,7 +25,7 @@ $inputRoot.body
 
 const BODY_FROM_INPUT_PATH = "$input.path('$').body";
 
-// DEPRECATED
+/// @deprecated
 const messageSchema: apigateway.JsonSchema = {
     schema: apigateway.JsonSchemaVersion.DRAFT4,
     type: apigateway.JsonSchemaType.OBJECT,
@@ -38,7 +38,7 @@ const messageSchema: apigateway.JsonSchema = {
     },
 };
 
-// DEPRECATED
+/// @deprecated
 export const MessageModel = {
     contentType: MediaType.APPLICATION_JSON,
     modelName: "MessageResponseModel",
@@ -56,27 +56,28 @@ const InternalServerErrorResponse = JSON.stringify({
 const BadRequestMessage = "Bad request";
 const BadRequestResponse = JSON.stringify({ message: BadRequestMessage });
 
+/// @deprecated
 export const BadRequestResponseTemplate = createResponses(
     MediaType.APPLICATION_JSON,
     BadRequestResponse
 );
+/// @deprecated
 export const NotFoundResponseTemplate = createResponses(
     MediaType.APPLICATION_JSON,
     NotFoundResponse
 );
+/// @deprecated
 export const XmlResponseTemplate = createResponses(
     MediaType.APPLICATION_XML,
     BODY_FROM_INPUT_PATH
 );
-export const SvgResponseTemplate = createResponses(
-    MediaType.IMAGE_SVG,
-    BODY_FROM_INPUT_PATH
-);
+/// @deprecated
 export const InternalServerErrorResponseTemplate = createResponses(
     MediaType.APPLICATION_JSON,
     InternalServerErrorResponse
 );
 
+/// @deprecated
 export function createResponses<T>(
     key: MediaType,
     value: T
