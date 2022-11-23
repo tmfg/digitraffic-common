@@ -11,17 +11,23 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "14"
+          cache: "pnpm"
 
       - name: Install packages
-        run: yarn install --frozen-lock
+        run: pnpm install
 
       - name: Create ESLint reports for affected projects
         id: report
-        run: yarn eslint-report -- -o ${{ github.ref_name }}/report.html
+        run: pnpm eslint-report -o ${{ github.ref_name }}/report.html
         continue-on-error: true
 
       - name: Publish report
