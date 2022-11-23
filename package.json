@@ -7,8 +7,7 @@
     "url": "https://github.com/tmfg/digitraffic-common.git"
   },
   "engines": {
-    "node": ">=14 <17",
-    "yarn": ">1.2 <2"
+    "node": ">=14 <17"
   },
   "scripts": {
     "build": "tsc",
