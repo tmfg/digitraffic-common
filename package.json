@@ -28,7 +28,7 @@
   "dependencies": {
     "@aws-cdk/aws-synthetics-alpha": "2.50.0-alpha.0",
     "@types/geojson": "^7946.0.10",
-    "aws-cdk-lib": "2.50.0",
+    "aws-cdk-lib": "2.51.1",
     "aws-sdk": "2.1241.0",
     "axios": "^0.21.1",
     "change-case": "4.1.2",
@@ -58,7 +58,7 @@
     "ramda": "^0.28.0",
     "rimraf": "^3.0.2",
     "sinon": "^14.0.0",
-    "ts-jest": "^29.0.2",
+    "ts-jest": "^29.0.3",
     "typescript": "^4.8.4"
   },
   "externals": [

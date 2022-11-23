@@ -52,6 +52,9 @@ export const RESPONSE_404_NOT_FOUND = {
     responseTemplates: NotFoundResponseTemplate,
 };
 
+/**
+ * @Deprecated Use DigitrafficMethodResponse
+ */
 export function methodResponse(
     status: string,
     contentType: MediaType,
@@ -65,6 +68,9 @@ export function methodResponse(
     };
 }
 
+/**
+ * @Deprecated Use DigitrafficMethodResponse
+ */
 export function corsMethod(response: MethodResponse): MethodResponse {
     return {
         ...response,
@@ -89,6 +95,8 @@ interface IntegrationOptions {
  * Creates a default Lambda integration for a REST API resource _root_
  * @param lambdaFunction The Lambda function
  * @param options Options
+ *
+ * @deprecated Use DigitrafficIntegration
  */
 export function defaultIntegration(
     lambdaFunction: AWSFunction,

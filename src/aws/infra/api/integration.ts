@@ -1,13 +1,17 @@
-import {IntegrationResponse, LambdaIntegration, PassthroughBehavior} from "aws-cdk-lib/aws-apigateway";
-import {IFunction} from "aws-cdk-lib/aws-lambda";
-import {MediaType} from "../../types/mediatypes";
-import {DigitrafficIntegrationResponse} from "../../runtime/digitraffic-integration-response";
+import {
+    IntegrationResponse,
+    LambdaIntegration,
+    PassthroughBehavior,
+} from "aws-cdk-lib/aws-apigateway";
+import { IFunction } from "aws-cdk-lib/aws-lambda";
+import { MediaType } from "../../types/mediatypes";
+import { DigitrafficIntegrationResponse } from "../../runtime/digitraffic-integration-response";
 
-type ParameterType = 'path' | 'querystring';
+type ParameterType = "path" | "querystring";
 
 interface ApiParameter {
-    type: ParameterType
-    name: string
+    type: ParameterType;
+    name: string;
 }
 
 export class DigitrafficIntegration {
@@ -22,13 +26,15 @@ export class DigitrafficIntegration {
     }
 
     addPathParameter(...names: string[]): DigitrafficIntegration {
-        names.forEach(name => this.parameters.push({type: 'path', name}));
+        names.forEach((name) => this.parameters.push({ type: "path", name }));
 
         return this;
     }
 
     addQueryParameter(...names: string[]): DigitrafficIntegration {
-        names.forEach(name => this.parameters.push({type: 'querystring', name}));
+        names.forEach((name) =>
+            this.parameters.push({ type: "querystring", name })
+        );
 
         return this;
     }
@@ -39,8 +45,14 @@ export class DigitrafficIntegration {
         return new LambdaIntegration(this.lambda, {
             proxy: false,
             integrationResponses,
-            requestParameters: this.parameters.length == 0 ? undefined : this.createRequestParameters(),
-            requestTemplates: this.parameters.length == 0 ? undefined : this.createRequestTemplates(),
+            requestParameters:
+                this.parameters.length == 0
+                    ? undefined
+                    : this.createRequestParameters(),
+            requestTemplates:
+                this.parameters.length == 0
+                    ? undefined
+                    : this.createRequestTemplates(),
             passthroughBehavior: PassthroughBehavior.WHEN_NO_MATCH,
         });
     }
@@ -49,7 +61,9 @@ export class DigitrafficIntegration {
         const requestParameters: Record<string, string> = {};
 
         this.parameters.forEach((parameter: ApiParameter) => {
-            requestParameters[`integration.request.${parameter.type}.${parameter.name}`] = `method.request.${parameter.type}.${parameter.name}`;
+            requestParameters[
+                `integration.request.${parameter.type}.${parameter.name}`
+            ] = `method.request.${parameter.type}.${parameter.name}`;
         });
 
         return requestParameters;
@@ -59,7 +73,9 @@ export class DigitrafficIntegration {
         const requestJson: Record<string, string> = {};
 
         this.parameters.forEach((parameter: ApiParameter) => {
-            requestJson[parameter.name] = `$util.escapeJavaScript($input.params('${parameter.name}'))`;
+            requestJson[
+                parameter.name
+            ] = `$util.escapeJavaScript($input.params('${parameter.name}'))`;
         });
 
         return {
