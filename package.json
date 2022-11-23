@@ -23,6 +23,7 @@
   "private": false,
   "files": [
     "dist/**/*.js",
+    "dist/**/*.d.ts",
     "src/**/*.ts"
   ],
   "dependencies": {
