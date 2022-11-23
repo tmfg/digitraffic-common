@@ -133,4 +133,16 @@ export class DigitrafficMethodResponse {
             false
         );
     }
+
+    static response400(
+        model = Model.EMPTY_MODEL,
+        mediaType = MediaType.APPLICATION_JSON
+    ) {
+        return DigitrafficMethodResponse.response(
+            "400",
+            model,
+            mediaType,
+            false
+        );
+    }
 }
