@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2022.11.23-4",
+  "version": "2022.11.25-2",
   "description": "",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "@types/geojson": "^7946.0.10",
     "aws-cdk-lib": "^2.51.1",
     "aws-sdk": "^2.1241.0",
-    "axios": "^0.21.1",
+    "axios": "^1.2.0",
     "change-case": "^4.1.2",
     "constructs": "^10.1.131",
     "geojson-validation": "^1.0.2",
