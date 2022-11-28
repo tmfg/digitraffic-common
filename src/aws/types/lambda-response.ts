@@ -1,11 +1,11 @@
 export class LambdaResponse {
     readonly status: number;
-    readonly binary: string;
+    readonly body: string;
     readonly fileName?: string;
 
     constructor(status: number, body: string, fileName?: string) {
         this.status = status;
-        this.binary = body;
+        this.body = body;
         this.fileName = fileName;
     }
 
