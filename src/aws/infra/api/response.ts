@@ -13,10 +13,13 @@ import { IModel } from "aws-cdk-lib/aws-apigateway/lib/model";
  * It will always return the body and status, but if status in something else than 200 OK the content-type
  * will be overridden to text/plain. (it's assumed, that lambda will return error text).
  *
+ * Body content must be base64-encoded! use LambdaResponse for this! This way you can also return
+ * non-textual content.
+ *
  * If fileName is set, then Content-Disposition-header will be set to use it
  */
 export const RESPONSE_DEFAULT_LAMBDA = `#set($inputRoot = $input.path('$'))
-$inputRoot.body
+$util.base64Decode($inputRoot.body)
 #if ($inputRoot.status != 200)
 #set ($context.responseOverride.status = $inputRoot.status)
 #set ($context.responseOverride.header.Content-Type = 'text/plain')
