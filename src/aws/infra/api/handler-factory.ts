@@ -1,5 +1,6 @@
+import { DtLogger } from "../../runtime/dt-logger";
+
 export type LoggingHandler<RESPONSE> = (
-    methodName: string,
     method: () => Promise<RESPONSE>
 ) => Promise<RESPONSE>;
 export type ErrorHandler<RESPONSE> = (error: unknown) => RESPONSE;
@@ -35,12 +36,9 @@ export class HandlerFactory<RESPONSE> {
         return this;
     }
 
-    createEventHandler(
-        methodName: string,
-        handler: (event: unknown) => Promise<RESPONSE>
-    ) {
+    createEventHandler(handler: (event: unknown) => Promise<RESPONSE>) {
         return async (event: unknown) => {
-            return await this.loggingHandler(methodName, async () => {
+            return await this.loggingHandler(async () => {
                 try {
                     return await handler(event);
                 } catch (error) {
@@ -52,19 +50,35 @@ export class HandlerFactory<RESPONSE> {
 }
 
 export function createNoLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
-    return (methodName: string, method: () => Promise<RESPONSE>) => {
+    return (method: () => Promise<RESPONSE>) => {
         return method();
     };
 }
 
 function createDefaultLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
-    return (methodName: string, method: () => Promise<RESPONSE>) => {
+    return (method: () => Promise<RESPONSE>) => {
         const start = Date.now();
 
         try {
             return method();
         } finally {
-            console.info("method=%s tookMs=%d", methodName, Date.now() - start);
+            console.info(
+                "method=%s.handler tookMs=%d",
+                process.env.AWS_LAMBDA_FUNCTION_NAME,
+                Date.now() - start
+            );
+        }
+    };
+}
+
+function createJsonLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
+    return (method: () => Promise<RESPONSE>) => {
+        const start = Date.now();
+
+        try {
+            return method();
+        } finally {
+            DtLogger.info({ tookMs: Date.now() - start });
         }
     };
 }
