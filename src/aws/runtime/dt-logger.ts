@@ -1,4 +1,13 @@
+import { Writable } from "stream";
+
 type LOG_LEVEL = "DEBUG" | "INFO" | "ERROR";
+
+export interface LoggerConfiguration {
+    lambdaName?: string;
+    fileName?: string;
+    runTime?: string;
+    writeStream?: Writable;
+}
 
 /**
  * Helper class for json-logging.  Logged line will include
@@ -8,15 +17,28 @@ type LOG_LEVEL = "DEBUG" | "INFO" | "ERROR";
  * * the actual message (as json or as string)
  */
 export class DtLogger {
-    static info<T>(message: T) {
+    readonly lambdaName?: string;
+    readonly fileName?: string;
+    readonly runtime?: string;
+    readonly writeStream: Writable;
+
+    constructor(config?: LoggerConfiguration) {
+        this.lambdaName =
+            config?.lambdaName ?? process.env.AWS_LAMBDA_FUNCTION_NAME;
+        this.fileName = config?.fileName;
+        this.runtime = config?.runTime ?? process.env.AWS_EXECUTION_ENV;
+        this.writeStream = config?.writeStream ?? process.stdout;
+    }
+
+    info<T>(message: T) {
         this.log("INFO", message);
     }
 
-    static error<T>(message: T) {
+    error<T>(message: T) {
         this.log("ERROR", message);
     }
 
-    static log<T>(level: LOG_LEVEL, message: T) {
+    log<T>(level: LOG_LEVEL, message: T) {
         const actualMessage =
             typeof message === "string" ? { message } : message;
 
@@ -24,11 +46,12 @@ export class DtLogger {
             ...actualMessage,
             ...{
                 level,
-                lambdaName: process.env.AWS_LAMBDA_FUNCTION_NAME ?? "",
-                runtime: process.env.AWS_EXECUTION_ENV ?? "",
+                fileName: this.fileName,
+                lambdaName: this.lambdaName,
+                runtime: this.runtime,
             },
         };
 
-        process.stdout.write(JSON.stringify(logMessage) + "\n");
+        this.writeStream.write(JSON.stringify(logMessage) + "\n");
     }
 }

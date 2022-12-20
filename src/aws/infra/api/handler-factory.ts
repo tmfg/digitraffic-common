@@ -56,11 +56,11 @@ export function createNoLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
 }
 
 function createDefaultLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
-    return (method: () => Promise<RESPONSE>) => {
+    return async (method: () => Promise<RESPONSE>) => {
         const start = Date.now();
 
         try {
-            return method();
+            return await method();
         } finally {
             console.info(
                 "method=%s.handler tookMs=%d",
@@ -71,14 +71,16 @@ function createDefaultLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
     };
 }
 
-function createJsonLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
-    return (method: () => Promise<RESPONSE>) => {
+function createJsonLoggingHandler<RESPONSE>(
+    logger: DtLogger
+): LoggingHandler<RESPONSE> {
+    return async (method: () => Promise<RESPONSE>) => {
         const start = Date.now();
 
         try {
-            return method();
+            return await method();
         } finally {
-            DtLogger.info({ tookMs: Date.now() - start });
+            logger.info({ tookMs: Date.now() - start });
         }
     };
 }
