@@ -8,7 +8,7 @@ describe("handler-factory tests", () => {
     test("test defaults", async () => {
         const factory = new HandlerFactory();
         const method = jest.fn();
-        const handler = factory.createEventHandler("test", method);
+        const handler = factory.createEventHandler(method);
 
         await handler({});
 
@@ -17,13 +17,13 @@ describe("handler-factory tests", () => {
 
     test("test logging", async () => {
         const logger: LoggingHandler<string> = jest.fn(
-            (name: string, method: () => Promise<string>) => {
+            (method: () => Promise<string>) => {
                 return method();
             }
         );
         const factory = new HandlerFactory<string>().withLoggingHandler(logger);
         const method = jest.fn();
-        const handler = factory.createEventHandler("test", method);
+        const handler = factory.createEventHandler(method);
 
         await handler({});
 
@@ -37,7 +37,7 @@ describe("handler-factory tests", () => {
         const method = jest.fn(() => {
             throw new Error("MAGIC");
         });
-        const handler = factory.createEventHandler("test", method);
+        const handler = factory.createEventHandler(method);
 
         await handler({});
 
