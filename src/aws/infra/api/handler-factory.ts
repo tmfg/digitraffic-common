@@ -1,8 +1,10 @@
 import { DtLogger } from "../../runtime/dt-logger";
 
 export type LoggingHandler<RESPONSE> = (
-    method: () => Promise<RESPONSE>
+    method: () => Promise<RESPONSE>,
+    logger: DtLogger
 ) => Promise<RESPONSE>;
+
 export type ErrorHandler<RESPONSE> = (error: unknown) => RESPONSE;
 
 /**
@@ -36,7 +38,10 @@ export class HandlerFactory<RESPONSE> {
         return this;
     }
 
-    createEventHandler(handler: (event: unknown) => Promise<RESPONSE>) {
+    createEventHandler(
+        handler: (event: unknown) => Promise<RESPONSE>,
+        logger: DtLogger
+    ) {
         return async (event: unknown) => {
             return await this.loggingHandler(async () => {
                 try {
@@ -44,15 +49,9 @@ export class HandlerFactory<RESPONSE> {
                 } catch (error) {
                     return this.errorHandler(error);
                 }
-            });
+            }, logger);
         };
     }
-}
-
-export function createNoLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
-    return (method: () => Promise<RESPONSE>) => {
-        return method();
-    };
 }
 
 function createDefaultLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
@@ -71,10 +70,8 @@ function createDefaultLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
     };
 }
 
-function createJsonLoggingHandler<RESPONSE>(
-    logger: DtLogger
-): LoggingHandler<RESPONSE> {
-    return async (method: () => Promise<RESPONSE>) => {
+export function createJsonLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
+    return async (method: () => Promise<RESPONSE>, logger: DtLogger) => {
         const start = Date.now();
 
         try {
