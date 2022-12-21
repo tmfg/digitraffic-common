@@ -2,8 +2,9 @@ import { HandlerFactory } from "../../src/aws/infra/api/handler-factory";
 import {
     ErrorHandler,
     LoggingHandler,
-} from "../../dist/aws/infra/api/handler-factory";
-import { DtLogger } from "../../dist/aws/runtime/dt-logger";
+} from "../../src/aws/infra/api/handler-factory";
+import { DtLogger } from "../../src/aws/runtime/dt-logger";
+import { LambdaResponse } from "../../src/aws/types/lambda-response";
 
 const logger = new DtLogger();
 
@@ -19,14 +20,12 @@ describe("handler-factory tests", () => {
     });
 
     test("test logging", async () => {
-        const loggingHandler: LoggingHandler<string> = jest.fn(
-            (method: () => Promise<string>) => {
+        const loggingHandler: LoggingHandler = jest.fn(
+            (method: () => Promise<LambdaResponse>) => {
                 return method();
             }
         );
-        const factory = new HandlerFactory<string>().withLoggingHandler(
-            loggingHandler
-        );
+        const factory = new HandlerFactory().withLoggingHandler(loggingHandler);
         const method = jest.fn();
         const handler = factory.createEventHandler(method, logger);
 
@@ -37,7 +36,7 @@ describe("handler-factory tests", () => {
     });
 
     test("test error handling", async () => {
-        const eh: ErrorHandler<string> = jest.fn();
+        const eh: ErrorHandler = jest.fn();
         const factory = new HandlerFactory().withErrorHandler(eh);
         const method = jest.fn(() => {
             throw new Error("MAGIC");

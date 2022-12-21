@@ -1,11 +1,12 @@
 import { DtLogger } from "../../runtime/dt-logger";
+import { LambdaResponse } from "../../types/lambda-response";
 
-export type LoggingHandler<RESPONSE> = (
-    method: () => Promise<RESPONSE>,
+export type LoggingHandler = (
+    method: () => Promise<LambdaResponse>,
     logger: DtLogger
-) => Promise<RESPONSE>;
+) => Promise<LambdaResponse>;
 
-export type ErrorHandler<RESPONSE> = (error: unknown) => RESPONSE;
+export type ErrorHandler = (error: unknown) => LambdaResponse;
 
 /**
  * Factory class for creating lambda-handler functions.  You can set functionality to handle logging and error-handling,
@@ -16,9 +17,9 @@ export type ErrorHandler<RESPONSE> = (error: unknown) => RESPONSE;
  * You should instantiate HandlerFactory in your project with desired error handling and use the factory instance for
  * creating handler-functions for your lambdas.
  */
-export class HandlerFactory<RESPONSE> {
-    private loggingHandler: LoggingHandler<RESPONSE>;
-    private errorHandler: ErrorHandler<RESPONSE>;
+export class HandlerFactory {
+    private loggingHandler: LoggingHandler;
+    private errorHandler: ErrorHandler;
 
     constructor() {
         this.loggingHandler = createDefaultLoggingHandler();
@@ -28,18 +29,18 @@ export class HandlerFactory<RESPONSE> {
         };
     }
 
-    withLoggingHandler(loggingHandler: LoggingHandler<RESPONSE>) {
+    withLoggingHandler(loggingHandler: LoggingHandler) {
         this.loggingHandler = loggingHandler;
         return this;
     }
 
-    withErrorHandler(errorHandler: ErrorHandler<RESPONSE>) {
+    withErrorHandler(errorHandler: ErrorHandler) {
         this.errorHandler = errorHandler;
         return this;
     }
 
     createEventHandler(
-        handler: (event: unknown) => Promise<RESPONSE>,
+        handler: (event: unknown) => Promise<LambdaResponse>,
         logger: DtLogger
     ) {
         return async (event: unknown) => {
@@ -54,8 +55,8 @@ export class HandlerFactory<RESPONSE> {
     }
 }
 
-function createDefaultLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
-    return async (method: () => Promise<RESPONSE>) => {
+function createDefaultLoggingHandler(): LoggingHandler {
+    return async (method: () => Promise<LambdaResponse>) => {
         const start = Date.now();
 
         try {
@@ -70,8 +71,8 @@ function createDefaultLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
     };
 }
 
-export function createJsonLoggingHandler<RESPONSE>(): LoggingHandler<RESPONSE> {
-    return async (method: () => Promise<RESPONSE>, logger: DtLogger) => {
+export function createJsonLoggingHandler(): LoggingHandler {
+    return async (method: () => Promise<LambdaResponse>, logger: DtLogger) => {
         const start = Date.now();
 
         try {
