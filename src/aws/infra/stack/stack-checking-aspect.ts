@@ -183,19 +183,17 @@ export class StackCheckingAspect implements IAspect {
             const c =
                 node.publicAccessBlockConfiguration as CfnBucket.PublicAccessBlockConfigurationProperty;
 
-            if (c) {
-                if (
-                    !c.blockPublicAcls ||
-                    !c.blockPublicPolicy ||
-                    !c.ignorePublicAcls ||
-                    !c.restrictPublicBuckets
-                ) {
-                    this.addAnnotation(
-                        node,
-                        ResourceType.bucketPublicity,
-                        "Check bucket publicity"
-                    );
-                }
+            if (
+                !c.blockPublicAcls ||
+                !c.blockPublicPolicy ||
+                !c.ignorePublicAcls ||
+                !c.restrictPublicBuckets
+            ) {
+                this.addAnnotation(
+                    node,
+                    ResourceType.bucketPublicity,
+                    "Check bucket publicity"
+                );
             }
         }
     }
@@ -227,9 +225,11 @@ export class StackCheckingAspect implements IAspect {
                 );
             }
         } else if (node instanceof CfnMethod) {
-            const integration = node.integration as IntegrationProperty;
+            const integration = node.integration as
+                | IntegrationProperty
+                | undefined;
 
-            if (integration && integration.requestParameters) {
+            if (integration?.requestParameters) {
                 Object.keys(integration.requestParameters).forEach((key) => {
                     const split = key.split(".");
                     const type = split[2];

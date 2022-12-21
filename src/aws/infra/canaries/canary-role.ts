@@ -1,5 +1,11 @@
-import {ManagedPolicy, PolicyStatement, PolicyStatementProps, Role, ServicePrincipal} from "aws-cdk-lib/aws-iam";
-import {Construct} from "constructs";
+import {
+    ManagedPolicy,
+    PolicyStatement,
+    PolicyStatementProps,
+    Role,
+    ServicePrincipal,
+} from "aws-cdk-lib/aws-iam";
+import { Construct } from "constructs";
 
 const BASE_POLICY_STATEMENT_PROPS: PolicyStatementProps = {
     actions: [
@@ -13,12 +19,10 @@ const BASE_POLICY_STATEMENT_PROPS: PolicyStatementProps = {
 };
 
 const CLOUDWATCH_STATEMENT_PROPS: PolicyStatementProps = {
-    actions: [
-        "cloudwatch:PutMetricData",
-    ],
+    actions: ["cloudwatch:PutMetricData"],
     resources: ["*"],
     conditions: {
-        "StringEquals": {
+        StringEquals: {
             "cloudwatch:namespace": "CloudWatchSynthetics",
         },
     },
@@ -26,10 +30,12 @@ const CLOUDWATCH_STATEMENT_PROPS: PolicyStatementProps = {
 
 export class DigitrafficCanaryRole extends Role {
     constructor(stack: Construct, canaryName: string) {
-        super(stack, 'canary-role-' + canaryName, {
+        super(stack, "canary-role-" + canaryName, {
             assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
             managedPolicies: [
-                ManagedPolicy.fromAwsManagedPolicyName("CloudWatchSyntheticsFullAccess"),
+                ManagedPolicy.fromAwsManagedPolicyName(
+                    "CloudWatchSyntheticsFullAccess"
+                ),
             ],
         });
 
@@ -37,11 +43,15 @@ export class DigitrafficCanaryRole extends Role {
         this.addToPolicy(new PolicyStatement(CLOUDWATCH_STATEMENT_PROPS));
     }
 
-    withDatabaseAccess(): DigitrafficCanaryRole {
+    withDatabaseAccess(): this {
         // Won't work :(
         // this.addToPolicy(new PolicyStatement(DB_STATEMENT_PROPS));
         // Works
-        this.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVPCAccessExecutionRole"));
+        this.addManagedPolicy(
+            ManagedPolicy.fromAwsManagedPolicyName(
+                "service-role/AWSLambdaVPCAccessExecutionRole"
+            )
+        );
         return this;
     }
 }

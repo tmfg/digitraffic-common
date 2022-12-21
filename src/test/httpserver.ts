@@ -1,4 +1,5 @@
 import { Server, createServer } from "http";
+import { parse } from "url";
 
 export const ERROR_NO_MATCH = "NO MATCH";
 export const ERRORCODE_NOT_FOUND = 404;
@@ -36,11 +37,18 @@ export class TestHttpServer {
         this.debuglog(`Starting test server on port ${port}`);
         this.server = createServer((req, res) => {
             this.debuglog("Mapped urls: ");
-
             Object.keys(props).forEach((k) => this.debuglog(k));
-            this.debuglog("Received request to url " + req.url + "..");
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const path = require("url").parse(req.url).pathname;
+
+            if (!req.url) {
+                throw new Error("Missing request url!");
+            }
+
+            this.debuglog(`Received request to url ${req.url} ..`);
+            const path = parse(req.url).pathname;
+
+            if (!path) {
+                throw new Error("Missing path from request!");
+            }
 
             let dataStr = "";
             req.on("data", (chunk) => {
@@ -64,7 +72,7 @@ export class TestHttpServer {
                     res.end(props[path](req.url, dataStr));
                 });
             } else {
-                this.debuglog("..no match for %" + path);
+                this.debuglog(`..no match for ${path}`);
                 req.on("end", () => {
                     // assume sent data is in JSON format
                     this.messageStack[this.messageStack.length] =
@@ -91,6 +99,7 @@ export class TestHttpServer {
     }
 }
 
-export interface ListenProperties {
-    [key: string]: (url?: string, data?: string) => string;
-}
+export type ListenProperties = Record<
+    string,
+    (url?: string, data?: string) => string
+>;

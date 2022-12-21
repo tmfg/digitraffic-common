@@ -10,13 +10,13 @@ import http = require("http");
 const DEFAULT_PATH = "/";
 const PORT = 8091;
 
-const DEFAULT_PROPS = {
+const DEFAULT_PROPS: ListenProperties = {
     "/": () => "",
 };
 
 describe("TestHttpServer - test", () => {
     async function withServer(
-        fn: (server: TestHttpServer) => Promise<void>,
+        fn: (server: TestHttpServer) => unknown,
         props: ListenProperties = DEFAULT_PROPS,
         statusCode = 200
     ) {
@@ -78,8 +78,8 @@ describe("TestHttpServer - test", () => {
     }
 
     test("no calls", () => {
-        return withServer(async (server: TestHttpServer) => {
-            await expect(server.getCallCount()).toEqual(0);
+        return withServer((server: TestHttpServer) => {
+            expect(server.getCallCount()).toEqual(0);
         });
     });
 

@@ -1,9 +1,9 @@
-import {Schedule} from "@aws-cdk/aws-synthetics-alpha";
+import { Schedule } from "@aws-cdk/aws-synthetics-alpha";
 
 /** Optional env parameters for canary */
 type CanaryEnv = Record<string, string>;
 
-export type CanaryParameters = {
+export interface CanaryParameters {
     readonly name: string;
     readonly schedule?: Schedule;
     readonly secret?: string;
@@ -14,6 +14,6 @@ export type CanaryParameters = {
         readonly evalutionPeriods?: number;
         readonly threshold?: number;
         readonly topicArn?: string;
-    }
+    };
     readonly canaryEnv?: CanaryEnv;
 }

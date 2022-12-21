@@ -1,5 +1,5 @@
-import {Construct} from "constructs";
-import {CfnDocumentationPart, Resource} from "aws-cdk-lib/aws-apigateway";
+import { Construct } from "constructs";
+import { CfnDocumentationPart, Resource } from "aws-cdk-lib/aws-apigateway";
 
 // Documentation parts are objects that describe an API Gateway API or parts of an API
 // https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-documenting-api.html
@@ -13,18 +13,20 @@ import {CfnDocumentationPart, Resource} from "aws-cdk-lib/aws-apigateway";
  *
  * @deprecated Use DigitrafficRestApi.documentResource
  */
-export function addQueryParameterDescription(name: string,
+export function addQueryParameterDescription(
+    name: string,
     description: string,
     resource: Resource,
-    stack: Construct) {
+    stack: Construct
+) {
     new CfnDocumentationPart(stack, `${name}Documentation`, {
         restApiId: resource.api.restApiId,
         location: {
-            type: 'QUERY_PARAMETER',
+            type: "QUERY_PARAMETER",
             name,
             path: resource.path,
         },
-        properties: JSON.stringify({description}),
+        properties: JSON.stringify({ description }),
     });
 }
 
@@ -35,14 +37,16 @@ export function addQueryParameterDescription(name: string,
  * @param resource REST API resource
  * @param stack CloudFormation stack
  */
-export function addDocumentation(methodDescription: string,
+export function addDocumentation(
+    methodDescription: string,
     documentationProperties: object,
     resource: Resource,
-    stack: Construct) {
+    stack: Construct
+) {
     new CfnDocumentationPart(stack, `${methodDescription}Documentation`, {
         restApiId: resource.api.restApiId,
         location: {
-            type: 'METHOD',
+            type: "METHOD",
             path: resource.path,
         },
         properties: JSON.stringify(documentationProperties),
@@ -56,11 +60,13 @@ export function addDocumentation(methodDescription: string,
  * @param resource REST API resource
  * @param stack CloudFormation stack
  */
-export function addTags(methodDescription: string,
+export function addTags(
+    methodDescription: string,
     tags: string[],
     resource: Resource,
-    stack: Construct) {
-    addDocumentation(methodDescription, {tags}, resource, stack);
+    stack: Construct
+) {
+    addDocumentation(methodDescription, { tags }, resource, stack);
 }
 
 /**
@@ -79,16 +85,16 @@ export function addTagsAndSummary(
     tags: string[],
     summary: string,
     resource: Resource,
-    stack: Construct,
+    stack: Construct
 ) {
-    addDocumentation(methodDescription, {tags, summary}, resource, stack);
+    addDocumentation(methodDescription, { tags, summary }, resource, stack);
 }
 
 export interface DocumentationProperties {
-    description?: string
-    tags?: string[]
-    summary?: string
-    deprecated?: boolean
+    description?: string;
+    tags?: string[];
+    summary?: string;
+    deprecated?: boolean;
 }
 
 export class DocumentationPart {
@@ -96,29 +102,41 @@ export class DocumentationPart {
     readonly type: string;
     readonly documentationProperties: DocumentationProperties;
 
-    private constructor(parameterName: string, documentationProperties: DocumentationProperties, type: string) {
+    private constructor(
+        parameterName: string,
+        documentationProperties: DocumentationProperties,
+        type: string
+    ) {
         this.parameterName = parameterName;
         this.documentationProperties = documentationProperties;
         this.type = type;
     }
 
-    deprecated(note: string): DocumentationPart {
+    deprecated(note: string): this {
         // deprecated is not supported ATM: https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-known-issues.html
         this.documentationProperties.deprecated = true;
-        this.documentationProperties.summary+= '. ' + note;
+        this.documentationProperties.summary += ". " + note;
 
         return this;
     }
 
     static queryParameter(parameterName: string, description: string) {
-        return new DocumentationPart(parameterName, {description}, "QUERY_PARAMETER");
+        return new DocumentationPart(
+            parameterName,
+            { description },
+            "QUERY_PARAMETER"
+        );
     }
 
     static pathParameter(parameterName: string, description: string) {
-        return new DocumentationPart(parameterName, {description}, "PATH_PARAMETER");
+        return new DocumentationPart(
+            parameterName,
+            { description },
+            "PATH_PARAMETER"
+        );
     }
 
     static method(tags: string[], name: string, summary: string) {
-        return new DocumentationPart(name, {tags, summary}, "METHOD");
+        return new DocumentationPart(name, { tags, summary }, "METHOD");
     }
 }

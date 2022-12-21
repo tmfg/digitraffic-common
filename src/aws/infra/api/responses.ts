@@ -64,7 +64,7 @@ export function methodResponse(
     return {
         statusCode: status,
         responseModels: createResponses(contentType, model),
-        responseParameters: parameters || {},
+        responseParameters: parameters ?? {},
     };
 }
 
@@ -83,7 +83,9 @@ export function corsMethod(response: MethodResponse): MethodResponse {
 }
 
 interface IntegrationOptions {
+    // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
     requestParameters?: { [dest: string]: string };
+    // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
     requestTemplates?: { [contentType: string]: string };
     responses?: IntegrationResponse[];
     disableCors?: boolean;
@@ -104,14 +106,14 @@ export function defaultIntegration(
 ): LambdaIntegration {
     return new LambdaIntegration(lambdaFunction, {
         proxy: false,
-        integrationResponses: options?.responses || [
+        integrationResponses: options?.responses ?? [
             getResponse(RESPONSE_200_OK, options),
             getResponse(RESPONSE_400_BAD_REQUEST, options),
             getResponse(RESPONSE_404_NOT_FOUND, options),
             getResponse(RESPONSE_500_SERVER_ERROR, options),
         ],
-        requestParameters: options?.requestParameters || {},
-        requestTemplates: options?.requestTemplates || {},
+        requestParameters: options?.requestParameters ?? {},
+        requestTemplates: options?.requestTemplates ?? {},
         passthroughBehavior:
             options?.passthroughBehavior ?? PassthroughBehavior.WHEN_NO_MATCH,
     });

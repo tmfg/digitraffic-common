@@ -16,7 +16,7 @@ import { TrafficType } from "../../../types/traffictype";
 /**
  * Allows customization of CloudWatch Alarm properties
  */
-export type MonitoredFunctionAlarmProps = {
+export interface MonitoredFunctionAlarmProps {
     /**
      * Setting this to false will not create a CloudWatch alarm
      */
@@ -29,9 +29,9 @@ export type MonitoredFunctionAlarmProps = {
     readonly datapointsToAlarm?: number;
 
     readonly comparisonOperator?: ComparisonOperator;
-};
+}
 
-export type MonitoredFunctionProps = {
+export interface MonitoredFunctionProps {
     readonly durationAlarmProps?: MonitoredFunctionAlarmProps;
 
     readonly durationWarningProps?: MonitoredFunctionAlarmProps;
@@ -39,7 +39,7 @@ export type MonitoredFunctionProps = {
     readonly errorAlarmProps?: MonitoredFunctionAlarmProps;
 
     readonly throttleAlarmProps?: MonitoredFunctionAlarmProps;
-};
+}
 
 /**
  * Creates a Lambda function that monitors default CloudWatch Lambda metrics with CloudWatch Alarms.
@@ -115,7 +115,7 @@ export class MonitoredFunction extends Function {
         functionParameters?: Partial<MonitoredFunctionParameters>
     ): MonitoredFunction {
         const functionName =
-            functionParameters?.functionName ||
+            functionParameters?.functionName ??
             `${stack.configuration.shortName}-${pascalCase(name)}`;
         const functionProps = databaseFunctionProps(
             stack,
@@ -313,7 +313,7 @@ export class MonitoredDBFunction {
         functionParameters?: Partial<MonitoredFunctionParameters>
     ): MonitoredFunction {
         const functionName =
-            functionParameters?.functionName ||
+            functionParameters?.functionName ??
             `${stack.configuration.shortName}-${pascalCase(name)}`;
         const env = environment ? environment : stack.createLambdaEnvironment();
         const functionProps = databaseFunctionProps(

@@ -25,13 +25,13 @@ export class DigitrafficIntegration {
         this.mediaType = mediaType;
     }
 
-    addPathParameter(...names: string[]): DigitrafficIntegration {
+    addPathParameter(...names: string[]): this {
         names.forEach((name) => this.parameters.push({ type: "path", name }));
 
         return this;
     }
 
-    addQueryParameter(...names: string[]): DigitrafficIntegration {
+    addQueryParameter(...names: string[]): this {
         names.forEach((name) =>
             this.parameters.push({ type: "querystring", name })
         );

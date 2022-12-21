@@ -1,57 +1,57 @@
-export type RtzPositionCoordinate = {
+export interface RtzPositionCoordinate {
     readonly $: {
-        readonly lat: number
-        readonly lon: number
-    }
+        readonly lat: number;
+        readonly lon: number;
+    };
 }
 
-export type RtzWaypointPosition = {
-    readonly position: RtzPositionCoordinate[]
+export interface RtzWaypointPosition {
+    readonly position: RtzPositionCoordinate[];
 }
 
-export type RtzWaypoint = {
-    readonly waypoint: RtzWaypointPosition[]
+export interface RtzWaypoint {
+    readonly waypoint: RtzWaypointPosition[];
 }
 
-export type RtzScheduleElement = {
+export interface RtzScheduleElement {
     readonly $: {
         /**
          * Date
          */
-        readonly etd?: string
+        readonly etd?: string;
         /**
          * Date
          */
-        readonly eta?: string
-    },
+        readonly eta?: string;
+    };
 }
 
-export type RtzSchedule = {
-    readonly scheduleElement: RtzScheduleElement[]
+export interface RtzSchedule {
+    readonly scheduleElement: RtzScheduleElement[];
 }
 
-export type RtzScheduleWrapper = {
-    readonly manual?: RtzSchedule[]
-    readonly calculated?: RtzSchedule[]
+export interface RtzScheduleWrapper {
+    readonly manual?: RtzSchedule[];
+    readonly calculated?: RtzSchedule[];
 }
 
-export type RtzSchedules = {
-    readonly schedule: RtzScheduleWrapper[]
+export interface RtzSchedules {
+    readonly schedule: RtzScheduleWrapper[];
 }
 
-export type RtzRouteInfo = {
+export interface RtzRouteInfo {
     readonly $: {
-        readonly vesselMMSI: string
-        readonly vesselIMO: string
-    }
+        readonly vesselMMSI: string;
+        readonly vesselIMO: string;
+    };
 }
 
-export type RtzRoute = {
-    readonly routeInfo: RtzRouteInfo[]
-    readonly waypoints: RtzWaypoint[]
-    readonly schedules: RtzSchedules[]
+export interface RtzRoute {
+    readonly routeInfo: RtzRouteInfo[];
+    readonly waypoints: RtzWaypoint[];
+    readonly schedules: RtzSchedules[];
 }
 
-export type RtzVoyagePlan = {
-    readonly route: RtzRoute
+export interface RtzVoyagePlan {
+    readonly route: RtzRoute;
 }

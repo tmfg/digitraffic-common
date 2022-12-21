@@ -1,11 +1,11 @@
 import { GenericSecret, withSecret, withSecretAndPrefix } from "./secret";
 
-export type DbSecret = {
+export interface DbSecret {
     readonly username: string;
     readonly password: string;
     readonly host: string;
     readonly ro_host: string;
-};
+}
 
 export enum RdsProxySecretKey {
     username = "username",
@@ -53,10 +53,10 @@ const missingSecretErrorText = "Missing or empty secretId";
  * The secret that is passed to the given function will not include the prefix in it's keys.
 
  */
-export type SecretOptions = {
+export interface SecretOptions {
     readonly expectedKeys?: string[];
     readonly prefix?: string;
-};
+}
 
 export type SecretToPromiseFunction<Secret, Response = void> = (
     secret: Secret
@@ -140,7 +140,7 @@ export function checkExpectedSecretKeys<Secret extends GenericSecret>(
     const missingKeys = keys.filter((key) => !(key in secret));
     if (missingKeys.length) {
         console.error(
-            `method=checkExpectedSecretKeys secret didn't contain the key(s) ${missingKeys}`
+            `method=checkExpectedSecretKeys secret didn't contain the key(s) ${missingKeys.toString()}`
         );
         throw new Error("Expected keys were not found");
     }

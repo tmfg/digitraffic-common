@@ -3,11 +3,11 @@
  *
  * Not fully described, extend if necessary.
  */
-export type ProxyLambdaResponse = {
-    readonly statusCode: number
-    readonly body: string
-    readonly headers?: Record<string, string>
-    readonly multiValueHeaders?: Record<string, string[]>
+export interface ProxyLambdaResponse {
+    readonly statusCode: number;
+    readonly body: string;
+    readonly headers?: Record<string, string>;
+    readonly multiValueHeaders?: Record<string, string[]>;
 }
 
 /**
@@ -15,13 +15,13 @@ export type ProxyLambdaResponse = {
  *
  * Not fully described, extend if necessary.
  */
-export type ProxyLambdaRequest = {
-    readonly resource: string
-    readonly path: string
-    readonly httpMethod: string
-    readonly headers: Record<string, string>
-    readonly multiValueHeaders: Record<string, string[]>
-    readonly queryStringParameters: Record<string, string>
-    readonly multiValueQueryStringParameters: Record<string, string[]>
-    readonly body?: string
+export interface ProxyLambdaRequest {
+    readonly resource: string;
+    readonly path: string;
+    readonly httpMethod: string;
+    readonly headers: Record<string, string>;
+    readonly multiValueHeaders: Record<string, string[]>;
+    readonly queryStringParameters: Record<string, string>;
+    readonly multiValueQueryStringParameters: Record<string, string[]>;
+    readonly body?: string;
 }

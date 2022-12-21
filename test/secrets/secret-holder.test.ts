@@ -17,7 +17,7 @@ import { DatabaseEnvironmentKeys } from "../../src/aws/runtime/secrets/dbsecret"
 
 describe("SecretHolder - tests", () => {
     beforeEach(() => {
-        process.env["SECRET_ID"] = "test-id";
+        process.env.SECRET_ID = "test-id";
     });
 
     afterEach(() => {
