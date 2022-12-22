@@ -6,7 +6,7 @@ export type LoggingHandler = (
     logger: DtLogger
 ) => Promise<LambdaResponse>;
 
-export type ErrorHandler = (error: unknown) => LambdaResponse;
+export type ErrorHandler = (error: unknown, logger: DtLogger) => LambdaResponse;
 
 /**
  * Factory class for creating lambda-handler functions.  You can set functionality to handle logging and error-handling,
@@ -22,7 +22,19 @@ export class HandlerFactory {
     private errorHandler: ErrorHandler;
 
     constructor() {
-        this.loggingHandler = createDefaultLoggingHandler();
+        this.loggingHandler = async (method: () => Promise<LambdaResponse>) => {
+            const start = Date.now();
+
+            try {
+                return await method();
+            } finally {
+                console.info(
+                    "method=%s.handler tookMs=%d",
+                    process.env.AWS_LAMBDA_FUNCTION_NAME,
+                    Date.now() - start
+                );
+            }
+        };
 
         this.errorHandler = (error: unknown) => {
             throw error;
@@ -48,27 +60,11 @@ export class HandlerFactory {
                 try {
                     return await handler(event);
                 } catch (error) {
-                    return this.errorHandler(error);
+                    return this.errorHandler(error, logger);
                 }
             }, logger);
         };
     }
-}
-
-function createDefaultLoggingHandler(): LoggingHandler {
-    return async (method: () => Promise<LambdaResponse>) => {
-        const start = Date.now();
-
-        try {
-            return await method();
-        } finally {
-            console.info(
-                "method=%s.handler tookMs=%d",
-                process.env.AWS_LAMBDA_FUNCTION_NAME,
-                Date.now() - start
-            );
-        }
-    };
 }
 
 export function createJsonLoggingHandler(): LoggingHandler {
