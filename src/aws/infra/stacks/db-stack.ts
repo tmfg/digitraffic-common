@@ -105,6 +105,7 @@ export class DbStack extends Stack {
                       parameters: {
                           "pg_stat_statements.track": "ALL",
                           random_page_cost: "1",
+                          work_mem: "512MB",
                       },
                   }
               )
@@ -156,9 +157,7 @@ export class DbStack extends Stack {
                 "Couldn't pull CfnDBInstances from the L1 constructs!"
             );
         }
-        cfnInstances.forEach(
-            (cfnInstance) => delete cfnInstance.engineVersion
-        );
+        cfnInstances.forEach((cfnInstance) => delete cfnInstance.engineVersion);
 
         return cluster;
     }

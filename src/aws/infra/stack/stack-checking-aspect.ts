@@ -180,14 +180,16 @@ export class StackCheckingAspect implements IAspect {
 
     private checkBucket(node: IConstruct) {
         if (node instanceof CfnBucket) {
-            const c =
-                node.publicAccessBlockConfiguration as CfnBucket.PublicAccessBlockConfigurationProperty;
+            const c = node.publicAccessBlockConfiguration as
+                | CfnBucket.PublicAccessBlockConfigurationProperty
+                | undefined;
 
             if (
-                !c.blockPublicAcls ||
-                !c.blockPublicPolicy ||
-                !c.ignorePublicAcls ||
-                !c.restrictPublicBuckets
+                c &&
+                (!c.blockPublicAcls ||
+                    !c.blockPublicPolicy ||
+                    !c.ignorePublicAcls ||
+                    !c.restrictPublicBuckets)
             ) {
                 this.addAnnotation(
                     node,
