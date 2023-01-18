@@ -103,3 +103,28 @@ export function getEnvVariableSafe(key: string): Either<string> {
     }
     return { result: "ok", value };
 }
+
+/**
+ * Gets environment variable. If environment variable is undefined, returns value of given function.
+ *
+ * @param key Environment key
+ * @param fn Alternative function
+ */
+function getEnvVariableOr<T>(key: string, fn: () => T): string | T {
+    const either = getEnvVariableSafe(key);
+    if (either.result === "ok") {
+        return either.value;
+    }
+    return fn();
+}
+
+/**
+ * Gets environment variable. If environment variable is undefined, returns given value.
+ * Use to return an explicit alternative value e.g. in cases where environment variable may be undefined.
+ *
+ * @param key Environment key
+ * @param orElse Alternative value
+ */
+function getEnvVariableOrElse<T>(key: string, orElse: T): string | T {
+    return getEnvVariableOr(key, () => orElse);
+}
