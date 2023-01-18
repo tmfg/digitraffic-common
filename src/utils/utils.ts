@@ -110,7 +110,7 @@ export function getEnvVariableSafe(key: string): Either<string> {
  * @param key Environment key
  * @param fn Alternative function
  */
-function getEnvVariableOr<T>(key: string, fn: () => T): string | T {
+export function getEnvVariableOr<T>(key: string, fn: () => T): string | T {
     const either = getEnvVariableSafe(key);
     if (either.result === "ok") {
         return either.value;
@@ -125,6 +125,6 @@ function getEnvVariableOr<T>(key: string, fn: () => T): string | T {
  * @param key Environment key
  * @param orElse Alternative value
  */
-function getEnvVariableOrElse<T>(key: string, orElse: T): string | T {
+export function getEnvVariableOrElse<T>(key: string, orElse: T): string | T {
     return getEnvVariableOr(key, () => orElse);
 }
