@@ -45,7 +45,7 @@ export class DigitrafficIntegration {
     }
 
     build(): LambdaIntegration {
-        const integrationResponses = this.createResponses(this.sunset);
+        const integrationResponses = this.createResponses();
 
         return new LambdaIntegration(this.lambda, {
             proxy: false,
@@ -88,7 +88,7 @@ export class DigitrafficIntegration {
         };
     }
 
-    createResponses(sunset?: string): IntegrationResponse[] {
-        return [DigitrafficIntegrationResponse.ok(this.mediaType, sunset)];
+    createResponses(): IntegrationResponse[] {
+        return [DigitrafficIntegrationResponse.ok(this.mediaType, this.sunset)];
     }
 }
