@@ -25,21 +25,10 @@ $util.base64Decode($inputRoot.body)
 #end
 `;
 
-export const getDeprecatedDefaultResponseLambda = (sunset: string) => {
-    return `#set($inputRoot = $input.path('$'))
-$util.base64Decode($inputRoot.body)
-#if ($inputRoot.status != 200)
-#set ($context.responseOverride.status = $inputRoot.status)
-#set ($context.responseOverride.header.Content-Type = 'text/plain')
-#end
-#set ($context.responseOverride.header.Access-Control-Allow-Origin = '*')
-#set ($context.responseOverride.header.Deprecation = 'true')
-#set ($context.responseOverride.header.Sunset = '${sunset}')
-#if ("$!inputRoot.fileName" != "")
-#set ($disposition = 'attachment; filename="FN"')
-#set ($context.responseOverride.header.Content-Disposition = $disposition.replaceAll('FN', $inputRoot.fileName))
-#end
-`;
+export const getDeprecatedDefaultLambdaResponse = (sunset: string) => {
+    const setDeprecationHeaders = `#set ($context.responseOverride.header.Deprecation = 'true')
+#set ($context.responseOverride.header.Sunset = '${sunset}')`;
+    return RESPONSE_DEFAULT_LAMBDA.concat(setDeprecationHeaders);
 };
 
 const BODY_FROM_INPUT_PATH = "$input.path('$').body";

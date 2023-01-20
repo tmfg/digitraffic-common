@@ -27,9 +27,7 @@ export class DigitrafficIntegration {
     ) {
         this.lambda = lambda;
         this.mediaType = mediaType;
-        if (sunset) {
-            this.sunset = sunset;
-        }
+        this.sunset = sunset;
     }
 
     addPathParameter(...names: string[]): this {
