@@ -1,11 +1,13 @@
-import {IntegrationResponse} from "aws-cdk-lib/aws-apigateway";
-import {MediaType} from "../types/mediatypes";
-import {RESPONSE_DEFAULT_LAMBDA} from "../infra/api/response";
+import { IntegrationResponse } from "aws-cdk-lib/aws-apigateway";
+import { MediaType } from "../types/mediatypes";
+import {
+    getDeprecatedDefaultResponseLambda,
+    RESPONSE_DEFAULT_LAMBDA,
+} from "../infra/api/response";
 
 export abstract class DigitrafficIntegrationResponse {
-
-    static ok(mediaType: MediaType): IntegrationResponse {
-        return this.create("200", mediaType);
+    static ok(mediaType: MediaType, sunset?: string): IntegrationResponse {
+        return this.create("200", mediaType, sunset);
     }
 
     static badRequest(mediaType?: MediaType): IntegrationResponse {
@@ -16,13 +18,18 @@ export abstract class DigitrafficIntegrationResponse {
         return this.create("501", mediaType ?? MediaType.TEXT_PLAIN);
     }
 
-    static create(statusCode: string, mediaType: MediaType): IntegrationResponse {
+    static create(
+        statusCode: string,
+        mediaType: MediaType,
+        sunset?: string
+    ): IntegrationResponse {
         return {
             statusCode,
             responseTemplates: {
-                [mediaType]: RESPONSE_DEFAULT_LAMBDA,
+                [mediaType]: sunset
+                    ? getDeprecatedDefaultResponseLambda(sunset)
+                    : RESPONSE_DEFAULT_LAMBDA,
             },
         };
     }
 }
-

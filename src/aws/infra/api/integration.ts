@@ -17,12 +17,19 @@ interface ApiParameter {
 export class DigitrafficIntegration {
     readonly lambda: IFunction;
     readonly mediaType: MediaType;
-
     readonly parameters: ApiParameter[] = [];
+    readonly sunset?: string;
 
-    constructor(lambda: IFunction, mediaType = MediaType.TEXT_PLAIN) {
+    constructor(
+        lambda: IFunction,
+        mediaType = MediaType.TEXT_PLAIN,
+        sunset?: string
+    ) {
         this.lambda = lambda;
         this.mediaType = mediaType;
+        if (sunset) {
+            this.sunset = sunset;
+        }
     }
 
     addPathParameter(...names: string[]): this {
@@ -40,7 +47,7 @@ export class DigitrafficIntegration {
     }
 
     build(): LambdaIntegration {
-        const integrationResponses = this.createResponses();
+        const integrationResponses = this.createResponses(this.sunset);
 
         return new LambdaIntegration(this.lambda, {
             proxy: false,
@@ -83,7 +90,7 @@ export class DigitrafficIntegration {
         };
     }
 
-    createResponses(): IntegrationResponse[] {
-        return [DigitrafficIntegrationResponse.ok(this.mediaType)];
+    createResponses(sunset?: string): IntegrationResponse[] {
+        return [DigitrafficIntegrationResponse.ok(this.mediaType, sunset)];
     }
 }
