@@ -1,6 +1,7 @@
 import {MediaType} from "../../types/mediatypes";
 import {JsonSchema, JsonSchemaType, JsonSchemaVersion, MethodResponse, Model,} from "aws-cdk-lib/aws-apigateway";
 import {IModel} from "aws-cdk-lib/aws-apigateway/lib/model";
+import {dateFromIsoString} from "../../../utils/date-utils";
 
 /**
  * This is velocity-script, that assumes the response to be LambdaResponse(status and body).
@@ -25,9 +26,18 @@ $util.base64Decode($inputRoot.body)
 #end
 `;
 
+/**
+ * Use this for deprecated integrations.
+ * Will add HTTP headers Deprecation and Sunset to response.
+ * Example:
+ *  Deprecation: true
+ *  Sunset: Tue, 20 Dec 2022 00:00:00 GMT
+ * @param sunset Sunset date as string in ISO 8601 date-time format (YYYY-MM-DD)
+ */
+
 export const getDeprecatedDefaultLambdaResponse = (sunset: string) => {
     const setDeprecationHeaders = `#set ($context.responseOverride.header.Deprecation = 'true')
-#set ($context.responseOverride.header.Sunset = '${sunset}')`;
+#set ($context.responseOverride.header.Sunset = '${dateFromIsoString(sunset).toUTCString()}')`;
     return RESPONSE_DEFAULT_LAMBDA.concat(setDeprecationHeaders);
 };
 
