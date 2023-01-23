@@ -1,12 +1,6 @@
-import { MediaType } from "../../types/mediatypes";
-import {
-    JsonSchemaType,
-    JsonSchemaVersion,
-    JsonSchema,
-    MethodResponse,
-    Model,
-} from "aws-cdk-lib/aws-apigateway";
-import { IModel } from "aws-cdk-lib/aws-apigateway/lib/model";
+import {MediaType} from "../../types/mediatypes";
+import {JsonSchema, JsonSchemaType, JsonSchemaVersion, MethodResponse, Model,} from "aws-cdk-lib/aws-apigateway";
+import {IModel} from "aws-cdk-lib/aws-apigateway/lib/model";
 
 /**
  * This is velocity-script, that assumes the response to be LambdaResponse(status and body).
@@ -30,6 +24,12 @@ $util.base64Decode($inputRoot.body)
 #set ($context.responseOverride.header.Content-Disposition = $disposition.replaceAll('FN', $inputRoot.fileName))
 #end
 `;
+
+export const getDeprecatedDefaultLambdaResponse = (sunset: string) => {
+    const setDeprecationHeaders = `#set ($context.responseOverride.header.Deprecation = 'true')
+#set ($context.responseOverride.header.Sunset = '${sunset}')`;
+    return RESPONSE_DEFAULT_LAMBDA.concat(setDeprecationHeaders);
+};
 
 const BODY_FROM_INPUT_PATH = "$input.path('$').body";
 
@@ -100,19 +100,19 @@ export class DigitrafficMethodResponse {
         statusCode: string,
         model: IModel,
         mediaType: MediaType,
-        disableCors = false
+        disableCors = false,
+        deprecation = false
     ): MethodResponse {
         return {
             statusCode,
             responseModels: {
                 [mediaType]: model,
             },
-            responseParameters: disableCors
-                ? {}
-                : {
-                      "method.response.header.Access-Control-Allow-Origin":
-                          true,
-                  },
+            responseParameters: {
+                "method.response.header.Access-Control-Allow-Origin": !disableCors,
+                "method.response.header.Deprecation": deprecation,
+                "method.response.header.Sunset": deprecation,
+            },
         };
     }
 
