@@ -82,7 +82,8 @@ export class MonitoredFunction extends Function {
             stack.configuration.production
         ) {
             throw new Error(
-                `Function ${functionProps.functionName} has DISABLE_ALARMS.  Remove before installing to production or define your own properties!`
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                `Function ${functionProps.functionName!} has DISABLE_ALARMS.  Remove before installing to production or define your own properties!`
             );
         }
 

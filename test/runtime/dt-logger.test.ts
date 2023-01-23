@@ -1,6 +1,6 @@
 import { Writable } from "stream";
 import { DtLogger, LoggerConfiguration } from "../../src/aws/runtime/dt-logger";
-import { LoggableType } from "../../dist/aws/runtime/dt-logger";
+import { LoggableType } from "../../src/aws/runtime/dt-logger";
 
 const LOG_LINE = {
     message: "FOO",

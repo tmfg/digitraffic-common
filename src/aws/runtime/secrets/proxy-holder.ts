@@ -1,10 +1,7 @@
 import { SecretHolder } from "./secret-holder";
-import {
-    DatabaseEnvironmentKeys,
-    RdsProxySecretKey,
-    RdsProxySecret,
-} from "./dbsecret";
+import { RdsProxySecretKey, RdsProxySecret } from "./dbsecret";
 import { getEnvVariable } from "../../../utils/utils";
+import { DatabaseEnvironmentKeys } from "../../../database/database";
 
 const RDS_PROXY_SECRET_KEYS = Object.values(RdsProxySecretKey);
 

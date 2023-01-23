@@ -6,7 +6,7 @@ import {
     Runtime,
 } from "aws-cdk-lib/aws-lambda";
 import { Duration } from "aws-cdk-lib";
-import { ISecurityGroup, IVpc, SubnetSelection } from "aws-cdk-lib/aws-ec2";
+import { IVpc, SubnetSelection } from "aws-cdk-lib/aws-ec2";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { Role } from "aws-cdk-lib/aws-iam";
 import { DigitrafficStack } from "./stack";
@@ -18,26 +18,6 @@ export type DBLambdaEnvironment = LambdaEnvironment & {
     SECRET_ID?: string;
     DB_APPLICATION: string;
 };
-
-export interface LambdaConfiguration {
-    vpcId: string;
-    allowFromIpAddresses?: string[];
-    privateSubnetIds: string[];
-    availabilityZones: string[];
-    lambdaDbSgId: string;
-    dbProps?: DbProps;
-    defaultLambdaDurationSeconds?: number;
-    logsDestinationArn: string;
-    memorySize?: number;
-    runtime?: Runtime;
-}
-
-declare interface DbProps {
-    username: string;
-    password: string;
-    uri?: string;
-    ro_uri?: string;
-}
 
 export function databaseFunctionProps(
     stack: DigitrafficStack,
@@ -61,9 +41,9 @@ export function databaseFunctionProps(
             config
         ),
         ...{
-            vpc: stack.vpc || undefined,
+            vpc: stack.vpc ?? undefined,
             vpcSubnets,
-            securityGroup: stack.lambdaDbSg || undefined,
+            securityGroup: stack.lambdaDbSg ?? undefined,
         },
     };
 }
@@ -101,47 +81,6 @@ function getAssetCode(
     return new AssetCode(lambdaPath);
 }
 
-/**
- * Creates a base configuration for a Lambda that uses an RDS database
- * @param vpc "Private" Lambdas are associated with a VPC
- * @param lambdaDbSg Security Group shared by Lambda and RDS
- * @param props Database connection properties for the Lambda
- * @param config Lambda configuration
- */
-export function dbLambdaConfiguration(
-    vpc: IVpc,
-    lambdaDbSg: ISecurityGroup,
-    props: LambdaConfiguration,
-    config: FunctionParameters
-): FunctionProps {
-    return {
-        runtime: props.runtime ?? Runtime.NODEJS_16_X,
-        memorySize: props.memorySize ?? config.memorySize ?? 1024,
-        functionName: config.functionName,
-        code: config.code,
-        role: config.role,
-        handler: config.handler,
-        timeout: Duration.seconds(
-            config.timeout ?? props.defaultLambdaDurationSeconds ?? 60
-        ),
-        environment: config.environment ?? {
-            DB_USER: props.dbProps?.username ?? "",
-            DB_PASS: props.dbProps?.password ?? "",
-            DB_URI:
-                (config.readOnly
-                    ? props.dbProps?.ro_uri
-                    : props.dbProps?.uri) ?? "",
-        },
-        logRetention: RetentionDays.ONE_YEAR,
-        vpc: vpc,
-        vpcSubnets: {
-            subnets: vpc.privateSubnets,
-        },
-        securityGroups: [lambdaDbSg],
-        reservedConcurrentExecutions: config.reservedConcurrentExecutions ?? 3,
-    };
-}
-
 export function defaultLambdaConfiguration(
     config: FunctionParameters
 ): FunctionProps {
@@ -155,7 +94,7 @@ export function defaultLambdaConfiguration(
         reservedConcurrentExecutions: config.reservedConcurrentExecutions,
         code: config.code,
         role: config.role,
-        timeout: Duration.seconds(config.timeout || 10),
+        timeout: Duration.seconds(config.timeout ?? 10),
     };
     if (config.vpc) {
         return {
@@ -163,7 +102,7 @@ export function defaultLambdaConfiguration(
             ...{
                 vpc: config.vpc,
                 vpcSubnets: {
-                    subnets: config.vpc?.privateSubnets,
+                    subnets: config.vpc.privateSubnets,
                 },
             },
         };
@@ -178,9 +117,7 @@ export interface FunctionParameters {
     code: Code;
     handler: string;
     readOnly?: boolean;
-    environment?: {
-        [key: string]: string;
-    };
+    environment?: Record<string, string>;
     reservedConcurrentExecutions?: number;
     role?: Role;
     vpc?: IVpc;

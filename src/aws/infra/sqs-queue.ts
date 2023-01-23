@@ -1,18 +1,20 @@
-import {Queue, QueueEncryption, QueueProps} from "aws-cdk-lib/aws-sqs";
-import {Duration} from "aws-cdk-lib";
-import {BlockPublicAccess, Bucket} from "aws-cdk-lib/aws-s3";
-import {PolicyStatement} from "aws-cdk-lib/aws-iam";
-import {InlineCode, Runtime} from "aws-cdk-lib/aws-lambda";
-import {RetentionDays} from "aws-cdk-lib/aws-logs";
-import {SqsEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
-import {ComparisonOperator, TreatMissingData} from "aws-cdk-lib/aws-cloudwatch";
-import {SnsAction} from "aws-cdk-lib/aws-cloudwatch-actions";
-import {ManagedUpload} from "aws-sdk/clients/s3";
-import {S3} from "aws-sdk";
-import {SQSEvent, SQSHandler, SQSRecord} from "aws-lambda";
-import {Construct} from "constructs";
-import {DigitrafficStack} from "./stack/stack";
-import {MonitoredFunction} from "./stack/monitoredfunction";
+import { Queue, QueueEncryption, QueueProps } from "aws-cdk-lib/aws-sqs";
+import { Duration } from "aws-cdk-lib";
+import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { InlineCode, Runtime } from "aws-cdk-lib/aws-lambda";
+import { RetentionDays } from "aws-cdk-lib/aws-logs";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import {
+    ComparisonOperator,
+    TreatMissingData,
+} from "aws-cdk-lib/aws-cloudwatch";
+import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
+import { ManagedUpload } from "aws-sdk/clients/s3";
+import { S3 } from "aws-sdk";
+import { SQSEvent, SQSHandler, SQSRecord } from "aws-lambda";
+import { DigitrafficStack } from "./stack/stack";
+import { MonitoredFunction } from "./stack/monitoredfunction";
 
 /**
  * Construct for creating SQS-queues.
@@ -21,20 +23,23 @@ import {MonitoredFunction} from "./stack/monitoredfunction";
  * and an alarm for the queue.  Anything that goes to the dlq will be written into the bucket and the alarm is activated.
  */
 export class DigitrafficSqsQueue extends Queue {
-    constructor(scope: Construct, name: string, props: QueueProps) {
-        super(scope, name, props);
-    }
-
-    static create(stack: DigitrafficStack, name: string, props: QueueProps): DigitrafficSqsQueue {
+    static create(
+        stack: DigitrafficStack,
+        name: string,
+        props: QueueProps
+    ): DigitrafficSqsQueue {
         const queueName = `${stack.configuration.shortName}-${name}-Queue`;
-        const queueProps = {...props, ...{
-            encryption: QueueEncryption.KMS_MANAGED,
-            queueName,
-            deadLetterQueue: props.deadLetterQueue || {
-                maxReceiveCount: 2,
-                queue: DigitrafficDLQueue.create(stack, name),
+        const queueProps = {
+            ...props,
+            ...{
+                encryption: QueueEncryption.KMS_MANAGED,
+                queueName,
+                deadLetterQueue: props.deadLetterQueue ?? {
+                    maxReceiveCount: 2,
+                    queue: DigitrafficDLQueue.create(stack, name),
+                },
             },
-        }};
+        };
 
         return new DigitrafficSqsQueue(stack, queueName, queueProps);
     }
@@ -61,15 +66,15 @@ export class DigitrafficDLQueue {
             functionName: dlqFunctionName,
             code: getDlqCode(dlqBucket.bucketName),
             timeout: Duration.seconds(10),
-            handler: 'index.handler',
+            handler: "index.handler",
             memorySize: 128,
             reservedConcurrentExecutions: 1,
         });
 
         const statement = new PolicyStatement();
-        statement.addActions('s3:PutObject');
-        statement.addActions('s3:PutObjectAcl');
-        statement.addResources(dlqBucket.bucketArn + '/*');
+        statement.addActions("s3:PutObject");
+        statement.addActions("s3:PutObjectAcl");
+        statement.addResources(dlqBucket.bucketArn + "/*");
 
         lambda.addToRolePolicy(statement);
         lambda.addEventSource(new SqsEventSource(dlq));
@@ -84,18 +89,19 @@ function addDLQAlarm(stack: DigitrafficStack, dlqName: string, dlq: Queue) {
     const alarmName = `${dlqName}-Alarm`;
     dlq.metricNumberOfMessagesReceived({
         period: Duration.minutes(5),
-    }).createAlarm(stack, alarmName, {
-        alarmName,
-        threshold: 0,
-        evaluationPeriods: 1,
-        treatMissingData: TreatMissingData.NOT_BREACHING,
-        comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
-    }).addAlarmAction(new SnsAction(stack.warningTopic));
+    })
+        .createAlarm(stack, alarmName, {
+            alarmName,
+            threshold: 0,
+            evaluationPeriods: 1,
+            treatMissingData: TreatMissingData.NOT_BREACHING,
+            comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+        })
+        .addAlarmAction(new SnsAction(stack.warningTopic));
 }
 
 function getDlqCode(bName: string): InlineCode {
-    const functionBody = DLQ_LAMBDA_CODE
-        .replace("__bucketName__", bName)
+    const functionBody = DLQ_LAMBDA_CODE.replace("__bucketName__", bName)
         .replace("__upload__", uploadToS3.toString())
         .replace("__doUpload__", doUpload.toString())
         .replace("__handler__", createHandler().toString().substring(23)); // remove function handler() from signature
@@ -103,38 +109,64 @@ function getDlqCode(bName: string): InlineCode {
     return new InlineCode(functionBody);
 }
 
-async function uploadToS3(s3: S3, bName: string, body: string, objectName: string): Promise<void> {
+async function uploadToS3(
+    s3: S3,
+    bName: string,
+    body: string,
+    objectName: string
+): Promise<void> {
     try {
-        console.info('writing %s to %s', objectName, bName);
+        console.info("writing %s to %s", objectName, bName);
         await doUpload(s3, bName, body, objectName);
     } catch (error) {
         console.warn(error);
-        console.warn('method=uploadToS3 retrying upload to bucket %s', bName);
+        console.warn("method=uploadToS3 retrying upload to bucket %s", bName);
         try {
             await doUpload(s3, bName, body, objectName);
         } catch (e2) {
-            console.error('method=uploadToS3 failed retrying upload to bucket %s', bName);
+            console.error(
+                "method=uploadToS3 failed retrying upload to bucket %s",
+                bName
+            );
         }
     }
 }
 
-function doUpload(s3: S3, bName: string, Body: string, Key: string): Promise<ManagedUpload.SendData> {
-    return s3.upload({
-        Bucket: bName, Body, Key,
-    }).promise();
+function doUpload(
+    s3: S3,
+    bName: string,
+    Body: string,
+    Key: string
+): Promise<ManagedUpload.SendData> {
+    return s3
+        .upload({
+            Bucket: bName,
+            Body,
+            Key,
+        })
+        .promise();
 }
 
 // bucketName is unused, will be overridden in the actual lambda code below
-const bucketName = '';
+const bucketName = "";
 
 function createHandler(): SQSHandler {
     return async function handler(event: SQSEvent): Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const AWS = require('aws-sdk');
+        // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
+        const AWS = require("aws-sdk");
 
         const millis = new Date().getTime();
-        await Promise.all(event.Records.map((e: SQSRecord, idx: number) =>
-            uploadToS3(new AWS.S3(), bucketName, e.body, `dlq-${millis}-${idx}.json`)));
+        await Promise.all(
+            event.Records.map((e: SQSRecord, idx: number) =>
+                uploadToS3(
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+                    new AWS.S3(),
+                    bucketName,
+                    e.body,
+                    `dlq-${millis}-${idx}.json`
+                )
+            )
+        );
     };
 }
 

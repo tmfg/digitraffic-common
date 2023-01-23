@@ -139,7 +139,7 @@ export class DbStack extends Stack {
                 vpc,
                 securityGroups: [securityGroup],
                 vpcSubnets: {
-                    subnetType: SubnetType.PRIVATE_WITH_NAT,
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
                 instanceType: configuration.dbInstanceType,
                 parameterGroup,

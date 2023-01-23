@@ -13,7 +13,7 @@ const SECRET_EMPTY = {};
 const stubSM = stubSecretsManager();
 
 import { SecretHolder } from "../../src/aws/runtime/secrets/secret-holder";
-import { DatabaseEnvironmentKeys } from "../../src/aws/runtime/secrets/dbsecret";
+import { DatabaseEnvironmentKeys } from "../../src/database/database";
 
 describe("SecretHolder - tests", () => {
     beforeEach(() => {
@@ -68,30 +68,6 @@ describe("SecretHolder - tests", () => {
         const holder = SecretHolder.create("", ["prefix.value", "username"]);
 
         await holder.get();
-    });
-
-    test("setDatabaseCredentials - no prefix", async () => {
-        mockSecret(SECRET_WITH_PREFIX);
-
-        const holder = SecretHolder.create();
-        expect(process.env[DatabaseEnvironmentKeys.DB_USER]).toBeUndefined();
-
-        await holder.setDatabaseCredentials();
-        expect(process.env[DatabaseEnvironmentKeys.DB_USER]).toEqual(
-            SECRET_WITH_PREFIX.username
-        );
-    });
-
-    test("setDatabaseCredentials - with prefix", async () => {
-        mockSecret(SECRET_WITH_PREFIX);
-
-        const holder = SecretHolder.create("prefix");
-        expect(process.env[DatabaseEnvironmentKeys.DB_USER]).toBeUndefined();
-
-        await holder.setDatabaseCredentials();
-        expect(process.env[DatabaseEnvironmentKeys.DB_USER]).toEqual(
-            SECRET_WITH_PREFIX.username
-        );
     });
 
     test("getSecret - with prefix", async () => {

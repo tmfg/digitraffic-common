@@ -31,7 +31,7 @@ export class DigitrafficCanary extends Canary {
             }),
             environmentVariables: {
                 ...environmentVariables,
-                ...params?.canaryEnv,
+                ...params.canaryEnv,
             },
             canaryName,
             schedule: params.schedule ?? Schedule.rate(Duration.minutes(15)),
@@ -39,8 +39,6 @@ export class DigitrafficCanary extends Canary {
 
         this.artifactsBucket.grantWrite(role);
 
-        if (params.alarm ?? true) {
-            new CanaryAlarm(scope, this, params);
-        }
+        new CanaryAlarm(scope, this, params);
     }
 }

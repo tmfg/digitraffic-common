@@ -48,7 +48,8 @@ export class UrlCanary extends DigitrafficCanary {
     ): UrlCanary {
         return new UrlCanary(stack, role, {
             ...{
-                handler: `${params.name}.handler`,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                handler: `${params.name!}.handler`,
                 hostname: publicApi.hostname(),
                 apiKeyId: this.getApiKey(publicApi),
             },

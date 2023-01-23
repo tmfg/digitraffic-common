@@ -1,7 +1,7 @@
 import { IncomingMessage, RequestOptions } from "http";
 import { Asserter } from "../../../test/asserter";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const synthetics = require("Synthetics");
 import zlib = require("zlib");
 import { MediaType } from "../../types/mediatypes";
@@ -19,12 +19,12 @@ const baseHeaders = {
     Accept: "*/*",
 } as Record<string, string>;
 
-type CheckerFunction = (Res: IncomingMessage) => void;
+type CheckerFunction = (Res: IncomingMessage) => Promise<void>;
 type JsonCheckerFunction<T> = (
     json: T,
     body: string,
     message: IncomingMessage
-) => void;
+) => Promise<void>;
 
 export class UrlChecker {
     private readonly requestOptions: RequestOptions;
@@ -43,8 +43,10 @@ export class UrlChecker {
             headers,
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         synthetics.getConfiguration().disableRequestMetrics();
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         synthetics
             .getConfiguration()
             .withIncludeRequestBody(false)
@@ -79,6 +81,7 @@ export class UrlChecker {
             },
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
         return synthetics.executeHttpStep(
             `Verify ${statusCode} for ${url.replace(/auth=.*/, "")}`,
             requestOptions,
@@ -109,6 +112,7 @@ export class UrlChecker {
             },
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
         return synthetics.executeHttpStep(
             `Verify 404 for ${url}`,
             requestOptions,
@@ -124,6 +128,7 @@ export class UrlChecker {
             },
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
         return synthetics.executeHttpStep(
             `Verify 400 for ${url}`,
             requestOptions,
@@ -133,6 +138,7 @@ export class UrlChecker {
 
     expect403WithoutApiKey(url: string, mediaType?: MediaType): Promise<void> {
         if (
+            // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
             !this.requestOptions.headers ||
             !this.requestOptions.headers[API_KEY_HEADER]
         ) {
@@ -147,6 +153,7 @@ export class UrlChecker {
             },
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
         return synthetics.executeHttpStep(
             `Verify 403 for ${url}`,
             requestOptions,
@@ -202,12 +209,14 @@ function validateStatusCodeAndContentType(
     return (res: IncomingMessage) => {
         return new Promise((resolve) => {
             if (res.statusCode !== statusCode) {
-                throw new Error(`${res.statusCode} ${res.statusMessage}`);
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                throw new Error(`${res.statusCode!} ${res.statusMessage!}`);
             }
 
             if (res.headers["content-type"] !== contentType) {
                 throw new Error(
-                    "Wrong content-type " + res.headers["content-type"]
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    `Wrong content-type ${res.headers["content-type"]!}`
                 );
             }
 
@@ -251,7 +260,7 @@ export class ResponseChecker {
         fn: (json: T, body: string, res: IncomingMessage) => void
     ): CheckerFunction {
         return this.responseChecker((body: string, res: IncomingMessage) => {
-            fn(JSON.parse(body), body, res);
+            fn(JSON.parse(body) as unknown as T, body, res);
         });
     }
 
@@ -264,7 +273,8 @@ export class ResponseChecker {
             }
 
             if (res.statusCode < 200 || res.statusCode > 299) {
-                throw new Error(`${res.statusCode} ${res.statusMessage}`);
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                throw new Error(`${res.statusCode} ${res.statusMessage!}`);
             }
 
             if (this.checkCors && !res.headers["access-control-allow-origin"]) {
@@ -273,7 +283,8 @@ export class ResponseChecker {
 
             if (res.headers["content-type"] !== this.contentType) {
                 throw new Error(
-                    "Wrong content-type " + res.headers["content-type"]
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    `Wrong content-type ${res.headers["content-type"]!}`
                 );
             }
 
@@ -291,7 +302,7 @@ export class ContentChecker {
         return async (res: IncomingMessage): Promise<void> => {
             const body = await getResponseBody(res);
 
-            fn(JSON.parse(body), body, res);
+            fn(JSON.parse(body) as unknown as T, body, res);
         };
     }
 
@@ -314,7 +325,8 @@ export class ContentTypeChecker {
             }
 
             if (res.statusCode < 200 || res.statusCode > 299) {
-                throw new Error(`${res.statusCode} ${res.statusMessage}`);
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                throw new Error(`${res.statusCode} ${res.statusMessage!}`);
             }
 
             if (!res.headers["access-control-allow-origin"]) {
@@ -323,7 +335,8 @@ export class ContentTypeChecker {
 
             if (res.headers["content-type"] !== contentType) {
                 throw new Error(
-                    "Wrong content-type " + res.headers["content-type"]
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    `Wrong content-type ${res.headers["content-type"]!}`
                 );
             }
         };
@@ -353,6 +366,8 @@ export class HeaderChecker {
             if (!res.headers[headerName]) {
                 throw new Error("Missing header: " + headerName);
             }
+
+            return Promise.resolve();
         };
     }
 
@@ -361,6 +376,8 @@ export class HeaderChecker {
             if (res.headers[headerName]) {
                 throw new Error("Header should not exist: " + headerName);
             }
+
+            return Promise.resolve();
         };
     }
 }

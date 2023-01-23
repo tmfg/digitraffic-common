@@ -1,5 +1,4 @@
-import {SecretsManager} from 'aws-sdk';
-import {SecretToPromiseFunction} from "./dbsecret";
+import { SecretsManager } from "aws-sdk";
 
 const smClient = new SecretsManager({
     region: process.env.AWS_REGION,
@@ -7,29 +6,29 @@ const smClient = new SecretsManager({
 
 export type GenericSecret = Record<string, string>;
 
-/**
- @deprecated use SecretHolder & ProxyHolder
- */
-export async function withSecret<Secret, Response>(secretId: string, fn: SecretToPromiseFunction<Secret, Response>): Promise<Response | void> {
-    return fn(await getSecret(secretId));
-}
-
-export async function getSecret<Secret>(secretId: string, prefix = ''): Promise<Secret> {
-    const secretObj = await smClient.getSecretValue({
-        SecretId: secretId,
-    }).promise();
+export async function getSecret<Secret>(
+    secretId: string,
+    prefix = ""
+): Promise<Secret> {
+    const secretObj = await smClient
+        .getSecretValue({
+            SecretId: secretId,
+        })
+        .promise();
 
     if (!secretObj.SecretString) {
-        throw new Error('No secret found!');
+        throw new Error("No secret found!");
     }
 
-    const secret = JSON.parse(secretObj.SecretString);
+    const secret: GenericSecret | Secret = JSON.parse(
+        secretObj.SecretString
+    ) as unknown as GenericSecret | Secret;
 
-    if (prefix === '') {
-        return secret;
+    if (!prefix) {
+        return secret as Secret;
     }
 
-    return parseSecret(secret, `${prefix}.`);
+    return parseSecret(secret as GenericSecret, `${prefix}.`);
 }
 
 function parseSecret<Secret>(secret: GenericSecret, prefix: string): Secret {
@@ -43,8 +42,4 @@ function parseSecret<Secret>(secret: GenericSecret, prefix: string): Secret {
     }
 
     return parsed as unknown as Secret;
-}
-
-export async function withSecretAndPrefix<Secret, Response>(secretId: string, prefix: string, fn: SecretToPromiseFunction<Secret, Response>): Promise<Response | void> {
-    return fn(await getSecret(secretId, prefix));
 }

@@ -4,7 +4,7 @@ import { RdsHolder } from "../../runtime/secrets/rds-holder";
 import { getEnvVariable } from "../../../utils/utils";
 import { Countable } from "../../../database/models";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const synthetics = require("Synthetics");
 
 abstract class DatabaseCheck<T> {
@@ -88,7 +88,9 @@ export class DatabaseCountChecker {
     private constructor(credentialsFunction: () => Promise<void>) {
         this.credentialsFunction = credentialsFunction;
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         synthetics.getConfiguration().disableRequestMetrics();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         synthetics.getConfiguration().withFailedCanaryMetric(true);
     }
 
@@ -146,6 +148,7 @@ export class DatabaseCountChecker {
                     check.check(value);
                 };
 
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 synthetics.executeStep(check.name, checkFunction, stepConfig);
             }
         });

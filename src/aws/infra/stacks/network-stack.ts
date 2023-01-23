@@ -1,7 +1,8 @@
 import { Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
+import { IVpc, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
+import { exportValue } from "../import-util";
 
 export interface NetworkConfiguration {
     readonly vpcName: string;
@@ -9,6 +10,8 @@ export interface NetworkConfiguration {
 }
 
 export class NetworkStack extends Stack {
+    readonly vpc: IVpc;
+
     constructor(
         scope: Construct,
         id: string,
@@ -19,7 +22,8 @@ export class NetworkStack extends Stack {
             env: isc.env,
         });
 
-        this.createVpc(configuration);
+        this.vpc = this.createVpc(configuration);
+        exportValue(this, isc.environmentName, "VPCID", this.vpc.vpcId);
     }
 
     createVpc(configuration: NetworkConfiguration): Vpc {
@@ -38,7 +42,7 @@ export class NetworkStack extends Stack {
                 {
                     name: "private",
                     cidrMask: 24,
-                    subnetType: SubnetType.PRIVATE_WITH_NAT,
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
             ],
         });

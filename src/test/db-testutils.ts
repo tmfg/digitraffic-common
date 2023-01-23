@@ -1,5 +1,8 @@
-import { DTDatabase, initDbConnection } from "../database/database";
-import { DatabaseEnvironmentKeys } from "../aws/runtime/secrets/dbsecret";
+import {
+    DatabaseEnvironmentKeys,
+    DTDatabase,
+    initDbConnection,
+} from "../database/database";
 import { Countable } from "../database/models";
 
 export async function assertCount(db: DTDatabase, sql: string, count: number) {

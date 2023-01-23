@@ -1,6 +1,7 @@
 import { SecretHolder } from "./secret-holder";
-import { DatabaseEnvironmentKeys, RdsSecret, RdsSecretKey } from "./dbsecret";
+import { RdsSecret, RdsSecretKey } from "./dbsecret";
 import { getEnvVariable } from "../../../utils/utils";
+import { DatabaseEnvironmentKeys } from "../../../database/database";
 
 const RDS_SECRET_KEYS = Object.values(RdsSecretKey);
 

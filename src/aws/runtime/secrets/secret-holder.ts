@@ -1,12 +1,8 @@
 import { GenericSecret, getSecret } from "./secret";
-import {
-    checkExpectedSecretKeys,
-    DatabaseEnvironmentKeys,
-    DbSecret,
-} from "./dbsecret";
+import { checkExpectedSecretKeys } from "./dbsecret";
 import { getEnvVariable } from "../../../utils/utils";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
 const NodeTtl = require("node-ttl");
 
 const DEFAULT_PREFIX = "";
@@ -40,6 +36,7 @@ export class SecretHolder<Secret extends GenericSecret> {
         this.prefix = prefix;
         this.expectedKeys = expectedKeys;
 
+        // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
         this.secretCache = new NodeTtl(configuration);
     }
 
@@ -48,6 +45,7 @@ export class SecretHolder<Secret extends GenericSecret> {
 
         console.info("refreshing secret " + this.secretId);
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         this.secretCache.push(DEFAULT_SECRET_KEY, secretValue);
     }
 
@@ -90,24 +88,14 @@ export class SecretHolder<Secret extends GenericSecret> {
     }
 
     private async getSecret<S>(): Promise<S> {
-        const secret = this.secretCache.get(DEFAULT_SECRET_KEY);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const secret: S | undefined = this.secretCache.get(DEFAULT_SECRET_KEY);
 
         if (!secret) {
             await this.initSecret();
         }
 
-        return secret || this.secretCache.get(DEFAULT_SECRET_KEY);
-    }
-
-    /**
-     * @deprecated Use ProxyHolder
-     */
-    public async setDatabaseCredentials() {
-        const secret = await this.getSecret<DbSecret>();
-
-        process.env[DatabaseEnvironmentKeys.DB_USER] = secret.username;
-        process.env[DatabaseEnvironmentKeys.DB_PASS] = secret.password;
-        process.env[DatabaseEnvironmentKeys.DB_URI] = secret.host;
-        process.env[DatabaseEnvironmentKeys.DB_RO_URI] = secret.ro_host;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        return secret ?? (this.secretCache.get(DEFAULT_SECRET_KEY) as S);
     }
 }

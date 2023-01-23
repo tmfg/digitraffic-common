@@ -1,20 +1,30 @@
 import { IDatabase, ITask } from "pg-promise";
-import { DatabaseEnvironmentKeys } from "../aws/runtime/secrets/dbsecret";
 import { getEnvVariable } from "../utils/utils";
 import { envValue } from "../aws/runtime/environment";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+export enum DatabaseEnvironmentKeys {
+    DB_USER = "DB_USER",
+    DB_PASS = "DB_PASS",
+    DB_URI = "DB_URI",
+    DB_RO_URI = "DB_RO_URI",
+    DB_APPLICATION = "DB_APPLICATION",
+}
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 const pgp = require("pg-promise")();
 
 // convert numeric types to number instead of string
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 pgp.pg.types.setTypeParser(pgp.pg.types.builtins.INT8, (value: string) => {
     return parseInt(value);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 pgp.pg.types.setTypeParser(pgp.pg.types.builtins.FLOAT8, (value: string) => {
     return parseFloat(value);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 pgp.pg.types.setTypeParser(pgp.pg.types.builtins.NUMERIC, (value: string) => {
     return parseFloat(value);
 });
@@ -44,6 +54,7 @@ export function initDbConnection(
 ): DTDatabase {
     const finalUrl = `postgresql://${username}:${password}@${url}?application_name=${applicationName}`;
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
     return pgp(finalUrl, options);
 }
 
@@ -90,6 +101,6 @@ async function doInDatabase<T>(
         console.error("Error in db:", e);
         throw e;
     } finally {
-        db.$pool.end();
+        await db.$pool.end();
     }
 }
