@@ -119,9 +119,13 @@ export class DigitrafficMethodResponse {
                 [mediaType]: model,
             },
             responseParameters: {
-                "method.response.header.Access-Control-Allow-Origin": !disableCors,
-                "method.response.header.Deprecation": deprecation,
-                "method.response.header.Sunset": deprecation,
+                ...(!disableCors && {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                }),
+                ...(deprecation && {
+                    "method.response.header.Deprecation": true,
+                    "method.response.header.Sunset": true,
+                }),
             },
         };
     }
