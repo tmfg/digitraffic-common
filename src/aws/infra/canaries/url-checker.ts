@@ -318,7 +318,7 @@ export class ContentChecker {
 }
 
 export class ContentTypeChecker {
-    static checkContentType(contentType: MediaType) {
+    static checkContentType(contentType: MediaType): CheckerFunction {
         return (res: IncomingMessage) => {
             if (!res.statusCode) {
                 throw new Error("statusCode missing");
@@ -339,6 +339,8 @@ export class ContentTypeChecker {
                     `Wrong content-type ${res.headers["content-type"]!}`
                 );
             }
+
+            return Promise.resolve();
         };
     }
 }
