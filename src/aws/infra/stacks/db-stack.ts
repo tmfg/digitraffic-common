@@ -1,6 +1,6 @@
 import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { SecurityGroup, SubnetType } from "aws-cdk-lib/aws-ec2";
+import { IVpc, SecurityGroup, SubnetType } from "aws-cdk-lib/aws-ec2";
 import {
     AuroraPostgresEngineVersion,
     CfnDBInstance,
@@ -8,20 +8,23 @@ import {
     DatabaseCluster,
     DatabaseClusterEngine,
     DatabaseClusterFromSnapshot,
+    DatabaseClusterProps,
     InstanceUpdateBehaviour,
+    IParameterGroup,
     ParameterGroup,
 } from "aws-cdk-lib/aws-rds";
-import { Secret } from "aws-cdk-lib/aws-secretsmanager";
+import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { exportValue, importVpc } from "../import-util";
 import { InstanceType } from "aws-cdk-lib/aws-ec2";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
+import { ISecurityGroup } from "aws-cdk-lib/aws-ec2/lib/security-group";
 
 export interface DbConfiguration {
     readonly secretArn: string;
 
     readonly dbVersion: AuroraPostgresEngineVersion;
     readonly dbInstanceType: InstanceType;
-    readonly snapshotIdentifier: string;
+    readonly snapshotIdentifier?: string;
     readonly instances: number;
     readonly customParameterGroup: boolean;
     readonly securityGroupId: string;
@@ -79,22 +82,8 @@ export class DbStack extends Stack {
         );
     }
 
-    createAuroraCluster(
-        isc: InfraStackConfiguration,
-        configuration: DbConfiguration
-    ): DatabaseCluster {
-        const instanceName = isc.environmentName + "-db";
-        const secret = Secret.fromSecretAttributes(this, "db-secret", {
-            secretCompleteArn: configuration.secretArn,
-        });
-        const securityGroup = SecurityGroup.fromSecurityGroupId(
-            this,
-            "securitygroup",
-            configuration.securityGroupId
-        );
-        const vpc = importVpc(this, isc.environmentName);
-
-        const parameterGroup = configuration.customParameterGroup
+    createParamaterGroup(configuration: DbConfiguration) {
+        return configuration.customParameterGroup
             ? new ParameterGroup(
                   this,
                   `parameter-group-${configuration.dbVersion.auroraPostgresMajorVersion}`,
@@ -114,9 +103,17 @@ export class DbStack extends Stack {
                   "ParameterGroup",
                   `default.aurora-postgresql${configuration.dbVersion.auroraPostgresMajorVersion}`
               );
+    }
 
-        const cluster = new DatabaseClusterFromSnapshot(this, instanceName, {
-            snapshotIdentifier: configuration.snapshotIdentifier,
+    createClusterParameters(
+        configuration: DbConfiguration,
+        instanceName: string,
+        vpc: IVpc,
+        securityGroup: ISecurityGroup,
+        parameterGroup: IParameterGroup,
+        secret: ISecret
+    ): DatabaseClusterProps {
+        return {
             engine: DatabaseClusterEngine.auroraPostgres({
                 version: configuration.dbVersion,
             }),
@@ -146,7 +143,38 @@ export class DbStack extends Stack {
             },
             credentials: Credentials.fromSecret(secret),
             parameterGroup,
+        };
+    }
+
+    createAuroraCluster(
+        isc: InfraStackConfiguration,
+        configuration: DbConfiguration
+    ): DatabaseCluster {
+        const instanceName = isc.environmentName + "-db";
+        const secret = Secret.fromSecretAttributes(this, "db-secret", {
+            secretCompleteArn: configuration.secretArn,
         });
+        const securityGroup = SecurityGroup.fromSecurityGroupId(
+            this,
+            "securitygroup",
+            configuration.securityGroupId
+        );
+        const vpc = importVpc(this, isc.environmentName);
+        const parameterGroup = this.createParamaterGroup(configuration);
+        const parameters = this.createClusterParameters(
+            configuration,
+            instanceName,
+            vpc,
+            securityGroup,
+            parameterGroup,
+            secret
+        );
+        const cluster = configuration.snapshotIdentifier
+            ? new DatabaseClusterFromSnapshot(this, instanceName, {
+                  ...parameters,
+                  ...{ snapshotIdentifier: configuration.snapshotIdentifier },
+              })
+            : new DatabaseCluster(this, instanceName, parameters);
 
         // this workaround should prevent stack failing on version upgrade
         const cfnInstances = cluster.node.children.filter(

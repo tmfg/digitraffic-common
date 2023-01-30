@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2023.01.26-1",
+  "version": "2023.01.30-1",
   "description": "",
   "repository": {
     "type": "git",
@@ -26,13 +26,13 @@
     "src/**/*.ts"
   ],
   "peerDependencies": {
-    "@aws-cdk/aws-synthetics-alpha": "^2.50.0-alpha.0",
+    "@aws-cdk/aws-synthetics-alpha": "2.62.2-alpha.0",
     "@types/geojson": "^7946.0.10",
-    "aws-cdk-lib": "^2.51.1",
-    "aws-sdk": "^2.1241.0",
+    "aws-cdk-lib": "^2.62.2",
+    "aws-sdk": "^2.1304.0",
     "axios": "^1.2.0",
     "change-case": "^4.1.2",
-    "constructs": "^10.1.131",
+    "constructs": "^10.1.235",
     "geojson-validation": "^1.0.2",
     "moment": "^2.29.4",
     "node-ttl": "^0.2.0",
@@ -41,8 +41,8 @@
     "spex": "^3.0.0"
   },
   "devDependencies": {
-    "@aws-cdk/aws-synthetics-alpha": "2.60.0-alpha.0",
-    "@types/aws-lambda": "^8.10.109",
+    "@aws-cdk/aws-synthetics-alpha": "2.62.2-alpha.0",
+    "@types/aws-lambda": "^8.10.110",
     "@types/geojson": "^7946.0.10",
     "@types/jest": "^29.2.5",
     "@types/node": "^18.11.18",
@@ -50,8 +50,8 @@
     "@types/sinon": "^10.0.13",
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@typescript-eslint/parser": "^5.48.2",
-    "aws-cdk-lib": "^2.60.0",
-    "aws-sdk": "^2.1295.0",
+    "aws-cdk-lib": "^2.62.2",
+    "aws-sdk": "^2.1304.0",
     "axios": "^1.2.2",
     "change-case": "^4.1.2",
     "constructs": "^10.1.222",

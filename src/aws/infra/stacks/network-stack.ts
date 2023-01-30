@@ -1,6 +1,6 @@
 import { Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { IVpc, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
+import { IpAddresses, IVpc, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
 import { exportValue } from "../import-util";
 
@@ -32,7 +32,7 @@ export class NetworkStack extends Stack {
             availabilityZones: ["eu-west-1a", "eu-west-1b"],
             enableDnsHostnames: true,
             enableDnsSupport: true,
-            cidr: configuration.cidr,
+            ipAddresses: IpAddresses.cidr(configuration.cidr),
             subnetConfiguration: [
                 {
                     name: "public",
