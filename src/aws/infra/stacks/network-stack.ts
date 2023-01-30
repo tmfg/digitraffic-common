@@ -24,6 +24,30 @@ export class NetworkStack extends Stack {
 
         this.vpc = this.createVpc(configuration);
         exportValue(this, isc.environmentName, "VPCID", this.vpc.vpcId);
+        exportValue(
+            this,
+            isc.environmentName,
+            "digitrafficpublicASubnet",
+            this.vpc.publicSubnets[0].subnetId
+        );
+        exportValue(
+            this,
+            isc.environmentName,
+            "digitrafficpublicBSubnet",
+            this.vpc.publicSubnets[1].subnetId
+        );
+        exportValue(
+            this,
+            isc.environmentName,
+            "digitrafficprivateASubnet",
+            this.vpc.privateSubnets[0].subnetId
+        );
+        exportValue(
+            this,
+            isc.environmentName,
+            "digitrafficprivateBSubnet",
+            this.vpc.privateSubnets[1].subnetId
+        );
     }
 
     createVpc(configuration: NetworkConfiguration): Vpc {
