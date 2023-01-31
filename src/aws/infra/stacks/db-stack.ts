@@ -94,7 +94,7 @@ export class DbStack extends Stack {
                       parameters: {
                           "pg_stat_statements.track": "ALL",
                           random_page_cost: "1",
-                          work_mem: "512MB",
+                          work_mem: "524288", // 512 MiB
                       },
                   }
               )
