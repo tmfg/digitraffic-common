@@ -38,11 +38,12 @@ export class DbProxyStack extends Stack {
         const secret = Secret.fromSecretAttributes(this, "proxy-secret", {
             secretCompleteArn: configuration.secretArn,
         });
+
         const proxy = this.createProxy(vpc, secret, configuration);
         const readerEndpoint = this.createProxyEndpoints(
             vpc,
             proxy,
-            configuration.securityGroupId
+            configuration.proxy.securityGroupId
         );
         this.setOutputs(configuration, proxy, readerEndpoint);
     }
@@ -52,7 +53,7 @@ export class DbProxyStack extends Stack {
         const securityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             "securitygroup",
-            configuration.securityGroupId
+            configuration.proxy.securityGroupId
         );
 
         const cluster = DatabaseCluster.fromDatabaseClusterAttributes(
@@ -75,7 +76,7 @@ export class DbProxyStack extends Stack {
         };
 
         return new DatabaseProxy(this, proxyId, {
-            dbProxyName: configuration.dbProxyName ?? "AuroraProxy",
+            dbProxyName: configuration.proxy.name ?? "AuroraProxy",
             securityGroups: [securityGroup],
             proxyTarget: ProxyTarget.fromCluster(cluster),
             idleClientTimeout: Duration.seconds(1800),

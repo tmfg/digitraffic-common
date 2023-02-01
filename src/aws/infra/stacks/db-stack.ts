@@ -29,7 +29,10 @@ export interface DbConfiguration {
     readonly customParameterGroup: boolean;
     readonly securityGroupId: string;
 
-    readonly dbProxyName?: string;
+    readonly proxy: {
+        readonly name?: string;
+        readonly securityGroupId: string;
+    };
 }
 
 /**
