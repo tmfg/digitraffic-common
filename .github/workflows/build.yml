@@ -2,7 +2,7 @@ name: Build
 on: [push]
 jobs:
   build:
-    if: github.event.repo.name != 'tmfg/digitraffic-common'
+    if: github.repository != 'tmfg/digitraffic-common'
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout

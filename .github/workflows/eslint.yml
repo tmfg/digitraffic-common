@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   lint:
+    if: github.repository != 'tmfg/digitraffic-common'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
