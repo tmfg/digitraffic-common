@@ -1,10 +1,11 @@
 import {
+    MethodResponse,
     MockIntegration,
     PassthroughBehavior,
     Resource,
 } from "aws-cdk-lib/aws-apigateway";
 import { MediaType } from "../../types/mediatypes";
-import { corsMethod, RESPONSE_CORS_INTEGRATION } from "./responses";
+import { RESPONSE_CORS_INTEGRATION } from "./responses";
 
 const INTEGRATION_RESPONSE_200 = `{
     "statusCode": 200
@@ -93,4 +94,15 @@ export class DigitrafficStaticIntegration extends MockIntegration {
             ? corsMethod(METHOD_RESPONSE_200)
             : METHOD_RESPONSE_200;
     }
+}
+
+function corsMethod(response: MethodResponse): MethodResponse {
+    return {
+        ...response,
+        ...{
+            responseParameters: {
+                "method.response.header.Access-Control-Allow-Origin": true,
+            },
+        },
+    };
 }

@@ -1,6 +1,11 @@
-import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib";
-import { Construct } from "constructs";
-import { IVpc, SecurityGroup, SubnetType } from "aws-cdk-lib/aws-ec2";
+import { Duration, RemovalPolicy, SecretValue, Stack } from "aws-cdk-lib";
+import {
+    InstanceType,
+    IVpc,
+    SecurityGroup,
+    SubnetType,
+} from "aws-cdk-lib/aws-ec2";
+import { ISecurityGroup } from "aws-cdk-lib/aws-ec2/lib/security-group";
 import {
     AuroraPostgresEngineVersion,
     CfnDBInstance,
@@ -13,11 +18,9 @@ import {
     IParameterGroup,
     ParameterGroup,
 } from "aws-cdk-lib/aws-rds";
-import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
+import { Construct } from "constructs";
 import { exportValue, importVpc } from "../import-util";
-import { InstanceType } from "aws-cdk-lib/aws-ec2";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
-import { ISecurityGroup } from "aws-cdk-lib/aws-ec2/lib/security-group";
 
 export interface DbConfiguration {
     readonly secretArn: string;
@@ -28,6 +31,9 @@ export interface DbConfiguration {
     readonly instances: number;
     readonly customParameterGroup: boolean;
     readonly securityGroupId: string;
+
+    readonly superuserName: string;
+    readonly superuserPassword: string;
 
     readonly proxy: {
         readonly name?: string;
@@ -113,8 +119,7 @@ export class DbStack extends Stack {
         instanceName: string,
         vpc: IVpc,
         securityGroup: ISecurityGroup,
-        parameterGroup: IParameterGroup,
-        secret: ISecret
+        parameterGroup: IParameterGroup
     ): DatabaseClusterProps {
         return {
             engine: DatabaseClusterEngine.auroraPostgres({
@@ -144,7 +149,10 @@ export class DbStack extends Stack {
                 instanceType: configuration.dbInstanceType,
                 parameterGroup,
             },
-            credentials: Credentials.fromSecret(secret),
+            credentials: Credentials.fromPassword(
+                configuration.superuserName,
+                SecretValue.unsafePlainText(configuration.superuserPassword)
+            ),
             parameterGroup,
         };
     }
@@ -154,24 +162,21 @@ export class DbStack extends Stack {
         configuration: DbConfiguration
     ): DatabaseCluster {
         const instanceName = isc.environmentName + "-db";
-        const secret = Secret.fromSecretAttributes(this, "db-secret", {
-            secretCompleteArn: configuration.secretArn,
-        });
         const securityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             "securitygroup",
             configuration.securityGroupId
         );
-        const vpc = importVpc(this, isc.environmentName);
         const parameterGroup = this.createParamaterGroup(configuration);
         const parameters = this.createClusterParameters(
             configuration,
             instanceName,
-            vpc,
+            importVpc(this, isc.environmentName),
             securityGroup,
-            parameterGroup,
-            secret
+            parameterGroup
         );
+
+        // create cluster from the snapshot or from the scratch
         const cluster = configuration.snapshotIdentifier
             ? new DatabaseClusterFromSnapshot(this, instanceName, {
                   ...parameters,

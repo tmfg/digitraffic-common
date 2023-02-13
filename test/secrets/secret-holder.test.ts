@@ -23,6 +23,7 @@ describe("SecretHolder - tests", () => {
     afterEach(() => {
         sinon.restore();
         sinon.reset();
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete process.env[DatabaseEnvironmentKeys.DB_USER];
     });
 
