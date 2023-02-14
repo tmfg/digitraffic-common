@@ -42,6 +42,11 @@ export interface DbConfiguration {
 }
 
 /**
+ * Stack that creates DatabaseCluster.
+ *
+ * Please not, that created Cluster has RETAIL removalPolicy, so if you want to delete the stack,
+ * you must first deploy without parameter group, then delete stack and manually delete cluster.
+ *
  * How to upgrade major version?
  * 0. Set correct SG for db-stack and db-proxy-stack(this step will be removed in the future)
  * 1. Update db-stack WITHOUT parameter group
@@ -194,6 +199,11 @@ export class DbStack extends Stack {
             );
         }
         cfnInstances.forEach((cfnInstance) => delete cfnInstance.engineVersion);
+
+        cluster.node.addDependency(
+            parameterGroup,
+            "Create ParameterGroup before DatabaseCluster"
+        );
 
         return cluster;
     }

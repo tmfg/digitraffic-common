@@ -16,6 +16,8 @@ const DEFAULT_RECORD_TTL = Duration.seconds(30);
 /**
  * Creates a dns local zone and creates records for cluster endpoints and proxy endpoints.
  *
+ * Please note, that created PrivateHostedZone has RETAIN removalPolicy, so if you want to delete this stack,
+ * you must remove the zone by hand after.
  */
 export class DbDnsStack extends Stack {
     constructor(scope: Construct, id: string, isc: InfraStackConfiguration) {

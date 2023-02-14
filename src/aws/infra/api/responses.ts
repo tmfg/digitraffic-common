@@ -68,20 +68,6 @@ export function methodResponse(
     };
 }
 
-/**
- * @deprecated Use DigitrafficMethodResponse
- */
-export function corsMethod(response: MethodResponse): MethodResponse {
-    return {
-        ...response,
-        ...{
-            responseParameters: {
-                "method.response.header.Access-Control-Allow-Origin": true,
-            },
-        },
-    };
-}
-
 interface IntegrationOptions {
     // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
     requestParameters?: { [dest: string]: string };
