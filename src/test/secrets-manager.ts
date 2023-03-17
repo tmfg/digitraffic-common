@@ -1,6 +1,9 @@
-import AWS = require('aws-sdk');
+import AWS = require("aws-sdk");
 import * as sinon from "sinon";
+import { EnvKeys } from "../aws/runtime/environment";
+import { setEnvVariable } from "../utils/utils";
 
+setEnvVariable(EnvKeys.AWS_REGION, "eu-west-1");
 const secretValue = sinon.stub();
 
 /**
@@ -14,7 +17,7 @@ export function stubSecretsManager() {
         getSecretValue: secretValue,
     };
 
-    sinon.stub(AWS, 'SecretsManager').returns(smStub);
+    sinon.stub(AWS, "SecretsManager").returns(smStub);
 
     return smStub.getSecretValue;
 }

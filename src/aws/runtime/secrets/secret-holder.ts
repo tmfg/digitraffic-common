@@ -18,6 +18,10 @@ const DEFAULT_CONFIGURATION = {
  * By default, secrets are cached for 5 minutes and then reread from the Secrets Manager(This can be overridden with configuration).
  *
  * Supports setting the database environment paramaters from the secret too.
+ *
+ * If you want secret manager to get values from different region than the lambda runtime is running, you can override this by
+ * setting the region with utils setSecretOverideAwsRegionEnv method.
+ *
  */
 export class SecretHolder<Secret extends GenericSecret> {
     private readonly secretId: string;

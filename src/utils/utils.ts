@@ -1,3 +1,7 @@
+import { AwsEnv } from "../types/aws-env";
+import { Either } from "../types/either";
+import { EnvKeys } from "../aws/runtime/environment";
+
 /**
  * Check if arrays have only elements that also exists also in other array.
  * Individual element count doesn't matter.
@@ -19,8 +23,6 @@
  * @param a first array to compare
  * @param b second array to compare
  */
-import { Either } from "../types/either";
-
 export function bothArraysHasSameValues(
     a: null | undefined | unknown[],
     b: null | undefined | unknown[]
@@ -73,6 +75,19 @@ function getFirstOrLast<T>(
 }
 
 /**
+ * Gets basic AWS environment variables. Throws error if variables are not found.
+ *
+ * @param key Environment key
+ * @return string
+ * @See https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html
+ */
+export function getAwsEnv(): AwsEnv {
+    return {
+        region: getEnvVariable("AWS_REGION"),
+    };
+}
+
+/**
  * Gets environment variable. Throws error if variable is not found.
  *
  * @param key Environment key
@@ -105,6 +120,16 @@ export function getEnvVariableSafe(key: string): Either<string> {
 }
 
 /**
+ * Sets environment variable.
+ *
+ * @param key Environment key
+ * @param value Environment variable value
+ */
+export function setEnvVariable(key: string, value: string) {
+    process.env[key] = value;
+}
+
+/**
  * Gets environment variable. If environment variable is undefined, returns value of given function.
  *
  * @param key Environment key
@@ -127,4 +152,33 @@ export function getEnvVariableOr<T>(key: string, fn: () => T): string | T {
  */
 export function getEnvVariableOrElse<T>(key: string, orElse: T): string | T {
     return getEnvVariableOr(key, () => orElse);
+}
+
+export function setSecretOverideAwsRegionEnv(region: string) {
+    setEnvVariable(EnvKeys.SECRET_OVERRIDE_AWS_REGION, region);
+}
+
+/**
+ * ESLint won't allow to call Object.prototype builtin methods.
+ * To call hasOwnProperty we must use Object.prototype.hasOwnProperty.call()
+ * @param object to test for property
+ * @param propertyName property name to check
+ * @see https://eslint.org/docs/latest/rules/no-prototype-builtins
+ */
+export function hasOwnPropertySafe(
+    object: object,
+    propertyName: string
+): boolean {
+    return Object.prototype.hasOwnProperty.call(object, propertyName);
+}
+
+/**
+ * Return an error message from the given object hat might be an Error object.
+ * @param maybeError
+ */
+export function getErrorMessage(maybeError: unknown) {
+    if (maybeError instanceof Error) {
+        return maybeError.name + ": " + maybeError.message;
+    }
+    return String(maybeError);
 }
