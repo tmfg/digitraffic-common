@@ -7,7 +7,7 @@ const functionName = getEnvVariableOrElse("AWS_LAMBDA_FUNCTION_NAME", "test");
 export function logException(
     logger: DtLogger,
     error: Error | string,
-    includeStack: boolean
+    includeStack?: boolean
 ): void;
 export function logException(logger: DtLogger, error: AxiosError): void;
 

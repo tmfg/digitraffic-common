@@ -22,10 +22,24 @@ describe("dt-logger", () => {
         );
     }
 
+    function assertDebug(
+        config: LoggerConfiguration,
+        message: unknown,
+        expected: Record<string, unknown>
+    ) {
+        assertWrite(
+            config,
+            (logger: DtLogger) => {
+                logger.debug(message);
+            },
+            expected
+        );
+    }
+
     function assertWrite(
         config: LoggerConfiguration,
         writeFunction: (logger: DtLogger) => void,
-        expected: LoggableType
+        expected: Record<string, unknown>
     ) {
         const logged: string[] = [];
         const writeStream = new Writable({
@@ -43,7 +57,10 @@ describe("dt-logger", () => {
 
         expect(logged.length).toBe(1);
 
-        const loggedLine = JSON.parse(logged[0]) as unknown as LoggableType;
+        const loggedLine = JSON.parse(logged[0]) as unknown as Record<
+            string,
+            unknown
+        >;
         console.info(loggedLine);
 
         if (expected.stack) {
@@ -95,6 +112,30 @@ describe("dt-logger", () => {
             method: LOG_LINE.method,
             level: "INFO",
             runtime: RUNTIME,
+        });
+    });
+
+    test("debug - string", () => {
+        const DEBUG_STRING = "debug string";
+
+        assertDebug({}, DEBUG_STRING, {
+            message: DEBUG_STRING,
+            level: "DEBUG",
+        });
+    });
+
+    test("debug - json", () => {
+        const DEBUG_JSON = {
+            debug: "debug",
+            thing: 42,
+        };
+
+        assertDebug({}, DEBUG_JSON, {
+            message: {
+                debug: "debug",
+                thing: 42,
+            },
+            level: "DEBUG",
         });
     });
 });

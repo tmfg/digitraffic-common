@@ -53,19 +53,27 @@ export class DtLogger {
     }
 
     /**
-     * Log given message with level DEBUG
+     * Log given message with level DEBUG.  This will not be forwarded to centralized logging system!.
      *
-     * @param message Either a string or json-object
+     * @param message anything
      * @see log
      */
-    debug(message: LoggableType): void {
-        this.log("DEBUG", message);
+    debug(message: unknown): void {
+        const logMessage = {
+            message,
+            level: "DEBUG",
+            fileName: this.fileName,
+            lambdaName: this.lambdaName,
+            runtime: this.runtime,
+        };
+
+        this.writeStream.write(JSON.stringify(logMessage) + "\n");
     }
 
     /**
      * Log given message with level INFO
      *
-     * @param message Either a string or json-object
+     * @param message Json-object to log
      * @see log
      */
     info(message: LoggableType): void {
@@ -75,7 +83,7 @@ export class DtLogger {
     /**
      * Log given message with level WARN
      *
-     * @param message Either a string or json-object
+     * @param message Json-object to log
      * @see log
      */
     warn(message: LoggableType): void {
@@ -84,7 +92,7 @@ export class DtLogger {
     /**
      * Log given message with level INFO
      *
-     * @param message Either a string or json-object
+     * @param message Json-object to log
      * @see log
      */
     error(message: LoggableType): void {
