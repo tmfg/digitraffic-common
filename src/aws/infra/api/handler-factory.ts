@@ -1,3 +1,4 @@
+import { getEnvVariableOrElse } from "../../../utils/utils";
 import { DtLogger } from "../../runtime/dt-logger";
 import { LambdaResponse } from "../../types/lambda-response";
 
@@ -7,6 +8,8 @@ export type LoggingHandler = (
 ) => Promise<LambdaResponse>;
 
 export type ErrorHandler = (error: unknown, logger: DtLogger) => LambdaResponse;
+
+const functionName = getEnvVariableOrElse("AWS_LAMBDA_FUNCTION_NAME", "test");
 
 /**
  * Factory class for creating lambda-handler functions.  You can set functionality to handle logging and error-handling,
@@ -30,7 +33,7 @@ export class HandlerFactory {
             } finally {
                 console.info(
                     "method=%s.handler tookMs=%d",
-                    process.env.AWS_LAMBDA_FUNCTION_NAME,
+                    functionName,
                     Date.now() - start
                 );
             }
@@ -74,7 +77,10 @@ export function createJsonLoggingHandler(): LoggingHandler {
         try {
             return await method();
         } finally {
-            logger.info({ tookMs: Date.now() - start });
+            logger.info({
+                method: `${functionName}.handler`,
+                tookMs: Date.now() - start,
+            });
         }
     };
 }

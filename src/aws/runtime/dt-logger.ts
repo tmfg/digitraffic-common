@@ -1,6 +1,6 @@
 import { Writable } from "stream";
 
-type LOG_LEVEL = "DEBUG" | "INFO" | "ERROR";
+type LOG_LEVEL = "DEBUG" | "INFO" | "WARN" | "ERROR";
 
 export interface LoggerConfiguration {
     lambdaName?: string;
@@ -9,11 +9,30 @@ export interface LoggerConfiguration {
     writeStream?: Writable;
 }
 
-export type LoggableType = string | number | Record<string, unknown>;
+export interface LoggableType {
+    /** name of method logging the message */
+    method: `${string}.${string}`;
+    /** message to log, optional */
+    message?: string;
+    /** type of message, optional */
+    type?: string;
+    /** stack trace, optional */
+    stack?: string;
+    /** amount of time some operation took in milliseconds, optional */
+    tookMs?: number;
+    /** count of something, optional */
+    count?: number;
+    /** do not log your apikey! */
+    apikey?: never;
+    /** do not log your apikey! */
+    apiKey?: never;
+    /** any other loggable key */
+    [key: string]: string | number | boolean | Date | undefined;
+}
 
 /**
  * Helper class for json-logging.  Logged line will include
- * * log-level (see LOG_LEVEL)
+ * * log-level
  * * lambdaName (taken from process environment)
  * * runtime (taken from process environment)
  * * the actual message (as json or as string)
@@ -33,27 +52,62 @@ export class DtLogger {
         this.writeStream = config?.writeStream ?? process.stdout;
     }
 
-    info(message: LoggableType) {
+    /**
+     * Log given message with level DEBUG
+     *
+     * @param message Either a string or json-object
+     * @see log
+     */
+    debug(message: LoggableType): void {
+        this.log("DEBUG", message);
+    }
+
+    /**
+     * Log given message with level INFO
+     *
+     * @param message Either a string or json-object
+     * @see log
+     */
+    info(message: LoggableType): void {
         this.log("INFO", message);
     }
 
-    error(message: LoggableType) {
+    /**
+     * Log given message with level WARN
+     *
+     * @param message Either a string or json-object
+     * @see log
+     */
+    warn(message: LoggableType): void {
+        this.log("WARN", message);
+    }
+    /**
+     * Log given message with level INFO
+     *
+     * @param message Either a string or json-object
+     * @see log
+     */
+    error(message: LoggableType): void {
         this.log("ERROR", message);
     }
 
-    log(level: LOG_LEVEL, message: LoggableType) {
-        // put string/number messages into message object
-        const actualMessage =
-            typeof message == "object" ? message : { message: message };
-
+    /**
+     * Log message with given log level.  If message is a json object, it will be logged as it is and if it is a string it will be wrapped into json-element with key "message".
+     * Some metadata is also added to the message:
+     * * runtime     - can be configured with constructor or inferred from environment
+     * * lambdaName  - can be configured with constructor or inferred from environment
+     * * fileName    - can be configured with constructor
+     *
+     * @param level "DEBUG", "INFO" or "ERROR"
+     * @param message Either a string or json-object
+     */
+    log(level: LOG_LEVEL, message: LoggableType): void {
         const logMessage = {
-            ...actualMessage,
-            ...{
-                level,
-                fileName: this.fileName,
-                lambdaName: this.lambdaName,
-                runtime: this.runtime,
-            },
+            ...message,
+            level,
+            fileName: message.fileName ?? this.fileName,
+            lambdaName: this.lambdaName,
+            runtime: this.runtime,
         };
 
         this.writeStream.write(JSON.stringify(logMessage) + "\n");

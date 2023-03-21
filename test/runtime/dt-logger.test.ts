@@ -2,15 +2,30 @@ import { Writable } from "stream";
 import { DtLogger, LoggerConfiguration } from "../../src/aws/runtime/dt-logger";
 import { LoggableType } from "../../src/aws/runtime/dt-logger";
 
-const LOG_LINE = {
+const LOG_LINE: LoggableType = {
+    method: "dt-logger.test",
     message: "FOO",
 };
 
 describe("dt-logger", () => {
-    function assertWrite(
+    function assertLog(
         config: LoggerConfiguration,
         message: LoggableType,
-        expected: unknown
+        expected: LoggableType
+    ) {
+        assertWrite(
+            config,
+            (logger: DtLogger) => {
+                logger.info(message);
+            },
+            expected
+        );
+    }
+
+    function assertWrite(
+        config: LoggerConfiguration,
+        writeFunction: (logger: DtLogger) => void,
+        expected: LoggableType
     ) {
         const logged: string[] = [];
         const writeStream = new Writable({
@@ -23,35 +38,29 @@ describe("dt-logger", () => {
             ...config,
             ...{ writeStream: writeStream },
         });
-        logger.info(message);
+
+        writeFunction(logger);
+
         expect(logged.length).toBe(1);
 
-        const loggedLine: unknown = JSON.parse(logged[0]);
+        const loggedLine = JSON.parse(logged[0]) as unknown as LoggableType;
         console.info(loggedLine);
+
+        if (expected.stack) {
+            const stack = loggedLine.stack;
+            delete loggedLine.stack;
+            delete expected.stack;
+
+            expect(stack).toBeDefined();
+        }
+
         expect(loggedLine).toEqual(expected);
     }
 
     test("default values", () => {
-        assertWrite({}, LOG_LINE, {
+        assertLog({}, LOG_LINE, {
+            method: LOG_LINE.method,
             message: LOG_LINE.message,
-            level: "INFO",
-        });
-    });
-
-    test("log text", () => {
-        const TEXT = "primitive_text";
-
-        assertWrite({}, TEXT, {
-            message: TEXT,
-            level: "INFO",
-        });
-    });
-
-    test("log number", () => {
-        const NUMBER = 42;
-
-        assertWrite({}, NUMBER, {
-            message: NUMBER,
             level: "INFO",
         });
     });
@@ -59,8 +68,9 @@ describe("dt-logger", () => {
     test("set lambdaName", () => {
         const LAMBDA_NAME = "test_lambda_name";
 
-        assertWrite({ lambdaName: LAMBDA_NAME }, LOG_LINE, {
+        assertLog({ lambdaName: LAMBDA_NAME }, LOG_LINE, {
             lambdaName: LAMBDA_NAME,
+            method: LOG_LINE.method,
             message: LOG_LINE.message,
             level: "INFO",
         });
@@ -69,8 +79,9 @@ describe("dt-logger", () => {
     test("set fileName", () => {
         const FILE_NAME = "test_file_name";
 
-        assertWrite({ fileName: FILE_NAME }, LOG_LINE, {
+        assertLog({ fileName: FILE_NAME }, LOG_LINE, {
             fileName: FILE_NAME,
+            method: LOG_LINE.method,
             message: LOG_LINE.message,
             level: "INFO",
         });
@@ -79,8 +90,9 @@ describe("dt-logger", () => {
     test("set runtime", () => {
         const RUNTIME = "test_runtime";
 
-        assertWrite({ runTime: RUNTIME }, LOG_LINE, {
+        assertLog({ runTime: RUNTIME }, LOG_LINE, {
             message: LOG_LINE.message,
+            method: LOG_LINE.method,
             level: "INFO",
             runtime: RUNTIME,
         });
