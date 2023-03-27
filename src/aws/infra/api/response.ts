@@ -1,7 +1,13 @@
-import {MediaType} from "../../types/mediatypes";
-import {JsonSchema, JsonSchemaType, JsonSchemaVersion, MethodResponse, Model,} from "aws-cdk-lib/aws-apigateway";
-import {IModel} from "aws-cdk-lib/aws-apigateway/lib/model";
-import {dateFromIsoString} from "../../../utils/date-utils";
+import { MediaType } from "../../types/mediatypes";
+import {
+    JsonSchema,
+    JsonSchemaType,
+    JsonSchemaVersion,
+    MethodResponse,
+    Model,
+} from "aws-cdk-lib/aws-apigateway";
+import { IModel } from "aws-cdk-lib/aws-apigateway/lib/model";
+import { dateFromIsoString } from "../../../utils/date-utils";
 
 /**
  * This is velocity-script, that assumes the response to be LambdaResponse(status and body).
@@ -37,7 +43,9 @@ $util.base64Decode($inputRoot.body)
 
 export const getDeprecatedDefaultLambdaResponse = (sunset: string) => {
     const setDeprecationHeaders = `#set ($context.responseOverride.header.Deprecation = 'true')
-#set ($context.responseOverride.header.Sunset = '${dateFromIsoString(sunset).toUTCString()}')`;
+#set ($context.responseOverride.header.Sunset = '${dateFromIsoString(
+        sunset
+    ).toUTCString()}')`;
     return RESPONSE_DEFAULT_LAMBDA.concat(setDeprecationHeaders);
 };
 
@@ -75,35 +83,21 @@ const BadRequestMessage = "Bad request";
 const BadRequestResponse = JSON.stringify({ message: BadRequestMessage });
 
 /// @deprecated
-export const BadRequestResponseTemplate = createResponses(
-    MediaType.APPLICATION_JSON,
-    BadRequestResponse
-);
+export const BadRequestResponseTemplate = {
+    [MediaType.APPLICATION_JSON]: BadRequestResponse,
+};
 /// @deprecated
-export const NotFoundResponseTemplate = createResponses(
-    MediaType.APPLICATION_JSON,
-    NotFoundResponse
-);
+export const NotFoundResponseTemplate = {
+    [MediaType.APPLICATION_JSON]: NotFoundResponse,
+};
 /// @deprecated
-export const XmlResponseTemplate = createResponses(
-    MediaType.APPLICATION_XML,
-    BODY_FROM_INPUT_PATH
-);
+export const XmlResponseTemplate = {
+    [MediaType.APPLICATION_XML]: BODY_FROM_INPUT_PATH,
+};
 /// @deprecated
-export const InternalServerErrorResponseTemplate = createResponses(
-    MediaType.APPLICATION_JSON,
-    InternalServerErrorResponse
-);
-
-/// @deprecated
-export function createResponses<T>(
-    key: MediaType,
-    value: T
-): Record<string, T> {
-    return {
-        [key]: value,
-    };
-}
+export const InternalServerErrorResponseTemplate = {
+    [MediaType.APPLICATION_JSON]: InternalServerErrorResponse,
+};
 
 export class DigitrafficMethodResponse {
     static response(

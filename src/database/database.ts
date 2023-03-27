@@ -1,6 +1,5 @@
 import { IDatabase, ITask } from "pg-promise";
-import { getEnvVariable } from "../utils/utils";
-import { envValue } from "../aws/runtime/environment";
+import { getEnvVariable, getEnvVariableOrElse } from "../utils/utils";
 
 export enum DatabaseEnvironmentKeys {
     DB_USER = "DB_USER",
@@ -78,13 +77,13 @@ async function doInDatabase<T>(
     readonly: boolean,
     fn: (db: DTDatabase) => Promise<T>
 ): Promise<T> {
-    const db_application = envValue(
+    const db_application = getEnvVariableOrElse(
         DatabaseEnvironmentKeys.DB_APPLICATION,
         "unknown-cdk-application"
     );
     const db_uri = readonly
-        ? envValue(DatabaseEnvironmentKeys.DB_RO_URI)
-        : envValue(DatabaseEnvironmentKeys.DB_URI);
+        ? getEnvVariable(DatabaseEnvironmentKeys.DB_RO_URI)
+        : getEnvVariable(DatabaseEnvironmentKeys.DB_URI);
 
     const db = initDbConnection(
         getEnvVariable(DatabaseEnvironmentKeys.DB_USER),

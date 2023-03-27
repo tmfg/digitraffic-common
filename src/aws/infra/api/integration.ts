@@ -7,7 +7,7 @@ import { IFunction } from "aws-cdk-lib/aws-lambda";
 import { MediaType } from "../../types/mediatypes";
 import { DigitrafficIntegrationResponse } from "../../runtime/digitraffic-integration-response";
 
-type ParameterType = "path" | "querystring";
+type ParameterType = "path" | "querystring" | "context";
 
 interface ApiParameter {
     type: ParameterType;
@@ -44,6 +44,14 @@ export class DigitrafficIntegration {
         return this;
     }
 
+    addContextParameter(...names: string[]): this {
+        names.forEach((name) =>
+            this.parameters.push({ type: "context", name })
+        );
+
+        return this;
+    }
+
     build(): LambdaIntegration {
         const integrationResponses = this.createResponses();
 
@@ -65,11 +73,14 @@ export class DigitrafficIntegration {
     createRequestParameters(): Record<string, string> {
         const requestParameters: Record<string, string> = {};
 
-        this.parameters.forEach((parameter: ApiParameter) => {
-            requestParameters[
-                `integration.request.${parameter.type}.${parameter.name}`
-            ] = `method.request.${parameter.type}.${parameter.name}`;
-        });
+        // filter out context parameters
+        this.parameters
+            .filter((parameter) => parameter.type !== "context")
+            .forEach((parameter: ApiParameter) => {
+                requestParameters[
+                    `integration.request.${parameter.type}.${parameter.name}`
+                ] = `method.request.${parameter.type}.${parameter.name}`;
+            });
 
         return requestParameters;
     }
@@ -78,9 +89,15 @@ export class DigitrafficIntegration {
         const requestJson: Record<string, string> = {};
 
         this.parameters.forEach((parameter: ApiParameter) => {
-            requestJson[
-                parameter.name
-            ] = `$util.escapeJavaScript($input.params('${parameter.name}'))`;
+            if (parameter.type === "context") {
+                requestJson[
+                    parameter.name
+                ] = `$util.parseJson($context.${parameter.name})`;
+            } else {
+                requestJson[
+                    parameter.name
+                ] = `$util.escapeJavaScript($input.params('${parameter.name}'))`;
+            }
         });
 
         return {

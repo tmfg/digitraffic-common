@@ -1,6 +1,5 @@
 import {
     InternalServerErrorResponseTemplate,
-    createResponses,
     XmlResponseTemplate,
     NotFoundResponseTemplate,
     BadRequestResponseTemplate,
@@ -20,32 +19,38 @@ import {
 } from "../../types/errors";
 import { MediaType } from "../../types/mediatypes";
 
+/// @deprecated
 export const RESPONSE_200_OK: IntegrationResponse = {
     statusCode: "200",
 };
 
+/// @deprecated
 export const RESPONSE_400_BAD_REQUEST: IntegrationResponse = {
     statusCode: "400",
     selectionPattern: BAD_REQUEST_MESSAGE,
     responseTemplates: BadRequestResponseTemplate,
 };
 
+/// @deprecated
 export const RESPONSE_500_SERVER_ERROR: IntegrationResponse = {
     statusCode: "500",
     selectionPattern: ERROR_MESSAGE,
     responseTemplates: InternalServerErrorResponseTemplate,
 };
 
+/// @deprecated
 const RESPONSE_XML = {
     responseTemplates: XmlResponseTemplate,
 };
 
+/// @deprecated
 export const RESPONSE_CORS_INTEGRATION = {
     responseParameters: {
         "method.response.header.Access-Control-Allow-Origin": "'*'",
     },
 };
 
+/// @deprecated
 export const RESPONSE_404_NOT_FOUND = {
     statusCode: "404",
     selectionPattern: NOT_FOUND_MESSAGE,
@@ -63,7 +68,9 @@ export function methodResponse(
 ): MethodResponse {
     return {
         statusCode: status,
-        responseModels: createResponses(contentType, model),
+        responseModels: {
+            [contentType]: model,
+        },
         responseParameters: parameters ?? {},
     };
 }
