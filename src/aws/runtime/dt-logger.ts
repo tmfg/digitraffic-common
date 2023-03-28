@@ -1,3 +1,4 @@
+import R from "ramda";
 import { Writable } from "stream";
 
 type LOG_LEVEL = "DEBUG" | "INFO" | "WARN" | "ERROR";
@@ -22,12 +23,16 @@ export interface LoggableType {
     tookMs?: number;
     /** count of something, optional */
     count?: number;
-    /** do not log your apikey! */
-    apikey?: never;
-    /** do not log your apikey! */
-    apiKey?: never;
-    /** any other loggable key */
-    [key: string]: string | number | boolean | Date | undefined;
+
+    /** Log some fancy object */
+    extra?: {
+        /** do not log your apikey! */
+        apikey?: never;
+        /** do not log your apikey! */
+        apiKey?: never;
+        /** any other loggable key */
+        [key: string]: string | number | boolean | Date | undefined;
+    };
 }
 
 /**
@@ -110,13 +115,14 @@ export class DtLogger {
      * @param message Either a string or json-object
      */
     log(level: LOG_LEVEL, message: LoggableType): void {
-        const logMessage = {
+        const logMessage = R.omit(["extra"], {
             ...message,
+            ...message.extra,
             level,
-            fileName: message.fileName ?? this.fileName,
+            fileName: message.extra?.fileName ?? this.fileName,
             lambdaName: this.lambdaName,
             runtime: this.runtime,
-        };
+        });
 
         this.writeStream.write(JSON.stringify(logMessage) + "\n");
     }

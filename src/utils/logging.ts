@@ -35,7 +35,7 @@ export function logException(
         type: "Error",
         method: `${functionName}.logException`,
         message,
-        code,
+        extra: { code },
         stack,
     });
 }
