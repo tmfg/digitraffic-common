@@ -18,11 +18,13 @@ export interface LoggableType {
     /** type of message, optional */
     type?: string;
     /** stack trace, optional */
-    stack?: string;
+    stack?: string | undefined;
     /** amount of time some operation took in milliseconds, optional */
     tookMs?: number;
     /** count of something, optional */
     count?: number;
+    /** Pass error object, which will be stringified before logging */
+    error?: unknown;
 
     /** Log some fancy object */
     extra?: {
@@ -115,9 +117,16 @@ export class DtLogger {
      * @param message Either a string or json-object
      */
     log(level: LOG_LEVEL, message: LoggableType): void {
+        const error = message.error
+            ? typeof message.error === "string"
+                ? message.error
+                : JSON.stringify(message.error)
+            : undefined;
+
         const logMessage = R.omit(["extra"], {
             ...message,
             ...message.extra,
+            error,
             level,
             fileName: message.extra?.fileName ?? this.fileName,
             lambdaName: this.lambdaName,
