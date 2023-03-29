@@ -33,7 +33,7 @@ export interface LoggableType {
         /** do not log your apikey! */
         apiKey?: never;
         /** any other loggable key */
-        [key: string]: string | number | boolean | Date | undefined;
+        [key: string]: string | number | boolean | Date | null | undefined;
     };
 }
 
@@ -114,7 +114,7 @@ export class DtLogger {
      * * fileName    - can be configured with constructor
      *
      * @param level "DEBUG", "INFO" or "ERROR"
-     * @param message Either a string or json-object
+     * @param message Json-object to log
      */
     log(level: LOG_LEVEL, message: LoggableType): void {
         const error = message.error
