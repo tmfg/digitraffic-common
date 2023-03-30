@@ -144,7 +144,7 @@ export class DtLogger {
 }
 
 function removePrefix(prefix: string, loggable: LoggableType) {
-    return _.mapKeys(loggable, (__, key: string) =>
+    return _.mapKeys(loggable, (_index, key: string) =>
         key.startsWith(prefix) ? _.lowerFirst(key.replace(prefix, "")) : key
     );
 }
