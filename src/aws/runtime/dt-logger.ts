@@ -10,7 +10,7 @@ export interface LoggerConfiguration {
     writeStream?: Writable;
 }
 
-export interface LoggableTypeInternal extends LoggableType {
+interface LoggableTypeInternal extends LoggableType {
     level: LOG_LEVEL;
 }
 
