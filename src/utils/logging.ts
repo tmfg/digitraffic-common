@@ -4,12 +4,17 @@ import { getEnvVariableOrElse } from "./utils";
 
 const functionName = getEnvVariableOrElse("AWS_LAMBDA_FUNCTION_NAME", "test");
 
-export function logException(
-    logger: DtLogger,
-    error: Error | string,
-    includeStack?: boolean
-): void;
-export function logException(logger: DtLogger, error: AxiosError): void;
+export const logExceptionCurried =
+    (logger: DtLogger | undefined = undefined, includeStack = false) =>
+    (error: unknown) => {
+        let thatLogger: DtLogger;
+        if (logger) {
+            thatLogger = logger;
+        } else {
+            thatLogger = new DtLogger();
+        }
+        logException(thatLogger, error, includeStack);
+    };
 
 /**
  * Log given exception with level ERROR to given logger.
@@ -23,19 +28,26 @@ export function logException(logger: DtLogger, error: AxiosError): void;
  */
 export function logException(
     logger: DtLogger,
-    error: Error | string | AxiosError,
+    error: unknown,
     includeStack = false
 ) {
-    const message = error instanceof Error ? error.message : error;
+    const message =
+        error instanceof Error
+            ? error.message
+            : typeof error === "string"
+            ? error
+            : JSON.stringify(error);
+
     const stack =
         error instanceof Error && includeStack ? error.stack : undefined;
-    const code = error instanceof AxiosError ? error.code : undefined;
+
+    const customCode = error instanceof AxiosError ? error.code : undefined;
 
     logger.error({
         type: "Error",
         method: `${functionName}.logException`,
         message,
-        extra: { code },
+        customCode,
         stack,
     });
 }

@@ -16,6 +16,7 @@
     "ci:eslint-report": "eslint . --format html -o report.html",
     "clean": "rimraf dist output",
     "test": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest",
+    "test:watch": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --watch",
     "prepare": "husky install",
     "prepublishOnly": "pnpm clean && pnpm build && pnpm test"
   },
@@ -45,6 +46,7 @@
     "@types/aws-lambda": "^8.10.114",
     "@types/geojson": "^7946.0.10",
     "@types/jest": "^29.5.0",
+    "@types/lodash": "^4.14.192",
     "@types/node": "^18.15.10",
     "@types/ramda": "^0.28.23",
     "@types/sinon": "^10.0.13",
@@ -80,5 +82,8 @@
   ],
   "lint-staged": {
     "*.{js,ts,css,md,yml,yaml,json}": "prettier --write"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
   }
 }

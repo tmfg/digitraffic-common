@@ -1,7 +1,7 @@
-import R from "ramda";
 import { Writable } from "stream";
+import _ from "lodash";
 
-type LOG_LEVEL = "DEBUG" | "INFO" | "WARN" | "ERROR";
+export type LOG_LEVEL = "DEBUG" | "INFO" | "WARN" | "ERROR";
 
 export interface LoggerConfiguration {
     lambdaName?: string;
@@ -10,7 +10,27 @@ export interface LoggerConfiguration {
     writeStream?: Writable;
 }
 
-export interface LoggableType {
+export interface LoggableTypeInternal extends LoggableType {
+    level: LOG_LEVEL;
+}
+
+export interface CustomParams {
+    /** do not log your apikey! */
+    customApikey?: never;
+    /** do not log your apikey! */
+    customApiKey?: never;
+    [key: `custom${Capitalize<string>}Count`]: number;
+
+    [key: `custom${Capitalize<string>}`]:
+        | string
+        | number
+        | boolean
+        | Date
+        | null
+        | undefined;
+}
+
+export interface LoggableType extends CustomParams {
     /** name of method logging the message */
     method: `${string}.${string}`;
     /** message to log, optional */
@@ -25,16 +45,6 @@ export interface LoggableType {
     count?: number;
     /** Pass error object, which will be stringified before logging */
     error?: unknown;
-
-    /** Log some fancy object */
-    extra?: {
-        /** do not log your apikey! */
-        apikey?: never;
-        /** do not log your apikey! */
-        apiKey?: never;
-        /** any other loggable key */
-        [key: string]: string | number | boolean | Date | null | undefined;
-    };
 }
 
 /**
@@ -46,7 +56,6 @@ export interface LoggableType {
  */
 export class DtLogger {
     readonly lambdaName?: string;
-    readonly fileName?: string;
     readonly runtime?: string;
 
     readonly writeStream: Writable;
@@ -54,7 +63,6 @@ export class DtLogger {
     constructor(config?: LoggerConfiguration) {
         this.lambdaName =
             config?.lambdaName ?? process.env.AWS_LAMBDA_FUNCTION_NAME;
-        this.fileName = config?.fileName;
         this.runtime = config?.runTime ?? process.env.AWS_EXECUTION_ENV;
         this.writeStream = config?.writeStream ?? process.stdout;
     }
@@ -69,7 +77,6 @@ export class DtLogger {
         const logMessage = {
             message,
             level: "DEBUG",
-            fileName: this.fileName,
             lambdaName: this.lambdaName,
             runtime: this.runtime,
         };
@@ -84,7 +91,7 @@ export class DtLogger {
      * @see log
      */
     info(message: LoggableType): void {
-        this.log("INFO", message);
+        this.log({ ...message, level: "INFO" });
     }
 
     /**
@@ -94,7 +101,7 @@ export class DtLogger {
      * @see log
      */
     warn(message: LoggableType): void {
-        this.log("WARN", message);
+        this.log({ ...message, level: "WARN" });
     }
     /**
      * Log given message with level INFO
@@ -103,7 +110,10 @@ export class DtLogger {
      * @see log
      */
     error(message: LoggableType): void {
-        this.log("ERROR", message);
+        this.log({
+            ...message,
+            level: "ERROR",
+        });
     }
 
     /**
@@ -111,28 +121,30 @@ export class DtLogger {
      * Some metadata is also added to the message:
      * * runtime     - can be configured with constructor or inferred from environment
      * * lambdaName  - can be configured with constructor or inferred from environment
-     * * fileName    - can be configured with constructor
      *
      * @param level "DEBUG", "INFO" or "ERROR"
      * @param message Json-object to log
      */
-    log(level: LOG_LEVEL, message: LoggableType): void {
+    private log(message: LoggableTypeInternal): void {
         const error = message.error
             ? typeof message.error === "string"
                 ? message.error
                 : JSON.stringify(message.error)
             : undefined;
 
-        const logMessage = R.omit(["extra"], {
-            ...message,
-            ...message.extra,
+        const logMessage = {
+            ...removePrefix("custom", message),
             error,
-            level,
-            fileName: message.extra?.fileName ?? this.fileName,
             lambdaName: this.lambdaName,
             runtime: this.runtime,
-        });
+        };
 
         this.writeStream.write(JSON.stringify(logMessage) + "\n");
     }
+}
+
+function removePrefix(prefix: string, loggable: LoggableType) {
+    return _.mapKeys(loggable, (__, key: string) =>
+        key.startsWith(prefix) ? _.lowerFirst(key.replace(prefix, "")) : key
+    );
 }
