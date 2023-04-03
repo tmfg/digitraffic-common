@@ -1,12 +1,21 @@
 import { Writable } from "stream";
 import _ from "lodash";
 
+/** Logging level */
 export type LOG_LEVEL = "DEBUG" | "INFO" | "WARN" | "ERROR";
 
+/**
+ * Configuration object for configuring the Digitraffic logging utility
+ * @see {@link DtLogger}
+ */
 export interface LoggerConfiguration {
+    /** Name of the lambda */
     lambdaName?: string;
+    /** The file name where the logging occurs */
     fileName?: string;
+    /** The lambda runtime environment */
     runTime?: string;
+    /** Custom end point to write the logs to */
     writeStream?: Writable;
 }
 
@@ -14,6 +23,10 @@ interface LoggableTypeInternal extends LoggableType {
     level: LOG_LEVEL;
 }
 
+/**
+ * CustomParams allows to add keys prefixed with `custom` keyword to be added to an
+ * object.
+ */
 export interface CustomParams {
     /** do not log your apikey! */
     customApikey?: never;
@@ -30,25 +43,34 @@ export interface CustomParams {
         | undefined;
 }
 
+/**
+ * Digitraffic logging object.
+ *
+ * `method` property is the only required propetry. {@link CustomParams} can be added by
+ * prefixin the property with keyword `custom`. The prefix is removed before writing to
+ * logging end point.
+ *
+ * @see {@link CustomParams}
+ */
 export interface LoggableType extends CustomParams {
-    /** name of method logging the message */
+    /** Name of the method logging the message */
     method: `${string}.${string}`;
-    /** message to log, optional */
+    /** Message to log, optional */
     message?: string;
-    /** type of message, optional */
+    /** Type of message, optional */
     type?: string;
-    /** stack trace, optional */
+    /** Stack trace, optional */
     stack?: string | undefined;
-    /** amount of time some operation took in milliseconds, optional */
+    /** Amount of time some operation took in milliseconds, optional */
     tookMs?: number;
-    /** count of something, optional */
-    count?: number;
     /** Pass error object, which will be stringified before logging */
     error?: unknown;
 }
 
 /**
- * Helper class for json-logging.  Logged line will include
+ * Helper class for json-logging.
+ *
+ * Logged line will include:
  * * log-level
  * * lambdaName (taken from process environment)
  * * runtime (taken from process environment)
@@ -60,6 +82,11 @@ export class DtLogger {
 
     readonly writeStream: Writable;
 
+    /**
+     * Create a new Logger instance.
+     * @constructor
+     * @param {LoggerConfiguration?} [config] - Accepts configuration options @see {@link LoggerConfiguration}
+     */
     constructor(config?: LoggerConfiguration) {
         this.lambdaName =
             config?.lambdaName ?? process.env.AWS_LAMBDA_FUNCTION_NAME;
@@ -71,7 +98,8 @@ export class DtLogger {
      * Log given message with level DEBUG.  This will not be forwarded to centralized logging system!.
      *
      * @param message anything
-     * @see log
+     * @see {@link LoggableType}
+     * @see {@link DtLogger.log}
      */
     debug(message: unknown): void {
         const logMessage = {
@@ -88,7 +116,8 @@ export class DtLogger {
      * Log given message with level INFO
      *
      * @param message Json-object to log
-     * @see log
+     * @see {@link LoggableType}
+     * @see {@link DtLogger.log}
      */
     info(message: LoggableType): void {
         this.log({ ...message, level: "INFO" });
@@ -98,7 +127,8 @@ export class DtLogger {
      * Log given message with level WARN
      *
      * @param message Json-object to log
-     * @see log
+     * @see {@link LoggableType}
+     * @see {@link DtLogger.log}
      */
     warn(message: LoggableType): void {
         this.log({ ...message, level: "WARN" });
@@ -107,7 +137,8 @@ export class DtLogger {
      * Log given message with level INFO
      *
      * @param message Json-object to log
-     * @see log
+     * @see {@link LoggableType}
+     * @see {@link DtLogger.log}
      */
     error(message: LoggableType): void {
         this.log({
@@ -117,13 +148,14 @@ export class DtLogger {
     }
 
     /**
-     * Log message with given log level.  If message is a json object, it will be logged as it is and if it is a string it will be wrapped into json-element with key "message".
+     * Log message with given log level.
+     *
      * Some metadata is also added to the message:
      * * runtime     - can be configured with constructor or inferred from environment
      * * lambdaName  - can be configured with constructor or inferred from environment
      *
-     * @param level "DEBUG", "INFO" or "ERROR"
      * @param message Json-object to log
+     * @see {@link LoggableType}
      */
     private log(message: LoggableTypeInternal): void {
         const error = message.error
