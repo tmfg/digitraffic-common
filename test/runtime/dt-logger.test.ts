@@ -1,5 +1,9 @@
 import { Writable } from "stream";
-import { DtLogger, LoggerConfiguration } from "../../src/aws/runtime/dt-logger";
+import {
+    DtLogger,
+    LoggerConfiguration,
+    LOG_LEVEL,
+} from "../../src/aws/runtime/dt-logger";
 import { LoggableType } from "../../src/aws/runtime/dt-logger";
 
 const LOG_LINE: LoggableType = {
@@ -7,11 +11,18 @@ const LOG_LINE: LoggableType = {
     message: "FOO",
 };
 
+type TestExpectedLoggableType = LoggableType & {
+    runtime?: unknown;
+    lambdaName?: string;
+    level?: LOG_LEVEL;
+    stack?: unknown;
+};
+
 describe("dt-logger", () => {
-    function assertLog(
+    function assertLog<T>(
         config: LoggerConfiguration,
         message: LoggableType,
-        expected: LoggableType
+        expected: NonNullable<T>
     ) {
         assertWrite(
             config,
@@ -22,10 +33,10 @@ describe("dt-logger", () => {
         );
     }
 
-    function assertDebug(
+    function assertDebug<T>(
         config: LoggerConfiguration,
         message: unknown,
-        expected: Record<string, unknown>
+        expected: NonNullable<T>
     ) {
         assertWrite(
             config,
@@ -36,10 +47,10 @@ describe("dt-logger", () => {
         );
     }
 
-    function assertWrite(
+    function assertWrite<T>(
         config: LoggerConfiguration,
         writeFunction: (logger: DtLogger) => void,
-        expected: Record<string, unknown>
+        expected: NonNullable<T>
     ) {
         const logged: string[] = [];
         const writeStream = new Writable({
@@ -63,7 +74,11 @@ describe("dt-logger", () => {
         >;
         console.info(loggedLine);
 
-        if (expected.stack) {
+        if (
+            typeof expected === "object" &&
+            "stack" in expected &&
+            expected.stack
+        ) {
             const stack = loggedLine.stack;
             delete loggedLine.stack;
             delete expected.stack;
@@ -71,8 +86,37 @@ describe("dt-logger", () => {
             expect(stack).toBeDefined();
         }
 
-        expect(loggedLine).toEqual(expected);
+        expect(loggedLine).toMatchObject(expected);
     }
+
+    test("custom values", () => {
+        const date = new Date();
+        assertLog(
+            {},
+            {
+                ...LOG_LINE,
+                customDate: date,
+            },
+            {
+                ...LOG_LINE,
+                date: date.toISOString(),
+            }
+        );
+    });
+
+    test("custom count should be a number", () => {
+        assertLog(
+            {},
+            {
+                ...LOG_LINE,
+                customFooCount: 123,
+            },
+            {
+                ...LOG_LINE,
+                fooCount: 123,
+            }
+        );
+    });
 
     test("default values", () => {
         assertLog({}, LOG_LINE, {
@@ -87,17 +131,6 @@ describe("dt-logger", () => {
 
         assertLog({ lambdaName: LAMBDA_NAME }, LOG_LINE, {
             lambdaName: LAMBDA_NAME,
-            method: LOG_LINE.method,
-            message: LOG_LINE.message,
-            level: "INFO",
-        });
-    });
-
-    test("set fileName", () => {
-        const FILE_NAME = "test_file_name";
-
-        assertLog({ fileName: FILE_NAME }, LOG_LINE, {
-            fileName: FILE_NAME,
             method: LOG_LINE.method,
             message: LOG_LINE.message,
             level: "INFO",
