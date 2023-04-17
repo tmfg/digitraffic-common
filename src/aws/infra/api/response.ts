@@ -18,19 +18,23 @@ import { dateFromIsoString } from "../../../utils/date-utils";
  * non-textual content.
  *
  * If fileName is set, then Content-Disposition-header will be set to use it
+ * If timestamp is set, then ETag & Last-Modified headers will be set
  */
 export const RESPONSE_DEFAULT_LAMBDA = `#set($inputRoot = $input.path('$'))
-$util.base64Decode($inputRoot.body)
 #if ($inputRoot.status != 200)
 #set ($context.responseOverride.status = $inputRoot.status)
 #set ($context.responseOverride.header.Content-Type = 'text/plain')
 #end
 #set ($context.responseOverride.header.Access-Control-Allow-Origin = '*')
+#if ("$!inputRoot.timestamp" != "")
+#set ($context.responseOverride.header.ETag = $inputRoot.timestamp)
+#set ($context.responseOverride.header.Last-Modified = $inputRoot.timestamp)
+#end
 #if ("$!inputRoot.fileName" != "")
 #set ($disposition = 'attachment; filename="FN"')
 #set ($context.responseOverride.header.Content-Disposition = $disposition.replaceAll('FN', $inputRoot.fileName))
 #end
-`;
+$util.base64Decode($inputRoot.body)`;
 
 /**
  * Use this for deprecated integrations.

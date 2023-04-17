@@ -2,11 +2,27 @@ export class LambdaResponse {
     readonly status: number;
     readonly body: string;
     readonly fileName?: string;
+    readonly timestamp?: string;
 
-    constructor(status: number, body: string, fileName?: string) {
+    constructor(
+        status: number,
+        body: string,
+        fileName?: string,
+        timestamp?: Date
+    ) {
         this.status = status;
         this.body = body;
         this.fileName = fileName;
+        this.timestamp = timestamp?.toUTCString();
+    }
+
+    withTimestamp(timestamp: Date) {
+        return new LambdaResponse(
+            this.status,
+            this.body,
+            this.fileName,
+            timestamp
+        );
     }
 
     /**
@@ -27,54 +43,54 @@ export class LambdaResponse {
      * Create LambdaResponse for HTTP 200 from base64-encoded data.
      */
     static okBinary(base64: string, fileName?: string) {
-        return createForBase64(200, base64, fileName);
+        return this.createForBase64(200, base64, fileName);
     }
 
     /**
      * Create LambdaResponse for HTTP 400
      */
     static badRequest(body: string) {
-        return createForString(400, body);
+        return this.createForString(400, body);
     }
 
     /**
      * Create LambdaResponse for HTTP 404
      */
     static notFound() {
-        return createForString(404, "Not found");
+        return this.createForString(404, "Not found");
     }
 
     /**
      * Create LambdaResponse for HTTP 500
      */
     static internalError() {
-        return createForString(500, "Internal error");
+        return this.createForString(500, "Internal error");
     }
 
     /**
      * Create LambdaResponse for HTTP 501
      */
     static notImplemented() {
-        return createForString(501, "Not implemented");
+        return this.createForString(501, "Not implemented");
+    }
+
+    private static createForString(
+        status: number,
+        body: string,
+        fileName?: string
+    ): LambdaResponse {
+        return this.createForBase64(status, toBase64(body), fileName);
+    }
+
+    private static createForBase64(
+        status: number,
+        base64Body: string,
+        fileName?: string
+    ): LambdaResponse {
+        return new LambdaResponse(status, base64Body, fileName);
     }
 }
 
 function toBase64(body: string) {
     return Buffer.from(body).toString("base64");
-}
-
-function createForString(
-    status: number,
-    body: string,
-    fileName?: string
-): LambdaResponse {
-    return createForBase64(status, toBase64(body), fileName);
-}
-
-function createForBase64(
-    status: number,
-    base64Body: string,
-    fileName?: string
-): LambdaResponse {
-    return new LambdaResponse(status, base64Body, fileName);
 }
