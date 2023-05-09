@@ -1,4 +1,4 @@
-import { Duration, RemovalPolicy, SecretValue, Stack } from "aws-cdk-lib";
+import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib";
 import {
     InstanceType,
     IVpc,
@@ -19,8 +19,9 @@ import {
     ParameterGroup,
 } from "aws-cdk-lib/aws-rds";
 import { Construct } from "constructs";
-import { exportValue, importVpc } from "../import-util";
+import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
+import { exportValue, importVpc } from "../import-util";
 
 export interface DbConfiguration {
     readonly secretArn: string;
@@ -31,9 +32,6 @@ export interface DbConfiguration {
     readonly instances: number;
     readonly customParameterGroup: boolean;
     readonly securityGroupId: string;
-
-    readonly superuserName: string;
-    readonly superuserPassword: string;
 
     readonly proxy: {
         readonly name?: string;
@@ -126,6 +124,12 @@ export class DbStack extends Stack {
         securityGroup: ISecurityGroup,
         parameterGroup: IParameterGroup
     ): DatabaseClusterProps {
+        const secret = Secret.fromSecretCompleteArn(
+            this,
+            "DBSecret",
+            configuration.secretArn
+        );
+
         return {
             engine: DatabaseClusterEngine.auroraPostgres({
                 version: configuration.dbVersion,
@@ -155,8 +159,8 @@ export class DbStack extends Stack {
                 parameterGroup,
             },
             credentials: Credentials.fromPassword(
-                configuration.superuserName,
-                SecretValue.unsafePlainText(configuration.superuserPassword)
+                secret.secretValueFromJson("db.superuser").unsafeUnwrap(),
+                secret.secretValueFromJson("db.superuser.password")
             ),
             parameterGroup,
         };
@@ -200,10 +204,7 @@ export class DbStack extends Stack {
         }
         cfnInstances.forEach((cfnInstance) => delete cfnInstance.engineVersion);
 
-        cluster.node.addDependency(
-            parameterGroup,
-            "Create ParameterGroup before DatabaseCluster"
-        );
+        cluster.node.addDependency(parameterGroup);
 
         return cluster;
     }
