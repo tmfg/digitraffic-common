@@ -1,4 +1,4 @@
-
+export const EPOCH = new Date(Date.UTC(1970, 0, 1));
 /**
  * Counts difference in milliseconds between dates.
  * @param start
@@ -14,7 +14,7 @@ export function countDiffMs(start: Date, end: Date): number {
  * @param end
  */
 export function countDiffInSeconds(start: Date, end: Date): number {
-    return countDiffMs(start, end)/1000;
+    return countDiffMs(start, end) / 1000;
 }
 
 /**
