@@ -1,4 +1,8 @@
+/**
+ * Date timestamp at epoch 0
+ */
 export const EPOCH = new Date(Date.UTC(1970, 0, 1));
+
 /**
  * Counts difference in milliseconds between dates.
  * @param start
