@@ -25,7 +25,7 @@ export function countDiffInSeconds(start: Date, end: Date): number {
  * Converts ISO 8601 date-time -string to Date object
  * @param isoString to convert
  */
-export function dateFromIsoString(isoString: string) {
+export function dateFromIsoString(isoString: string): Date {
     const parsed = new Date(isoString);
     if (!isValidDate(parsed)) {
         throw new Error(
