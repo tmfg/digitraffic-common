@@ -25,10 +25,16 @@ export function countDiffInSeconds(start: Date, end: Date): number {
  * Converts ISO 8601 date-time -string to Date object
  * @param isoString to convert
  */
-export function dateFromIsoString(isoString: string): Date {
+export function dateFromIsoString(isoString: string) {
     const parsed = new Date(isoString);
-    if (!(parsed instanceof Date) || isNaN(parsed.getTime())) {
-        throw new Error(`Invalid ISO-DATE -string: ${isoString}`);
+    if (!isValidDate(parsed)) {
+        throw new Error(
+            `Could not parse iso date-time string: "${isoString}" to date`
+        );
     }
     return parsed;
+}
+
+function isValidDate(d: any) {
+    return d instanceof Date && !isNaN(d.getTime());
 }
