@@ -1,5 +1,5 @@
 /**
- * Date timestamp at epoch 0
+ * Constant for the 1970-01-01T00:00:00Z epoch Date.
  */
 export const EPOCH = new Date(Date.UTC(1970, 0, 1));
 
