@@ -4,24 +4,20 @@ import { DTDatabase, DTTransaction } from "./database";
 export interface CachedValue<T> {
     content: T;
     last_updated: Date;
+    modified: Date;
 }
-
-const SQL_UPDATE_CACHE_VALUE = `insert into cached_json(cache_id, content, last_updated)
-    values ($1, $2, now())
-    on conflict(cache_id) do
-    update set content = $2, last_updated = now()`;
-
-const SQL_GET_CACHE_VALUE = `select content, last_updated from cached_json
-    where cache_id = $1`;
 
 const PS_UPDATE_CACHE_VALUE = new PreparedStatement({
     name: "update-cache-value",
-    text: SQL_UPDATE_CACHE_VALUE,
+    text: `insert into cached_json(cache_id, content, last_updated)
+    values ($1, $2, $3)
+    on conflict(cache_id) do
+    update set content = $2, last_updated = $3`,
 });
 
 const PS_GET_CACHE_VALUE = new PreparedStatement({
     name: "get-cache-value",
-    text: SQL_GET_CACHE_VALUE,
+    text: "select content, last_updated, modified from cached_json where cache_id = $1",
 });
 
 export enum JSON_CACHE_KEY {
@@ -29,26 +25,38 @@ export enum JSON_CACHE_KEY {
     NAUTICAL_WARNINGS_ARCHIVED = "nautical-warnings-archived",
 }
 
-export function updateCachedJson<T>(
+/**
+ *
+ * @param db
+ * @param cacheKey
+ * @param value
+ * @param lastUpdated time when data was created or updated
+ */
+export async function updateCachedJson<T>(
     db: DTDatabase | DTTransaction,
     cacheKey: JSON_CACHE_KEY,
-    value: T
-): Promise<null> {
-    return db.none(PS_UPDATE_CACHE_VALUE, [cacheKey, value]);
+    value: T,
+    lastUpdated: Date
+): Promise<void> {
+    await db.none(PS_UPDATE_CACHE_VALUE, [cacheKey, value, lastUpdated]);
 }
 
 export function getJsonFromCache<T>(
     db: DTDatabase | DTTransaction,
     cacheKey: JSON_CACHE_KEY
-): Promise<T | null> {
+): Promise<T | undefined> {
     return db
         .oneOrNone<CachedValue<T>>(PS_GET_CACHE_VALUE, [cacheKey])
-        .then((value) => value?.content ?? null);
+        .then((value) => value?.content ?? undefined);
 }
 
-export function getFromCache<T>(
+export async function getFromCache<T>(
     db: DTDatabase | DTTransaction,
     cacheKey: JSON_CACHE_KEY
-): Promise<CachedValue<T> | null> {
-    return db.oneOrNone<CachedValue<T>>(PS_GET_CACHE_VALUE, [cacheKey]);
+): Promise<CachedValue<T> | undefined> {
+    return db
+        .oneOrNone<CachedValue<T>>(PS_GET_CACHE_VALUE, [cacheKey])
+        .then((result) => {
+            return result ?? undefined;
+        });
 }
