@@ -1,4 +1,5 @@
 import { RESPONSE_DEFAULT_LAMBDA } from "../../src/aws/infra/api/response";
+import etag from "etag";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const velocity = require("velocityjs");
@@ -13,6 +14,15 @@ interface VelocityContext {
 }
 
 describe("response tests", () => {
+    function generateEtagValueFromString(body: string) {
+        return generateEtagValueFromBase64String(
+            Buffer.from(body).toString("base64")
+        );
+    }
+    function generateEtagValueFromBase64String(bodyBase64: string) {
+        return etag(bodyBase64);
+    }
+
     function generateResponse(
         status: number,
         fileName?: string,
@@ -31,6 +41,7 @@ describe("response tests", () => {
                     status,
                     fileName,
                     timestamp: timestamp?.toUTCString(),
+                    etag: generateEtagValueFromString(TEST_BODY),
                 }),
             },
             util: {
@@ -55,13 +66,15 @@ describe("response tests", () => {
         return [output as string, compile.context.context];
     }
 
-    function assertContext(
+    function assertOutputAndContext(
+        output: string,
         context: VelocityContext,
         status?: number,
         contentType?: string,
         fileName?: string,
         timestamp?: Date
     ) {
+        expect(output).toEqual(TEST_BODY);
         expect(context).toMatchObject({
             responseOverride: {
                 status,
@@ -70,7 +83,7 @@ describe("response tests", () => {
                     "Access-Control-Allow-Origin": "*",
                     "Content-Disposition": fileName,
                     "Last-Modified": timestamp?.toUTCString(),
-                    ETag: timestamp?.toUTCString(),
+                    ETag: generateEtagValueFromString(TEST_BODY),
                 },
             },
         });
@@ -78,17 +91,15 @@ describe("response tests", () => {
 
     test("test 200", () => {
         const [output, context] = generateResponse(200);
-
-        expect(output).toEqual(TEST_BODY);
-        assertContext(context);
+        assertOutputAndContext(output, context);
     });
 
     test("test 200 - filename", () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
         const [output, context] = generateResponse(200, "test.txt");
 
-        expect(output).toEqual(TEST_BODY);
-        assertContext(
+        assertOutputAndContext(
+            output,
             context,
             undefined,
             undefined,
@@ -101,8 +112,8 @@ describe("response tests", () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
         const [output, context] = generateResponse(200, "test.txt", now);
 
-        expect(output).toEqual(TEST_BODY);
-        assertContext(
+        assertOutputAndContext(
+            output,
             context,
             undefined,
             undefined,
@@ -115,7 +126,6 @@ describe("response tests", () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
         const [output, context] = generateResponse(204);
 
-        expect(output).toEqual(TEST_BODY);
-        assertContext(context, 204, "text/plain");
+        assertOutputAndContext(output, context, 204, "text/plain");
     });
 });

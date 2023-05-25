@@ -1,8 +1,11 @@
+import etag from "etag";
+
 export class LambdaResponse {
     readonly status: number;
     readonly body: string;
     readonly fileName?: string;
     readonly timestamp?: string;
+    readonly etag: string;
 
     constructor(
         status: number,
@@ -14,6 +17,7 @@ export class LambdaResponse {
         this.body = body;
         this.fileName = fileName;
         this.timestamp = timestamp?.toUTCString();
+        this.etag = etag(body); // create strong etag by default
     }
 
     withTimestamp(timestamp: Date) {

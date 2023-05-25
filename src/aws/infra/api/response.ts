@@ -27,8 +27,10 @@ export const RESPONSE_DEFAULT_LAMBDA = `#set($inputRoot = $input.path('$'))
 #end
 #set ($context.responseOverride.header.Access-Control-Allow-Origin = '*')
 #if ("$!inputRoot.timestamp" != "")
-#set ($context.responseOverride.header.ETag = $inputRoot.timestamp)
 #set ($context.responseOverride.header.Last-Modified = $inputRoot.timestamp)
+#end
+#if ("$!inputRoot.etag" != "")
+#set ($context.responseOverride.header.ETag = $inputRoot.etag)
 #end
 #if ("$!inputRoot.fileName" != "")
 #set ($disposition = 'attachment; filename="FN"')
