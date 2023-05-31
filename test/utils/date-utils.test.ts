@@ -1,4 +1,3 @@
-import moment from "moment";
 import * as CommonDateUtils from "../../src/utils/date-utils";
 
 const ISO = "2022-01-02T01:02:03.004Z";
@@ -17,13 +16,13 @@ describe("CommonDateUtilsTest", () => {
 
     test("countDiffMs", () => {
         const start = new Date();
-        const end = moment(start).add(1234, "milliseconds").toDate();
+        const end = new Date(start.getTime() + 1234);
         expect(CommonDateUtils.countDiffMs(start, end)).toEqual(1234);
     });
 
     test("countDiffMs", () => {
         const start = new Date();
-        const end = moment(start).add(1234, "seconds").toDate();
+        const end = new Date(start.getTime() + 1234 * 1000);
         expect(CommonDateUtils.countDiffInSeconds(start, end)).toEqual(1234);
     });
 });

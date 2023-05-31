@@ -37,7 +37,7 @@ export interface DbConfiguration {
     readonly customParameterGroup: boolean;
     readonly securityGroupId: string;
     /** If this is not specified, import default vpc */
-    readonly vpcId?: string;
+    readonly vpc?: IVpc;
 
     readonly proxy: {
         readonly name?: string;
@@ -185,10 +185,8 @@ export class DbStack extends Stack {
             configuration.securityGroupId
         );
         const parameterGroup = this.createParamaterGroup(configuration);
-        const vpc = configuration.vpcId
-            ? Vpc.fromLookup(this, "vpc", {
-                  vpcId: configuration.vpcId,
-              })
+        const vpc = configuration.vpc
+            ? configuration.vpc
             : importVpc(this, isc.environmentName);
 
         const parameters = this.createClusterParameters(
