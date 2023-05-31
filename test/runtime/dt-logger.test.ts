@@ -1,21 +1,10 @@
 import { Writable } from "stream";
-import {
-    DtLogger,
-    LoggerConfiguration,
-    LOG_LEVEL,
-} from "../../src/aws/runtime/dt-logger";
+import { DtLogger, LoggerConfiguration } from "../../src/aws/runtime/dt-logger";
 import { LoggableType } from "../../src/aws/runtime/dt-logger";
 
 const LOG_LINE: LoggableType = {
     method: "dt-logger.test",
     message: "FOO",
-};
-
-type TestExpectedLoggableType = LoggableType & {
-    runtime?: unknown;
-    lambdaName?: string;
-    level?: LOG_LEVEL;
-    stack?: unknown;
 };
 
 describe("dt-logger", () => {

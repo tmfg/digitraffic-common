@@ -35,6 +35,6 @@ export function dateFromIsoString(isoString: string): Date {
     return parsed;
 }
 
-function isValidDate(d: any) {
+function isValidDate(d: unknown) {
     return d instanceof Date && !isNaN(d.getTime());
 }

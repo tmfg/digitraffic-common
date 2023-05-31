@@ -4,6 +4,7 @@ import {
     IVpc,
     SecurityGroup,
     SubnetType,
+    Vpc,
 } from "aws-cdk-lib/aws-ec2";
 import { ISecurityGroup } from "aws-cdk-lib/aws-ec2/lib/security-group";
 import {
@@ -24,6 +25,9 @@ import { InfraStackConfiguration } from "./intra-stack-configuration";
 import { exportValue, importVpc } from "../import-util";
 
 export interface DbConfiguration {
+    /** superuser username and password are fetched from this secret, using keys
+     * db.superuser and db.superuser.password
+     */
     readonly secretArn: string;
 
     readonly dbVersion: AuroraPostgresEngineVersion;
@@ -32,6 +36,8 @@ export interface DbConfiguration {
     readonly instances: number;
     readonly customParameterGroup: boolean;
     readonly securityGroupId: string;
+    /** If this is not specified, import default vpc */
+    readonly vpcId?: string;
 
     readonly proxy: {
         readonly name?: string;
@@ -163,6 +169,8 @@ export class DbStack extends Stack {
                 secret.secretValueFromJson("db.superuser.password")
             ),
             parameterGroup,
+            storageEncrypted: true,
+            monitoringInterval: Duration.seconds(30),
         };
     }
 
@@ -177,10 +185,16 @@ export class DbStack extends Stack {
             configuration.securityGroupId
         );
         const parameterGroup = this.createParamaterGroup(configuration);
+        const vpc = configuration.vpcId
+            ? Vpc.fromLookup(this, "vpc", {
+                  vpcId: configuration.vpcId,
+              })
+            : importVpc(this, isc.environmentName);
+
         const parameters = this.createClusterParameters(
             configuration,
             instanceName,
-            importVpc(this, isc.environmentName),
+            vpc,
             securityGroup,
             parameterGroup
         );
