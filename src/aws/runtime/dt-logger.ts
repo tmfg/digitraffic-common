@@ -37,6 +37,7 @@ export interface CustomParams {
     [key: `custom${Capitalize<string>}`]:
         | string
         | number
+        | bigint
         | boolean
         | Date
         | null
