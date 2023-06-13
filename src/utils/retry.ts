@@ -42,57 +42,72 @@ export async function retry<T>(
 ): Promise<T> {
     retryCount = 0;
 
-    if (!isFinite(retries)) {
-        throw new Error("Only finite numbers are supported");
-    }
-    if (retries > 100) {
-        throw new Error("Exceeded the maximum retry count of 100");
-    }
-    try {
-        return await asyncFn();
-    } catch (error) {
-        const remainingRetries = retries - 1;
+    return (async function inner(
+        asyncFn: () => Promise<T>,
+        retries,
+        logError,
+        timeoutBetweenRetries: TimeoutFn,
+        retryPredicate: RetryPredicate = alwaysRetry
+    ): Promise<T> {
+        if (!isFinite(retries)) {
+            throw new Error("Only finite numbers are supported");
+        }
+        if (retries > 100) {
+            throw new Error("Exceeded the maximum retry count of 100");
+        }
+        try {
+            return await asyncFn();
+        } catch (error) {
+            const remainingRetries = retries - 1;
 
-        const errorMessage = "method=retry error";
-        if (logError === RetryLogError.LOG_ALL_AS_ERRORS) {
-            console.error(errorMessage, error);
-        } else if (
-            logError === RetryLogError.LOG_LAST_RETRY_AS_ERROR_OTHERS_AS_WARNS
-        ) {
-            if (remainingRetries < 0) {
+            const errorMessage = "method=retry error";
+            if (logError === RetryLogError.LOG_ALL_AS_ERRORS) {
                 console.error(errorMessage, error);
-            } else {
-                console.warn(errorMessage, error);
+            } else if (
+                logError ===
+                RetryLogError.LOG_LAST_RETRY_AS_ERROR_OTHERS_AS_WARNS
+            ) {
+                if (remainingRetries < 0) {
+                    console.error(errorMessage, error);
+                } else {
+                    console.warn(errorMessage, error);
+                }
             }
-        }
 
-        if (remainingRetries < 0) {
-            console.warn("method=retry no retries left");
-            throw new Error("No retries left");
-        }
-        console.warn(
-            "method=retry invocation failed, retrying with remaining retries %d",
-            remainingRetries
-        );
-        if (retryPredicate(error)) {
-            retryCount++;
-            const milliseconds = timeoutBetweenRetries(retryCount);
-            if (milliseconds > 0) {
-                await new Promise((resolve) =>
-                    setTimeout(resolve, milliseconds)
-                );
+            if (remainingRetries < 0) {
+                console.warn("method=retry no retries left");
+                throw new Error("No retries left");
             }
-            return retry(asyncFn, remainingRetries, logError);
-        } else {
-            throw new Error("Retry predicate failed");
+            console.warn(
+                "method=retry invocation failed, retrying with remaining retries %d",
+                remainingRetries
+            );
+            if (retryPredicate(error)) {
+                retryCount++;
+                const milliseconds = timeoutBetweenRetries(retryCount);
+                if (milliseconds > 0) {
+                    await new Promise((resolve) =>
+                        setTimeout(resolve, milliseconds)
+                    );
+                }
+                return inner(
+                    asyncFn,
+                    retries,
+                    logError,
+                    timeoutBetweenRetries,
+                    retryPredicate
+                );
+            } else {
+                throw new Error("Retry predicate failed");
+            }
         }
-    }
+    })(asyncFn, retries, logError, timeoutBetweenRetries, retryPredicate);
 }
 
 const retryStatusCodes = new Set([
-    // 403 näyttää tulevan aina sillon tällön ilman mitään ilmeistä syytä
+    // service might return 403 for no apparent reason
     403,
-    // Opensearch ainakin huutaa 429, jos tekee liian monta kyselyä liian nopeasti
+    // Opensearch responds 429, if you make too many requests too fast
     429,
 ]);
 
