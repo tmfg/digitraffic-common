@@ -14,7 +14,7 @@ function noTimeout(retryCount: number): number {
 }
 
 function exponentialTimeout(retryCount: number): number {
-    return 2 ** retryCount;
+    return 2 ** retryCount * 1000;
 }
 
 function alwaysRetry(error: unknown): boolean {
