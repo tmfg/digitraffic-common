@@ -67,13 +67,13 @@ export async function retry<T>(
 ): Promise<T> {
     retryCount = 0;
 
-    return (async function inner(
+    const inner = async (
         asyncFn: () => Promise<T>,
-        retries,
-        logError,
+        retries: number,
+        logError: RetryLogError,
         timeoutBetweenRetries: TimeoutFn,
         retryPredicate: RetryPredicate
-    ): Promise<T> {
+    ): Promise<T> => {
         if (!isFinite(retries)) {
             throw new Error("Only finite numbers are supported");
         }
@@ -126,7 +126,15 @@ export async function retry<T>(
                 throw new Error("Retry predicate failed");
             }
         }
-    })(asyncFn, retries, logError, timeoutBetweenRetries, retryPredicate);
+    };
+
+    return inner(
+        asyncFn,
+        retries,
+        logError,
+        timeoutBetweenRetries,
+        retryPredicate
+    );
 }
 
 function wrapArgsToFn<T>(
