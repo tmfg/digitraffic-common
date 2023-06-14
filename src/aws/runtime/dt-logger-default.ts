@@ -1,3 +1,5 @@
+// eslint-disable-next-line
+// @ts-ignore TS1371
 import { DtLogger } from "./dt-logger";
 
 /**

@@ -159,6 +159,10 @@ export async function retry<T>(
 ): Promise<T> {
     retryCount = 0;
 
+    logger.debug({
+        message: `Retrying with ${retries} retries`,
+        method: "retry.retry",
+    });
     return retryRecursive(
         asyncFn,
         retries,
