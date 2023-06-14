@@ -1,4 +1,6 @@
 import { HttpError } from "../types/http-error";
+import { AsyncTimeoutError } from "../types/async-timeout-error";
+import { logger } from "../aws/runtime/dt-logger-default";
 
 export enum RetryLogError {
     LOG_ALL_AS_ERRORS,
@@ -6,8 +8,8 @@ export enum RetryLogError {
     NO_LOGGING,
 }
 
-type TimeoutFn = (retryCount: number) => number;
-type RetryPredicate = (error: unknown) => boolean;
+export type TimeoutFn = (retryCount: number) => number;
+export type RetryPredicate = (error: unknown) => boolean;
 
 /**
  * Utility timeout functions for "retry" function.
@@ -46,8 +48,98 @@ export const retryPredicates = (function () {
     };
 })();
 
+function readPossibleErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+        return error.message;
+    }
+    return "Something else than an Error object was thrown";
+}
+
 // Tämä muuttuja on testejä varten määritelty täällä.
 export let retryCount = 0;
+
+async function retryRecursive<T>(
+    asyncFn: () => Promise<T>,
+    retries: number,
+    logError: RetryLogError,
+    timeoutBetweenRetries: TimeoutFn,
+    retryPredicate: RetryPredicate
+): Promise<T> {
+    const asyncFnTimeout = 30 * 60 * 1000; // 30 minutes
+    if (!isFinite(retries)) {
+        throw new Error("Only finite numbers are supported");
+    }
+    if (retries > 100) {
+        throw new Error("Exceeded the maximum retry count of 100");
+    }
+    try {
+        // NOTE, a Promise cannot be cancelled. So if the asyncFn calls multiple async/await paris and the first one takes 31 minutes to complete,
+        // then the rest of async/await pairs will be called even though AysncTimeoutError is allready thrown.
+        const result: T = await Promise.race([
+            asyncFn(),
+            new Promise<never>((_, reject) =>
+                setTimeout(
+                    () => reject(new AsyncTimeoutError()),
+                    asyncFnTimeout
+                )
+            ),
+        ]);
+        return result;
+    } catch (error) {
+        const remainingRetries = retries - 1;
+
+        if (logError === RetryLogError.LOG_ALL_AS_ERRORS) {
+            logger.error({
+                message: readPossibleErrorMessage(error),
+                method: "retry.retryRecursive",
+            });
+        } else if (
+            logError === RetryLogError.LOG_LAST_RETRY_AS_ERROR_OTHERS_AS_WARNS
+        ) {
+            if (remainingRetries < 0) {
+                logger.error({
+                    message: readPossibleErrorMessage(error),
+                    method: "retry.retryRecursive",
+                });
+            } else {
+                logger.warn({
+                    message: readPossibleErrorMessage(error),
+                    method: "retry.retryRecursive",
+                });
+            }
+        }
+
+        if (remainingRetries < 0) {
+            logger.warn({
+                message: "No retries left",
+                method: "retry.retryRecursive",
+            });
+            throw new Error("No retries left");
+        }
+        logger.warn({
+            message: `Retrying with remaining retries ${remainingRetries}`,
+            method: "retry.retryRecursive",
+        });
+        if (retryPredicate(error)) {
+            retryCount++;
+            const milliseconds = timeoutBetweenRetries(retryCount);
+            if (milliseconds > 0) {
+                await new Promise((resolve) =>
+                    setTimeout(resolve, milliseconds)
+                );
+            }
+            return retryRecursive(
+                asyncFn,
+                retries,
+                logError,
+                timeoutBetweenRetries,
+                retryPredicate
+            );
+        } else {
+            throw new Error("Retry predicate failed");
+        }
+    }
+}
 
 /**
  * Utility function for retrying async functions.
@@ -67,68 +159,7 @@ export async function retry<T>(
 ): Promise<T> {
     retryCount = 0;
 
-    const inner = async (
-        asyncFn: () => Promise<T>,
-        retries: number,
-        logError: RetryLogError,
-        timeoutBetweenRetries: TimeoutFn,
-        retryPredicate: RetryPredicate
-    ): Promise<T> => {
-        if (!isFinite(retries)) {
-            throw new Error("Only finite numbers are supported");
-        }
-        if (retries > 100) {
-            throw new Error("Exceeded the maximum retry count of 100");
-        }
-        try {
-            return await asyncFn();
-        } catch (error) {
-            const remainingRetries = retries - 1;
-
-            const errorMessage = "method=retry error";
-            if (logError === RetryLogError.LOG_ALL_AS_ERRORS) {
-                console.error(errorMessage, error);
-            } else if (
-                logError ===
-                RetryLogError.LOG_LAST_RETRY_AS_ERROR_OTHERS_AS_WARNS
-            ) {
-                if (remainingRetries < 0) {
-                    console.error(errorMessage, error);
-                } else {
-                    console.warn(errorMessage, error);
-                }
-            }
-
-            if (remainingRetries < 0) {
-                console.warn("method=retry no retries left");
-                throw new Error("No retries left");
-            }
-            console.warn(
-                "method=retry invocation failed, retrying with remaining retries %d",
-                remainingRetries
-            );
-            if (retryPredicate(error)) {
-                retryCount++;
-                const milliseconds = timeoutBetweenRetries(retryCount);
-                if (milliseconds > 0) {
-                    await new Promise((resolve) =>
-                        setTimeout(resolve, milliseconds)
-                    );
-                }
-                return inner(
-                    asyncFn,
-                    retries,
-                    logError,
-                    timeoutBetweenRetries,
-                    retryPredicate
-                );
-            } else {
-                throw new Error("Retry predicate failed");
-            }
-        }
-    };
-
-    return inner(
+    return retryRecursive(
         asyncFn,
         retries,
         logError,
