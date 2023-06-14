@@ -9,17 +9,42 @@ export enum RetryLogError {
 type TimeoutFn = (retryCount: number) => number;
 type RetryPredicate = (error: unknown) => boolean;
 
-function noTimeout(retryCount: number): number {
-    return 0;
-}
+/**
+ * Utility timeout functions for "retry" function.
+ */
+export const timeoutFunctions = (function () {
+    return {
+        noTimeout: (retryCount: number): number => {
+            return 0;
+        },
+        exponentialTimeout: (retryCount: number): number => {
+            return 2 ** retryCount * 1000;
+        },
+    };
+})();
 
-function exponentialTimeout(retryCount: number): number {
-    return 2 ** retryCount * 1000;
-}
-
-function alwaysRetry(error: unknown): boolean {
-    return true;
-}
+/**
+ * Utility retry predicates for "retry" function.
+ */
+export const retryPredicates = (function () {
+    const retryStatusCodes = new Set([
+        // service might return 403 for no apparent reason
+        403,
+        // Opensearch responds 429, if you make too many requests too fast
+        429,
+    ]);
+    return {
+        retryBasedOnStatusCode: (error: unknown): boolean => {
+            if (error instanceof HttpError) {
+                return retryStatusCodes.has(error.statusCode);
+            }
+            return false;
+        },
+        alwaysRetry: (error: unknown): boolean => {
+            return true;
+        },
+    };
+})();
 
 // Tämä muuttuja on testejä varten määritelty täällä.
 export let retryCount = 0;
@@ -37,8 +62,8 @@ export async function retry<T>(
     asyncFn: () => Promise<T>,
     retries = 3,
     logError = RetryLogError.LOG_LAST_RETRY_AS_ERROR_OTHERS_AS_WARNS,
-    timeoutBetweenRetries: TimeoutFn = noTimeout,
-    retryPredicate: RetryPredicate = alwaysRetry
+    timeoutBetweenRetries: TimeoutFn = timeoutFunctions.noTimeout,
+    retryPredicate: RetryPredicate = retryPredicates.alwaysRetry
 ): Promise<T> {
     retryCount = 0;
 
@@ -47,7 +72,7 @@ export async function retry<T>(
         retries,
         logError,
         timeoutBetweenRetries: TimeoutFn,
-        retryPredicate: RetryPredicate = alwaysRetry
+        retryPredicate: RetryPredicate
     ): Promise<T> {
         if (!isFinite(retries)) {
             throw new Error("Only finite numbers are supported");
@@ -104,20 +129,6 @@ export async function retry<T>(
     })(asyncFn, retries, logError, timeoutBetweenRetries, retryPredicate);
 }
 
-const retryStatusCodes = new Set([
-    // service might return 403 for no apparent reason
-    403,
-    // Opensearch responds 429, if you make too many requests too fast
-    429,
-]);
-
-function retryBasedOnStatusCode(error: unknown): boolean {
-    if (error instanceof HttpError) {
-        return retryStatusCodes.has(error.statusCode);
-    }
-    return false;
-}
-
 function wrapArgsToFn<T>(
     fn: (...args: unknown[]) => Promise<T>,
     ...args: unknown[]
@@ -134,7 +145,7 @@ export async function retryRequest<T>(
         asyncFn,
         5,
         RetryLogError.LOG_LAST_RETRY_AS_ERROR_OTHERS_AS_WARNS,
-        exponentialTimeout,
-        retryBasedOnStatusCode
+        timeoutFunctions.exponentialTimeout,
+        retryPredicates.retryBasedOnStatusCode
     );
 }
