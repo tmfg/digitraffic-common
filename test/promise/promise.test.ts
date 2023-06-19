@@ -1,5 +1,6 @@
 import { getRandomInteger } from "../../src/test/testutils";
 import { retry, RetryLogError } from "../../src/utils/retry";
+import { logger } from "../../src/aws/runtime/dt-logger-default";
 
 describe("Promise utils tests", () => {
     test("retry - no retries", async () => {
@@ -37,7 +38,7 @@ describe("Promise utils tests", () => {
     test("retry - errors with no error logging", async () => {
         const fn = jest.fn().mockRejectedValue("error");
         const consoleErrorSpy = jest
-            .spyOn(global.console, "error")
+            .spyOn(logger, "error")
             .mockImplementation();
 
         try {
@@ -53,7 +54,7 @@ describe("Promise utils tests", () => {
     test("retry - no retries with error logging", async () => {
         const fn = jest.fn().mockRejectedValue("error");
         const consoleErrorSpy = jest
-            .spyOn(global.console, "error")
+            .spyOn(logger, "error")
             .mockImplementation();
 
         try {
@@ -70,7 +71,7 @@ describe("Promise utils tests", () => {
         const fn = jest.fn().mockRejectedValue("error");
         const retries = getRandomInteger(1, 10);
         const consoleErrorSpy = jest
-            .spyOn(global.console, "error")
+            .spyOn(logger, "error")
             .mockImplementation();
 
         try {
@@ -94,7 +95,7 @@ describe("Promise utils tests", () => {
     test("retry - defaults", async () => {
         const fn = jest.fn().mockRejectedValue("error");
         const consoleErrorSpy = jest
-            .spyOn(global.console, "error")
+            .spyOn(logger, "error")
             .mockImplementation();
 
         try {

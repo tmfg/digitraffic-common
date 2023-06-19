@@ -61,6 +61,7 @@ export let retryCount = 0;
 async function retryRecursive<T>(
     asyncFn: () => Promise<T>,
     retries: number,
+    retryCountInj: number,
     logError: RetryLogError,
     timeoutBetweenRetries: TimeoutFn,
     retryPredicate: RetryPredicate
@@ -121,8 +122,9 @@ async function retryRecursive<T>(
             method: "retry.retryRecursive",
         });
         if (retryPredicate(error)) {
-            retryCount++;
-            const milliseconds = timeoutBetweenRetries(retryCount);
+            retryCountInj++;
+            retryCount = retryCountInj;
+            const milliseconds = timeoutBetweenRetries(retryCountInj);
             if (milliseconds > 0) {
                 await new Promise((resolve) =>
                     setTimeout(resolve, milliseconds)
@@ -130,7 +132,8 @@ async function retryRecursive<T>(
             }
             return retryRecursive(
                 asyncFn,
-                retries,
+                remainingRetries,
+                retryCountInj,
                 logError,
                 timeoutBetweenRetries,
                 retryPredicate
@@ -166,6 +169,7 @@ export async function retry<T>(
     return retryRecursive(
         asyncFn,
         retries,
+        0,
         logError,
         timeoutBetweenRetries,
         retryPredicate
