@@ -176,7 +176,7 @@ function wrapArgsToFn<T>(
     fn: (...args: unknown[]) => Promise<T>,
     ...args: unknown[]
 ): () => Promise<T> {
-    return () => fn(...args);
+    return async () => await fn(...args);
 }
 
 export async function retryRequest<T>(
