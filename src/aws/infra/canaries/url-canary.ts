@@ -1,21 +1,22 @@
-import { Construct } from "constructs";
-import { CanaryParameters } from "./canary-parameters";
 import { Role } from "aws-cdk-lib/aws-iam";
-import { DigitrafficCanary } from "./canary";
 import { ISecret } from "aws-cdk-lib/aws-secretsmanager";
-import { DigitrafficStack } from "../stack/stack";
+import { CfnCanary } from "aws-cdk-lib/aws-synthetics";
 import { LambdaEnvironment } from "../stack/lambda-configs";
 import { DigitrafficRestApi } from "../stack/rest_apis";
+import { DigitrafficStack } from "../stack/stack";
+import { DigitrafficCanary } from "./canary";
 import { ENV_API_KEY, ENV_HOSTNAME, ENV_SECRET } from "./canary-keys";
+import { CanaryParameters } from "./canary-parameters";
 
 export interface UrlCanaryParameters extends CanaryParameters {
     readonly hostname: string;
     readonly apiKeyId?: string;
+    readonly inVpc?: boolean;
 }
 
 export class UrlCanary extends DigitrafficCanary {
     constructor(
-        stack: Construct,
+        stack: DigitrafficStack,
         role: Role,
         params: UrlCanaryParameters,
         secret?: ISecret
@@ -38,23 +39,47 @@ export class UrlCanary extends DigitrafficCanary {
 
         // the handler code is defined at the actual project using this
         super(stack, canaryName, role, params, environmentVariables);
+
+        if (params.inVpc && this.node.defaultChild instanceof CfnCanary) {
+            const subnetIds =
+                stack.vpc === undefined
+                    ? []
+                    : stack.vpc.privateSubnets.map((subnet) => subnet.subnetId);
+
+            const securityGroupIds =
+                stack.lambdaDbSg === undefined
+                    ? []
+                    : [stack.lambdaDbSg.securityGroupId];
+
+            this.node.defaultChild.vpcConfig = {
+                vpcId: stack.vpc?.vpcId,
+                securityGroupIds,
+                subnetIds,
+            };
+        }
     }
 
     static create(
         stack: DigitrafficStack,
         role: Role,
         publicApi: DigitrafficRestApi,
-        params: Partial<UrlCanaryParameters>
+        params: Partial<UrlCanaryParameters>,
+        secret?: ISecret
     ): UrlCanary {
-        return new UrlCanary(stack, role, {
-            ...{
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                handler: `${params.name!}.handler`,
-                hostname: publicApi.hostname(),
-                apiKeyId: this.getApiKey(publicApi),
-            },
-            ...params,
-        } as UrlCanaryParameters);
+        return new UrlCanary(
+            stack,
+            role,
+            {
+                ...{
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    handler: `${params.name!}.handler`,
+                    hostname: publicApi.hostname(),
+                    apiKeyId: this.getApiKey(publicApi),
+                },
+                ...params,
+            } as UrlCanaryParameters,
+            secret
+        );
     }
 
     static getApiKey(publicApi: DigitrafficRestApi): string | undefined {

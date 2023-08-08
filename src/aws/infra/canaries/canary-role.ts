@@ -54,4 +54,13 @@ export class DigitrafficCanaryRole extends Role {
         );
         return this;
     }
+
+    withVpcAccess(): this {
+        this.addManagedPolicy(
+            ManagedPolicy.fromAwsManagedPolicyName(
+                "service-role/AWSLambdaVPCAccessExecutionRole"
+            )
+        );
+        return this;
+    }
 }
