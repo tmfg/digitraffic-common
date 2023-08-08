@@ -21,7 +21,7 @@ export class DigitrafficCanary extends Canary {
         environmentVariables: LambdaEnvironment
     ) {
         super(scope, canaryName, {
-            runtime: Runtime.SYNTHETICS_NODEJS_PUPPETEER_3_8,
+            runtime: Runtime.SYNTHETICS_NODEJS_PUPPETEER_4_0,
             role,
             test: Test.custom({
                 code: new AssetCode("dist", {
