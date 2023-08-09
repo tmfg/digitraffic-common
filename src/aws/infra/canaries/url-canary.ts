@@ -10,7 +10,7 @@ import { CanaryParameters } from "./canary-parameters";
 
 export interface UrlCanaryParameters extends CanaryParameters {
     readonly hostname: string;
-    readonly apiKeyId?: string;
+    readonly apiKeyId: string;
     readonly inVpc?: boolean;
 }
 
@@ -70,12 +70,10 @@ export class UrlCanary extends DigitrafficCanary {
             stack,
             role,
             {
-                ...{
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    handler: `${params.name!}.handler`,
-                    hostname: publicApi.hostname(),
-                    apiKeyId: this.getApiKey(publicApi),
-                },
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                handler: `${params.name!}.handler`,
+                hostname: publicApi.hostname(),
+                apiKeyId: this.getApiKey(publicApi),
                 ...params,
             } as UrlCanaryParameters,
             secret

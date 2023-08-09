@@ -43,6 +43,9 @@ export class DigitrafficCanaryRole extends Role {
         this.addToPolicy(new PolicyStatement(CLOUDWATCH_STATEMENT_PROPS));
     }
 
+    /**
+     * Provides permissions to access resources within a VPC.
+     */
     withDatabaseAccess(): this {
         // Won't work :(
         // this.addToPolicy(new PolicyStatement(DB_STATEMENT_PROPS));
@@ -55,6 +58,10 @@ export class DigitrafficCanaryRole extends Role {
         return this;
     }
 
+    /**
+     * Same as withDatabaseAccess() - renamed to avoid confusion if used with UrlCanary.
+     * A UrlCanary needs these permissions to e.g. access a private API Gateway endpoint in a VPC.
+     */
     withVpcAccess(): this {
         this.addManagedPolicy(
             ManagedPolicy.fromAwsManagedPolicyName(
