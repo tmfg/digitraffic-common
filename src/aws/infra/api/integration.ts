@@ -7,7 +7,7 @@ import { IFunction } from "aws-cdk-lib/aws-lambda";
 import { MediaType } from "../../types/mediatypes";
 import { DigitrafficIntegrationResponse } from "../../runtime/digitraffic-integration-response";
 
-type ParameterType = "path" | "querystring" | "context";
+type ParameterType = "path" | "querystring" | "context" | "header";
 
 interface ApiParameter {
     type: ParameterType;
@@ -40,14 +40,30 @@ export class DigitrafficIntegration {
         names.forEach((name) =>
             this.parameters.push({ type: "querystring", name })
         );
-
         return this;
     }
 
+    /**
+     * Note that context parameter values needs to be in json format as they will be parsed in template as json.
+     * See createRequestTemplates below.
+     * @param names for the parameters
+     * @returns
+     */
     addContextParameter(...names: string[]): this {
         names.forEach((name) =>
             this.parameters.push({ type: "context", name })
         );
+
+        return this;
+    }
+
+    /**
+     * Do not use Authorization header as that will be consumed by ApiGW.
+     * If Authorization header is needed, use lambda authorizers.
+     * @param names for the headers
+     */
+    addHeaderParameter(...names: string[]): this {
+        names.forEach((name) => this.parameters.push({ type: "header", name }));
 
         return this;
     }
