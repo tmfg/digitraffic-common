@@ -1,28 +1,30 @@
 import {
-    RestApi,
-    MethodLoggingLevel,
-    GatewayResponse,
-    ResponseType,
-    EndpointType,
-    RestApiProps,
-    JsonSchema,
-    Model,
     CfnDocumentationPart,
+    EndpointType,
+    GatewayResponse,
+    IResource,
+    JsonSchema,
+    MethodLoggingLevel,
+    MockIntegration,
+    Model,
     Resource,
+    ResponseType,
+    RestApi,
+    RestApiProps,
 } from "aws-cdk-lib/aws-apigateway";
 import {
+    AnyPrincipal,
+    Effect,
     PolicyDocument,
     PolicyStatement,
-    Effect,
-    AnyPrincipal,
 } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
-import { DigitrafficStack } from "./stack";
-import { createDefaultUsagePlan, createUsagePlan } from "../usage-plans";
-import { ModelWithReference } from "../../types/model-with-reference";
 import { getModelReference } from "../../../utils/api-model";
 import { MediaType } from "../../types/mediatypes";
+import { ModelWithReference } from "../../types/model-with-reference";
 import { DocumentationPart, DocumentationProperties } from "../documentation";
+import { createDefaultUsagePlan, createUsagePlan } from "../usage-plans";
+import { DigitrafficStack } from "./stack";
 
 import R = require("ramda");
 
@@ -151,6 +153,50 @@ export class DigitrafficRestApi extends RestApi {
         } else {
             console.info("Skipping documentation for %s", resource.path);
         }
+    }
+
+    /**
+     * Add support for HTTP OPTIONS to an API GW resource,
+     * this is required for preflight CORS requests made by browsers.
+     * @param apiResource
+     */
+    addCorsOptions(apiResource: IResource): void {
+        apiResource.addMethod(
+            "OPTIONS",
+            new MockIntegration({
+                integrationResponses: [
+                    {
+                        statusCode: "200",
+                        responseParameters: {
+                            "method.response.header.Access-Control-Allow-Headers":
+                                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Digitraffic-User'",
+                            "method.response.header.Access-Control-Allow-Origin":
+                                "'*'",
+                            "method.response.header.Access-Control-Allow-Methods":
+                                "'OPTIONS,GET,HEAD'",
+                        },
+                    },
+                ],
+                requestTemplates: {
+                    "application/json": '{"statusCode": 200}',
+                },
+            }),
+            {
+                methodResponses: [
+                    {
+                        statusCode: "200",
+                        responseParameters: {
+                            "method.response.header.Access-Control-Allow-Headers":
+                                true,
+                            "method.response.header.Access-Control-Allow-Methods":
+                                true,
+                            "method.response.header.Access-Control-Allow-Origin":
+                                true,
+                        },
+                    },
+                ],
+            }
+        );
     }
 }
 
