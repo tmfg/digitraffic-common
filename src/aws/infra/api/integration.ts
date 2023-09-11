@@ -7,7 +7,12 @@ import { IFunction } from "aws-cdk-lib/aws-lambda";
 import { MediaType } from "../../types/mediatypes";
 import { DigitrafficIntegrationResponse } from "../../runtime/digitraffic-integration-response";
 
-type ParameterType = "path" | "querystring" | "context" | "header";
+type ParameterType =
+    | "path"
+    | "querystring"
+    | "multivaluequerystring"
+    | "context"
+    | "header";
 
 interface ApiParameter {
     type: ParameterType;
@@ -39,6 +44,13 @@ export class DigitrafficIntegration {
     addQueryParameter(...names: string[]): this {
         names.forEach((name) =>
             this.parameters.push({ type: "querystring", name })
+        );
+        return this;
+    }
+
+    addMultiValueQueryParameter(...names: string[]): this {
+        names.forEach((name) =>
+            this.parameters.push({ type: "multivaluequerystring", name })
         );
         return this;
     }
@@ -94,7 +106,10 @@ export class DigitrafficIntegration {
             .filter((parameter) => parameter.type !== "context")
             .forEach((parameter: ApiParameter) => {
                 requestParameters[
-                    `integration.request.${parameter.type}.${parameter.name}`
+                    `integration.request.${parameter.type.replace(
+                        "multivaluequerystring",
+                        "querystring"
+                    )}.${parameter.name}`
                 ] = `method.request.${parameter.type}.${parameter.name}`;
             });
 
@@ -109,6 +124,11 @@ export class DigitrafficIntegration {
                 requestJson[
                     parameter.name
                 ] = `$util.parseJson($context.${parameter.name})`;
+            } else if (parameter.type === "multivaluequerystring") {
+                // make multivaluequerystring values to array
+                requestJson[
+                    parameter.name
+                ] = `[#foreach($val in $method.request.multivaluequerystring.get('${parameter.name}'))"$util.escapeJavaScript($val)"#if($foreach.hasNext),#end#end]`;
             } else {
                 requestJson[
                     parameter.name
