@@ -1,5 +1,3 @@
-import { Duration, Stack } from "aws-cdk-lib";
-import { Construct } from "constructs";
 import {
     CfnDBProxyEndpoint,
     DatabaseCluster,
@@ -10,29 +8,40 @@ import {
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { IVpc, SecurityGroup } from "aws-cdk-lib/aws-ec2";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
-import { DbConfiguration, DbStack } from "./db-stack";
-import { exportValue, importValue, importVpc } from "../import-util";
+import { DbStack } from "./db-stack";
+import { importVpc } from "../import-util";
+import { createParameter } from "../stack/parameters";
+import { Stack, Duration } from "aws-cdk-lib/core";
+import { Construct } from "constructs/lib/construct";
+
+export interface ProxyConfiguration {
+    readonly secretArn: string;
+    readonly name?: string;
+    readonly securityGroupId: string;
+    readonly clusterIdentifier: string;
+}
 
 /**
  * A stack that creates a Database proxy.
  */
 export class DbProxyStack extends Stack {
-    public static PROXY_READER_EXPORT_NAME = "db-reader-endpoint";
-    public static PROXY_WRITER_EXPORT_NAME = "db-writer-endpoint";
-
     readonly isc: InfraStackConfiguration;
 
     constructor(
         scope: Construct,
         id: string,
         isc: InfraStackConfiguration,
-        configuration: DbConfiguration
+        configuration: ProxyConfiguration
     ) {
         super(scope, id, {
             env: isc.env,
         });
 
         this.isc = isc;
+
+        if (configuration.clusterIdentifier === "") {
+            throw new Error("Empty cluster identifier!");
+        }
 
         const vpc = importVpc(this, isc.environmentName);
         const secret = Secret.fromSecretAttributes(this, "proxy-secret", {
@@ -43,27 +52,26 @@ export class DbProxyStack extends Stack {
         const readerEndpoint = this.createProxyEndpoints(
             vpc,
             proxy,
-            configuration.proxy.securityGroupId
+            configuration.securityGroupId
         );
-        this.setOutputs(configuration, proxy, readerEndpoint);
+
+        createParameter(this, "proxy.reader", readerEndpoint.attrEndpoint);
+        createParameter(this, "proxy.writer", proxy.endpoint);
     }
 
-    createProxy(vpc: IVpc, secret: ISecret, configuration: DbConfiguration) {
+    createProxy(vpc: IVpc, secret: ISecret, configuration: ProxyConfiguration) {
         const proxyId = `${this.isc.environmentName}-proxy`;
         const securityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             "securitygroup",
-            configuration.proxy.securityGroupId
+            configuration.securityGroupId
         );
 
         const cluster = DatabaseCluster.fromDatabaseClusterAttributes(
             this,
             "db-cluster",
             {
-                clusterIdentifier: importValue(
-                    this.isc.environmentName,
-                    DbStack.CLUSTER_IDENTIFIER_EXPORT_NAME
-                ),
+                clusterIdentifier: configuration.clusterIdentifier,
                 engine: DatabaseClusterEngine.AURORA_POSTGRESQL,
                 port: DbStack.CLUSTER_PORT,
             }
@@ -76,7 +84,7 @@ export class DbProxyStack extends Stack {
         };
 
         return new DatabaseProxy(this, proxyId, {
-            dbProxyName: configuration.proxy.name ?? "AuroraProxy",
+            dbProxyName: configuration.name ?? "AuroraProxy",
             securityGroups: [securityGroup],
             proxyTarget: ProxyTarget.fromCluster(cluster),
             idleClientTimeout: Duration.seconds(1800),
@@ -101,30 +109,5 @@ export class DbProxyStack extends Stack {
             vpcSecurityGroupIds: [securityGroupId],
             targetRole: "READ_ONLY",
         });
-    }
-
-    setOutputs(
-        configuration: DbConfiguration,
-        proxy: DatabaseProxy,
-        proxyEndpoint: CfnDBProxyEndpoint
-    ) {
-        const readerEndpoint =
-            configuration.instances > 1
-                ? proxyEndpoint.attrEndpoint
-                : proxy.endpoint;
-
-        // if only one instance, then there is no reader-endpoint
-        exportValue(
-            this,
-            this.isc.environmentName,
-            DbProxyStack.PROXY_READER_EXPORT_NAME,
-            readerEndpoint
-        );
-        exportValue(
-            this,
-            this.isc.environmentName,
-            DbProxyStack.PROXY_WRITER_EXPORT_NAME,
-            proxy.endpoint
-        );
     }
 }

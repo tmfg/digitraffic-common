@@ -1,5 +1,5 @@
 import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib";
-import { Construct } from "constructs";
+import { Construct } from "constructs/lib/construct";
 import {
     PrivateHostedZone,
     RecordSet,
@@ -7,9 +7,8 @@ import {
     RecordType,
 } from "aws-cdk-lib/aws-route53";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
-import { importValue, importVpc } from "../import-util";
-import { DbStack } from "./db-stack";
-import { DbProxyStack } from "./db-proxy-stack";
+import { importVpc } from "../import-util";
+import { getParameterValue } from "../stack/parameters";
 
 const DEFAULT_RECORD_TTL = Duration.seconds(30);
 
@@ -37,23 +36,11 @@ export class DbDnsStack extends Stack {
 
         zone.applyRemovalPolicy(RemovalPolicy.RETAIN);
 
-        const clusterReaderEndpoint = importValue(
-            isc.environmentName,
-            DbStack.CLUSTER_READ_ENDPOINT_EXPORT_NAME
-        );
-        const clusterWriterEndpoint = importValue(
-            isc.environmentName,
-            DbStack.CLUSTER_WRITE_ENDPOINT_EXPORT_NAME
-        );
+        const clusterReaderEndpoint = getParameterValue(this, "cluster.reader");
+        const clusterWriterEndpoint = getParameterValue(this, "cluster.writer");
 
-        const proxyReaderEndpoint = importValue(
-            isc.environmentName,
-            DbProxyStack.PROXY_READER_EXPORT_NAME
-        );
-        const proxyWriterEndpoint = importValue(
-            isc.environmentName,
-            DbProxyStack.PROXY_WRITER_EXPORT_NAME
-        );
+        const proxyReaderEndpoint = getParameterValue(this, "proxy.reader");
+        const proxyWriterEndpoint = getParameterValue(this, "proxy.writer");
 
         new RecordSet(this, "ReaderRecord", {
             recordType: RecordType.CNAME,

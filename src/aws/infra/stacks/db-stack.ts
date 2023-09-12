@@ -1,10 +1,8 @@
-import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib";
 import {
     InstanceType,
     IVpc,
     SecurityGroup,
     SubnetType,
-    Vpc,
 } from "aws-cdk-lib/aws-ec2";
 import { ISecurityGroup } from "aws-cdk-lib/aws-ec2/lib/security-group";
 import {
@@ -19,30 +17,34 @@ import {
     IParameterGroup,
     ParameterGroup,
 } from "aws-cdk-lib/aws-rds";
-import { Construct } from "constructs";
+import { Construct } from "constructs/lib/construct";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
 import { exportValue, importVpc } from "../import-util";
+import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib/core";
+import { createParameter } from "../stack/parameters";
 
 export interface DbConfiguration {
+    readonly cluster?: ClusterConfiguration;
+    readonly customParameterGroups: AuroraPostgresEngineVersion[];
+    readonly workmem?: number; // default 524288, 512MiB
+
     /** superuser username and password are fetched from this secret, using keys
      * db.superuser and db.superuser.password
      */
     readonly secretArn: string;
 
-    readonly dbVersion: AuroraPostgresEngineVersion;
+    /** If this is not specified, import default vpc */
+    readonly vpc?: IVpc;
+}
+
+export interface ClusterConfiguration {
+    readonly securityGroupId: string;
     readonly dbInstanceType: InstanceType;
     readonly snapshotIdentifier?: string;
     readonly instances: number;
-    readonly customParameterGroup: boolean;
-    readonly securityGroupId: string;
-    /** If this is not specified, import default vpc */
-    readonly vpc?: IVpc;
-
-    readonly proxy: {
-        readonly name?: string;
-        readonly securityGroupId: string;
-    };
+    readonly dbVersion: AuroraPostgresEngineVersion;
+    readonly storageEncrypted?: boolean; /// default true
 }
 
 /**
@@ -51,22 +53,20 @@ export interface DbConfiguration {
  * Please not, that created Cluster has RETAIL removalPolicy, so if you want to delete the stack,
  * you must first deploy without parameter group, then delete stack and manually delete cluster.
  *
- * How to upgrade major version?
- * 0. Set correct SG for db-stack and db-proxy-stack(this step will be removed in the future)
- * 1. Update db-stack WITHOUT parameter group
- * 2. Upgrade extensions by hand
- * 3. Upgrade database from the AWS console
- * 4. Update db-stack with the upgraded version and custom parameter group
+ * You should deploy once with cluster and then without.  This way you can create the cluster with this
+ * stack, but cluster is not part of the stack after that.
  */
 
 export class DbStack extends Stack {
+    public static CLUSTER_PORT = 5432;
+
     public static CLUSTER_IDENTIFIER_EXPORT_NAME = "db-cluster";
     public static CLUSTER_READ_ENDPOINT_EXPORT_NAME =
         "db-cluster-reader-endpoint";
     public static CLUSTER_WRITE_ENDPOINT_EXPORT_NAME =
         "db-cluster-writer-endpoint";
 
-    public static CLUSTER_PORT = 5432;
+    public clusterIdentifier = "";
 
     constructor(
         scope: Construct,
@@ -78,53 +78,87 @@ export class DbStack extends Stack {
             env: isc.env,
         });
 
-        const cluster = this.createAuroraCluster(isc, configuration);
+        const parameterGroups = this.createParamaterGroups(
+            configuration.customParameterGroups,
+            configuration.workmem ?? 524288
+        );
 
-        exportValue(
-            this,
-            isc.environmentName,
-            DbStack.CLUSTER_IDENTIFIER_EXPORT_NAME,
-            cluster.clusterIdentifier
-        );
-        exportValue(
-            this,
-            isc.environmentName,
-            DbStack.CLUSTER_WRITE_ENDPOINT_EXPORT_NAME,
-            cluster.clusterEndpoint.hostname
-        );
-        exportValue(
-            this,
-            isc.environmentName,
-            DbStack.CLUSTER_READ_ENDPOINT_EXPORT_NAME,
-            cluster.clusterReadEndpoint.hostname
-        );
+        // create cluster if this is wanted, should do it only once
+        if (configuration.cluster) {
+            const cluster = this.createAuroraCluster(
+                isc,
+                configuration,
+                configuration.cluster,
+                parameterGroups
+            );
+
+            exportValue(
+                this,
+                isc.environmentName,
+                DbStack.CLUSTER_IDENTIFIER_EXPORT_NAME,
+                cluster.clusterIdentifier
+            );
+
+            exportValue(
+                this,
+                isc.environmentName,
+                DbStack.CLUSTER_WRITE_ENDPOINT_EXPORT_NAME,
+                cluster.clusterEndpoint.hostname
+            );
+
+            exportValue(
+                this,
+                isc.environmentName,
+                DbStack.CLUSTER_READ_ENDPOINT_EXPORT_NAME,
+                cluster.clusterReadEndpoint.hostname
+            );
+
+            createParameter(
+                this,
+                "cluster.reader",
+                cluster.clusterReadEndpoint.hostname
+            );
+            createParameter(
+                this,
+                "cluster.writer",
+                cluster.clusterEndpoint.hostname
+            );
+            createParameter(
+                this,
+                "cluster.identifier",
+                cluster.clusterIdentifier
+            );
+
+            this.clusterIdentifier = cluster.clusterIdentifier;
+        }
     }
 
-    createParamaterGroup(configuration: DbConfiguration) {
-        return configuration.customParameterGroup
-            ? new ParameterGroup(
-                  this,
-                  `parameter-group-${configuration.dbVersion.auroraPostgresMajorVersion}`,
-                  {
-                      engine: DatabaseClusterEngine.auroraPostgres({
-                          version: configuration.dbVersion,
-                      }),
-                      parameters: {
-                          "pg_stat_statements.track": "ALL",
-                          random_page_cost: "1",
-                          work_mem: "524288", // 512 MiB
-                      },
-                  }
-              )
-            : ParameterGroup.fromParameterGroupName(
-                  this,
-                  "ParameterGroup",
-                  `default.aurora-postgresql${configuration.dbVersion.auroraPostgresMajorVersion}`
-              );
+    createParamaterGroups(
+        customVersions: AuroraPostgresEngineVersion[],
+        workmem: number
+    ): IParameterGroup[] {
+        return customVersions.map(
+            (version: AuroraPostgresEngineVersion) =>
+                new ParameterGroup(
+                    this,
+                    `parameter-group-${version.auroraPostgresMajorVersion}`,
+                    {
+                        engine: DatabaseClusterEngine.auroraPostgres({
+                            version,
+                        }),
+                        parameters: {
+                            "pg_stat_statements.track": "ALL",
+                            random_page_cost: "1",
+                            work_mem: workmem.toString(),
+                        },
+                    }
+                )
+        );
     }
 
     createClusterParameters(
-        configuration: DbConfiguration,
+        secretArn: string,
+        clusterConfiguration: ClusterConfiguration,
         instanceName: string,
         vpc: IVpc,
         securityGroup: ISecurityGroup,
@@ -133,14 +167,14 @@ export class DbStack extends Stack {
         const secret = Secret.fromSecretCompleteArn(
             this,
             "DBSecret",
-            configuration.secretArn
+            secretArn
         );
 
         return {
             engine: DatabaseClusterEngine.auroraPostgres({
-                version: configuration.dbVersion,
+                version: clusterConfiguration.dbVersion,
             }),
-            instances: configuration.instances,
+            instances: clusterConfiguration.instances,
             instanceUpdateBehaviour: InstanceUpdateBehaviour.ROLLING,
             instanceIdentifierBase: instanceName + "-",
             cloudwatchLogsExports: ["postgresql"],
@@ -161,7 +195,7 @@ export class DbStack extends Stack {
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
                 },
-                instanceType: configuration.dbInstanceType,
+                instanceType: clusterConfiguration.dbInstanceType,
                 parameterGroup,
             },
             credentials: Credentials.fromPassword(
@@ -169,39 +203,44 @@ export class DbStack extends Stack {
                 secret.secretValueFromJson("db.superuser.password")
             ),
             parameterGroup,
-            storageEncrypted: true,
+            //            storageEncrypted: clusterConfiguration.storageEncrypted ?? true,
             monitoringInterval: Duration.seconds(30),
         };
     }
 
     createAuroraCluster(
         isc: InfraStackConfiguration,
-        configuration: DbConfiguration
+        configuration: DbConfiguration,
+        clusterConfiguration: ClusterConfiguration,
+        parameterGroups: IParameterGroup[]
     ): DatabaseCluster {
         const instanceName = isc.environmentName + "-db";
         const securityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             "securitygroup",
-            configuration.securityGroupId
+            clusterConfiguration.securityGroupId
         );
-        const parameterGroup = this.createParamaterGroup(configuration);
         const vpc = configuration.vpc
             ? configuration.vpc
             : importVpc(this, isc.environmentName);
 
         const parameters = this.createClusterParameters(
-            configuration,
+            configuration.secretArn,
+            clusterConfiguration,
             instanceName,
             vpc,
             securityGroup,
-            parameterGroup
+            parameterGroups[0]
         );
 
         // create cluster from the snapshot or from the scratch
-        const cluster = configuration.snapshotIdentifier
+        const cluster = clusterConfiguration.snapshotIdentifier
             ? new DatabaseClusterFromSnapshot(this, instanceName, {
                   ...parameters,
-                  ...{ snapshotIdentifier: configuration.snapshotIdentifier },
+                  ...{
+                      snapshotIdentifier:
+                          clusterConfiguration.snapshotIdentifier,
+                  },
               })
             : new DatabaseCluster(this, instanceName, parameters);
 
@@ -215,8 +254,6 @@ export class DbStack extends Stack {
             );
         }
         cfnInstances.forEach((cfnInstance) => delete cfnInstance.engineVersion);
-
-        cluster.node.addDependency(parameterGroup);
 
         return cluster;
     }

@@ -3,7 +3,7 @@ import { CfnOutput, Fn, Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class OldStackImports {
-    public static AURORAINSTANCE_SG_IMPORT_NAME = "AuroraInstanceSG";
+    public static AURORAINSTANCE_SG_IMPORT_NAME = "AuroraSG";
     public static RDSPROXY_SG_IMPORT_NAME = "RDSProxySG";
 }
 
