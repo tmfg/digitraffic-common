@@ -9,7 +9,7 @@ import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { IVpc, SecurityGroup } from "aws-cdk-lib/aws-ec2";
 import { InfraStackConfiguration } from "./intra-stack-configuration";
 import { DbStack } from "./db-stack";
-import { importVpc } from "../import-util";
+import { exportValue, importVpc } from "../import-util";
 import { createParameter } from "../stack/parameters";
 import { Stack, Duration } from "aws-cdk-lib/core";
 import { Construct } from "constructs/lib/construct";
@@ -26,6 +26,9 @@ export interface ProxyConfiguration {
  */
 export class DbProxyStack extends Stack {
     readonly isc: InfraStackConfiguration;
+
+    public static PROXY_READER_EXPORT_NAME = "db-reader-endpoint";
+    public static PROXY_WRITER_EXPORT_NAME = "db-writer-endpoint";
 
     constructor(
         scope: Construct,
@@ -57,6 +60,24 @@ export class DbProxyStack extends Stack {
 
         createParameter(this, "proxy.reader", readerEndpoint.attrEndpoint);
         createParameter(this, "proxy.writer", proxy.endpoint);
+
+        this.setOutputs(proxy);
+    }
+
+    setOutputs(proxy: DatabaseProxy) {
+        // if only one instance, then there is no reader-endpoint
+        exportValue(
+            this,
+            this.isc.environmentName,
+            DbProxyStack.PROXY_READER_EXPORT_NAME,
+            proxy.endpoint
+        );
+        exportValue(
+            this,
+            this.isc.environmentName,
+            DbProxyStack.PROXY_WRITER_EXPORT_NAME,
+            proxy.endpoint
+        );
     }
 
     createProxy(vpc: IVpc, secret: ISecret, configuration: ProxyConfiguration) {

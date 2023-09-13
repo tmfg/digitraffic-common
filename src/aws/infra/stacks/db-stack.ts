@@ -26,6 +26,8 @@ import { createParameter } from "../stack/parameters";
 
 export interface DbConfiguration {
     readonly cluster?: ClusterConfiguration;
+    readonly clusterImport?: ClusterImportConfiguration;
+
     readonly customParameterGroups: AuroraPostgresEngineVersion[];
     readonly workmem?: number; // default 524288, 512MiB
 
@@ -45,6 +47,11 @@ export interface ClusterConfiguration {
     readonly instances: number;
     readonly dbVersion: AuroraPostgresEngineVersion;
     readonly storageEncrypted?: boolean; /// default true
+}
+
+export interface ClusterImportConfiguration {
+    readonly clusterReadEndpoint: string;
+    readonly clusterWriteEndpoint: string;
 }
 
 /**
@@ -78,10 +85,17 @@ export class DbStack extends Stack {
             env: isc.env,
         });
 
-        const parameterGroups = this.createParamaterGroups(
+        const parameterGroups = this.createParameterGroups(
             configuration.customParameterGroups,
             configuration.workmem ?? 524288
         );
+
+        if (
+            (configuration.cluster && configuration.clusterImport) ||
+            (!configuration.cluster && !configuration.clusterImport)
+        ) {
+            throw new Error("Configure either cluster or clusterImport");
+        }
 
         // create cluster if this is wanted, should do it only once
         if (configuration.cluster) {
@@ -131,29 +145,47 @@ export class DbStack extends Stack {
 
             this.clusterIdentifier = cluster.clusterIdentifier;
         }
+
+        if (configuration.clusterImport) {
+            createParameter(
+                this,
+                "cluster.reader",
+                configuration.clusterImport.clusterReadEndpoint
+            );
+            createParameter(
+                this,
+                "cluster.writer",
+                configuration.clusterImport.clusterWriteEndpoint
+            );
+        }
     }
 
-    createParamaterGroups(
+    createParameterGroups(
         customVersions: AuroraPostgresEngineVersion[],
         workmem: number
     ): IParameterGroup[] {
-        return customVersions.map(
-            (version: AuroraPostgresEngineVersion) =>
-                new ParameterGroup(
-                    this,
-                    `parameter-group-${version.auroraPostgresMajorVersion}`,
-                    {
-                        engine: DatabaseClusterEngine.auroraPostgres({
-                            version,
-                        }),
-                        parameters: {
-                            "pg_stat_statements.track": "ALL",
-                            random_page_cost: "1",
-                            work_mem: workmem.toString(),
-                        },
-                    }
-                )
-        );
+        return customVersions.map((version: AuroraPostgresEngineVersion) => {
+            const pg = new ParameterGroup(
+                this,
+                `parameter-group-${version.auroraPostgresMajorVersion}`,
+                {
+                    engine: DatabaseClusterEngine.auroraPostgres({
+                        version,
+                    }),
+                    parameters: {
+                        "pg_stat_statements.track": "ALL",
+                        random_page_cost: "1",
+                        work_mem: workmem.toString(),
+                    },
+                }
+            );
+
+            // create both cluster parameter group and instance parameter group
+            pg.bindToCluster({});
+            pg.bindToInstance({});
+
+            return pg;
+        });
     }
 
     createClusterParameters(
