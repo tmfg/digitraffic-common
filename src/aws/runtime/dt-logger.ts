@@ -3,6 +3,7 @@ import _ from "lodash";
 
 /** Logging level */
 export type LOG_LEVEL = "DEBUG" | "INFO" | "WARN" | "ERROR";
+export type LoggerMethodType = `${string}.${string}`;
 
 /**
  * Configuration object for configuring the Digitraffic logging utility
@@ -55,7 +56,7 @@ export interface CustomParams {
  */
 export interface LoggableType extends CustomParams {
     /** Name of the method logging the message */
-    method: `${string}.${string}`;
+    method: LoggerMethodType;
     /** Message to log, optional */
     message?: string;
     /** Type of message, optional */

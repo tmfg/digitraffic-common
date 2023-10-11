@@ -2,6 +2,13 @@
 
 This is a place for common utilities and classes that can be used in other cdk-projects.
 
+## How to build
+
+Use `npm` to build the code i.e.
+
+    npm run build
+    npm run test
+
 ## How to use
 
 In package.json dependencies:
