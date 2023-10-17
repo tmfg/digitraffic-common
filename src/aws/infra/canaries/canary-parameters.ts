@@ -1,4 +1,4 @@
-import { Schedule } from "@aws-cdk/aws-synthetics-alpha";
+import { Schedule } from "aws-cdk-lib/aws-synthetics";
 
 /** Optional env parameters for canary */
 type CanaryEnv = Record<string, string>;

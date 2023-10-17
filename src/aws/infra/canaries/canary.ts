@@ -5,7 +5,7 @@ import {
     Runtime,
     Schedule,
     Test,
-} from "@aws-cdk/aws-synthetics-alpha";
+} from "aws-cdk-lib/aws-synthetics";
 import { Role } from "aws-cdk-lib/aws-iam";
 import { CanaryAlarm } from "./canary-alarm";
 import { CanaryParameters } from "./canary-parameters";

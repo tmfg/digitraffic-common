@@ -19,7 +19,7 @@ interface ApiParameter {
     name: string;
 }
 
-export class DigitrafficIntegration {
+export class DigitrafficIntegration<T extends string> {
     readonly lambda: IFunction;
     readonly mediaType: MediaType;
     readonly parameters: ApiParameter[] = [];
@@ -35,20 +35,20 @@ export class DigitrafficIntegration {
         this.sunset = sunset;
     }
 
-    addPathParameter(...names: string[]): this {
+    addPathParameter(...names: T[]): this {
         names.forEach((name) => this.parameters.push({ type: "path", name }));
 
         return this;
     }
 
-    addQueryParameter(...names: string[]): this {
+    addQueryParameter(...names: T[]): this {
         names.forEach((name) =>
             this.parameters.push({ type: "querystring", name })
         );
         return this;
     }
 
-    addMultiValueQueryParameter(...names: string[]): this {
+    addMultiValueQueryParameter(...names: T[]): this {
         names.forEach((name) =>
             this.parameters.push({ type: "multivaluequerystring", name })
         );
@@ -61,7 +61,7 @@ export class DigitrafficIntegration {
      * @param names for the parameters
      * @returns
      */
-    addContextParameter(...names: string[]): this {
+    addContextParameter(...names: T[]): this {
         names.forEach((name) =>
             this.parameters.push({ type: "context", name })
         );
@@ -74,7 +74,7 @@ export class DigitrafficIntegration {
      * If Authorization header is needed, use lambda authorizers.
      * @param names for the headers
      */
-    addHeaderParameter(...names: string[]): this {
+    addHeaderParameter(...names: T[]): this {
         names.forEach((name) => this.parameters.push({ type: "header", name }));
 
         return this;
