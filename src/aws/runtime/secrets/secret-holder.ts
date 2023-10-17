@@ -1,6 +1,7 @@
 import { GenericSecret, getSecret } from "./secret";
 import { checkExpectedSecretKeys } from "./dbsecret";
 import { getEnvVariable } from "../../../utils/utils";
+import { logger } from "../dt-logger-default";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
 const NodeTtl = require("node-ttl");
@@ -47,7 +48,10 @@ export class SecretHolder<Secret extends GenericSecret> {
     private async initSecret() {
         const secretValue = await getSecret<Secret>(this.secretId);
 
-        console.info("refreshing secret " + this.secretId);
+        logger.info({
+            method: "SecretHolder.initSecret",
+            message: "Refreshing secret " + this.secretId,
+        });
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         this.secretCache.push(DEFAULT_SECRET_KEY, secretValue);

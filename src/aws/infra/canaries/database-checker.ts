@@ -3,6 +3,7 @@ import { ProxyHolder } from "../../runtime/secrets/proxy-holder";
 import { RdsHolder } from "../../runtime/secrets/rds-holder";
 import { getEnvVariable } from "../../../utils/utils";
 import { Countable } from "../../../database/models";
+import { logger } from "../../runtime/dt-logger-default";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const synthetics = require("Synthetics");
@@ -141,7 +142,10 @@ export class DatabaseCountChecker {
         await this.credentialsFunction();
         await inDatabaseReadonly(async (db: DTDatabase) => {
             for (const check of this.checks) {
-                console.info("canary checking sql " + check.sql);
+                logger.info({
+                    method: "DatabaseCountChecker.expect",
+                    message: "Running sql: " + check.sql,
+                });
 
                 const value = await db.one<Countable>(check.sql);
                 const checkFunction = () => {

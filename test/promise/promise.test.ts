@@ -2,6 +2,8 @@ import { getRandomInteger } from "../../src/test/testutils";
 import { retry, RetryLogError } from "../../src/utils/retry";
 import { logger } from "../../src/aws/runtime/dt-logger-default";
 
+jest.useFakeTimers();
+
 describe("Promise utils tests", () => {
     test("retry - no retries", async () => {
         const fn = jest.fn().mockResolvedValue(1);

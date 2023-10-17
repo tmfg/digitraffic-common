@@ -1,5 +1,6 @@
 import { IDatabase, ITask } from "pg-promise";
 import { getEnvVariable, getEnvVariableOrElse } from "../utils/utils";
+import { logger } from "../aws/runtime/dt-logger-default";
 
 export enum DatabaseEnvironmentKeys {
     DB_USER = "DB_USER",
@@ -97,7 +98,11 @@ async function doInDatabase<T>(
         await db.none("DISCARD ALL");
         return await fn(db);
     } catch (e) {
-        console.error("Error in db:", e);
+        logger.error({
+            method: "Database.doInDatabase",
+            message: "Error in db:" + e,
+        });
+
         throw e;
     } finally {
         await db.$pool.end();

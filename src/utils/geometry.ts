@@ -3,6 +3,7 @@
  */
 import { Feature, FeatureCollection, Geometry, Position } from "geojson";
 import * as geoJsonValidator from "geojson-validation";
+import { logger } from "../aws/runtime/dt-logger-default";
 
 export const SRID_WGS84 = 4326;
 
@@ -29,7 +30,11 @@ export function createGeometry(geometry: Geometry): string {
         return `MULTIPOLYGON(${coordinates})`;
     }
 
-    console.error("unsupported locationType=%s", geometry.type);
+    logger.error({
+        method: "Geometry.createGeometry",
+        message: "Unsupported locationType " + geometry.type,
+    });
+
     return "POLYGON EMPTY";
 }
 
