@@ -10,6 +10,8 @@ import { FeatureCollection } from "geojson";
 import { isValidGeoJson } from "../../../utils/geometry";
 import { getEnvVariable } from "../../../utils/utils";
 import { ENV_API_KEY, ENV_HOSTNAME } from "./canary-keys";
+import { logger } from "../../runtime/dt-logger-default";
+import { logException } from "../../../utils/logging";
 
 export const API_KEY_HEADER = "x-api-key";
 
@@ -142,7 +144,10 @@ export class UrlChecker {
             !this.requestOptions.headers ||
             !this.requestOptions.headers[API_KEY_HEADER]
         ) {
-            console.error("No api key defined");
+            logger.error({
+                method: "UrlChecker.expect403WithoutApiKey",
+                message: "No Api-key defined",
+            });
         }
 
         const requestOptions = {
@@ -176,7 +181,7 @@ async function getResponseBody(response: IncomingMessage): Promise<string> {
         try {
             return zlib.gunzipSync(body).toString();
         } catch (e) {
-            console.info("error " + JSON.stringify(e));
+            logException(logger, e);
         }
     }
 
