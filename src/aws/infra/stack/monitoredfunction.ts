@@ -9,9 +9,10 @@ import {
     LambdaEnvironment,
     MonitoredFunctionParameters,
 } from "../stack/lambda-configs";
-import { pascalCase } from "change-case";
 import { DigitrafficLogSubscriptions } from "../stack/subscription";
 import { TrafficType } from "../../../types/traffictype";
+
+import _ from "lodash";
 
 /**
  * Allows customization of CloudWatch Alarm properties
@@ -117,7 +118,11 @@ export class MonitoredFunction extends Function {
     ): MonitoredFunction {
         const functionName =
             functionParameters?.functionName ??
-            `${stack.configuration.shortName}-${pascalCase(name)}`;
+            `${stack.configuration.shortName}-${_.chain(name)
+                .camelCase()
+                .startCase()
+                .replace(/\s/g, "")
+                .value()}`;
         const functionProps = databaseFunctionProps(
             stack,
             environment,
@@ -315,7 +320,11 @@ export class MonitoredDBFunction {
     ): MonitoredFunction {
         const functionName =
             functionParameters?.functionName ??
-            `${stack.configuration.shortName}-${pascalCase(name)}`;
+            `${stack.configuration.shortName}-${_.chain(name)
+                .camelCase()
+                .startCase()
+                .replace(/\s/g, "")
+                .value()}`;
         const env = environment ? environment : stack.createLambdaEnvironment();
         const functionProps = databaseFunctionProps(
             stack,
