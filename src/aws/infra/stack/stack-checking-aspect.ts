@@ -4,9 +4,9 @@ import { CfnBucket } from "aws-cdk-lib/aws-s3";
 import { DigitrafficStack, SOLUTION_KEY } from "./stack";
 import { IConstruct } from "constructs";
 import { CfnMethod, CfnResource } from "aws-cdk-lib/aws-apigateway";
-import { paramCase, snakeCase } from "change-case";
 import { CfnQueue } from "aws-cdk-lib/aws-sqs";
 import { LogRetention } from "aws-cdk-lib/aws-logs";
+import _ from "lodash";
 import IntegrationProperty = CfnMethod.IntegrationProperty;
 
 const MAX_CONCURRENCY_LIMIT = 100;
@@ -210,11 +210,11 @@ export class StackCheckingAspect implements IAspect {
             return this.isValidPath(path.split("{")[0]);
         }
 
-        return paramCase(path) === path;
+        return _.kebabCase(path) === path;
     }
 
     private static isValidQueryString(name: string) {
-        return snakeCase(name) === name;
+        return _.snakeCase(name) === name;
     }
 
     private checkResourceCasing(node: IConstruct) {

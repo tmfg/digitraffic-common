@@ -26,7 +26,7 @@ import { DocumentationPart, DocumentationProperties } from "../documentation";
 import { createDefaultUsagePlan, createUsagePlan } from "../usage-plans";
 import { DigitrafficStack } from "./stack";
 
-import R = require("ramda");
+import _ from "lodash";
 
 export class DigitrafficRestApi extends RestApi {
     readonly apiKeyIds: string[];
@@ -109,10 +109,10 @@ export class DigitrafficRestApi extends RestApi {
     }
 
     private getModelWithReference(model: Model): ModelWithReference {
-        return R.assoc(
+        return _.set(
+            model,
             "modelReference",
-            getModelReference(model.modelId, this.restApiId),
-            model
+            getModelReference(model.modelId, this.restApiId)
         ) as ModelWithReference;
     }
 
