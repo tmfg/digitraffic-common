@@ -54,6 +54,7 @@
     "aws-cdk-lib": "~2.103.1",
     "aws-sdk": "~2.1482.0",
     "axios": "^1.6.0",
+    "change-case": "4.1.2",
     "constructs": "10.3.0",
     "date-fns-tz": "~2.0.0",
     "date-fns": "~2.30.0",
