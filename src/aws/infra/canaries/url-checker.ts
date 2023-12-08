@@ -40,10 +40,10 @@ interface SyntheticsConfiguration {
 
 /** Temporary type fix for Synthetics */
 interface Synthetics {
-    executeHttpStep(
+    executeHttpStep<T>(
         name: string,
         requestOptions: RequestOptions,
-        callback: CheckerFunction
+        callback: JsonCheckerFunction<T>
     ): Promise<void>;
     getConfiguration(): SyntheticsConfiguration;
 }
