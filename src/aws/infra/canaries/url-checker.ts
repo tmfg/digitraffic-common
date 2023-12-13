@@ -2,7 +2,7 @@ import { IncomingMessage, RequestOptions } from "http";
 import { Asserter } from "../../../test/asserter";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
-const synthetics = require("Synthetics");
+const synthetics: Synthetics = require("Synthetics");
 import zlib = require("zlib");
 import { MediaType } from "../../types/mediatypes";
 import { getApiKeyFromAPIGateway } from "../../runtime/apikey";
@@ -28,6 +28,26 @@ type JsonCheckerFunction<T> = (
     message: IncomingMessage
 ) => Promise<void>;
 
+/** Temporary type fix for SyntheticsConfiguration */
+interface SyntheticsConfiguration {
+    withIncludeRequestBody: (value: boolean) => SyntheticsConfiguration;
+    withIncludeRequestHeaders: (value: boolean) => SyntheticsConfiguration;
+    withIncludeResponseBody: (value: boolean) => SyntheticsConfiguration;
+    withIncludeResponseHeaders: (value: boolean) => SyntheticsConfiguration;
+    withFailedCanaryMetric: (value: boolean) => SyntheticsConfiguration;
+    disableRequestMetrics: () => SyntheticsConfiguration;
+}
+
+/** Temporary type fix for Synthetics */
+interface Synthetics {
+    executeHttpStep<T>(
+        name: string,
+        requestOptions: RequestOptions,
+        callback: JsonCheckerFunction<T>
+    ): Promise<void>;
+    getConfiguration(): SyntheticsConfiguration;
+}
+
 export class UrlChecker {
     private readonly requestOptions: RequestOptions;
 
@@ -45,10 +65,8 @@ export class UrlChecker {
             headers,
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         synthetics.getConfiguration().disableRequestMetrics();
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         synthetics
             .getConfiguration()
             .withIncludeRequestBody(false)
