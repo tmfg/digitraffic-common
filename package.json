@@ -7,10 +7,11 @@
     "url": "https://github.com/tmfg/digitraffic-common.git"
   },
   "engines": {
-    "node": ">=14 <17 || >=18 <19"
+    "node": ">=18 <19 || >=20 <21"
   },
   "scripts": {
     "build": "tsc",
+    "build:watch": "tsc --watch",
     "lint": "eslint --cache .",
     "eslint-report": "eslint . --format html",
     "ci:eslint-report": "eslint . --format html -o report.html || true",
@@ -29,7 +30,6 @@
   "peerDependencies": {
     "@types/geojson": "^7946.0.12",
     "aws-cdk-lib": "^2.103.0",
-    "aws-sdk": "^2.1481.0",
     "axios": "^1.5.1",
     "change-case": "4.1.2",
     "constructs": "^10.3.0",
@@ -52,7 +52,6 @@
     "@typescript-eslint/eslint-plugin": "~6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
     "aws-cdk-lib": "~2.103.1",
-    "aws-sdk": "~2.1482.0",
     "axios": "^1.6.0",
     "change-case": "4.1.2",
     "constructs": "10.3.0",
