@@ -74,5 +74,9 @@
     "ts-jest": "^29.1.1",
     "typescript": "~4.9.5",
     "velocityjs": "2.0.6"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "~3.472.0",
+    "@aws-sdk/lib-storage": "~3.472.0"
   }
 }
