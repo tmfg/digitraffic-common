@@ -5,13 +5,10 @@ import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { InlineCode, Runtime } from "aws-cdk-lib/aws-lambda";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
-import {
-    ComparisonOperator,
-    TreatMissingData,
-} from "aws-cdk-lib/aws-cloudwatch";
+import { ComparisonOperator, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
-import { ManagedUpload } from "aws-sdk/clients/s3";
-import { S3 } from "aws-sdk";
+import { S3, S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 import { SQSEvent, SQSHandler, SQSRecord } from "aws-lambda";
 import { DigitrafficStack } from "./stack/stack";
 import { MonitoredFunction } from "./stack/monitoredfunction";
@@ -23,11 +20,7 @@ import { MonitoredFunction } from "./stack/monitoredfunction";
  * and an alarm for the queue.  Anything that goes to the dlq will be written into the bucket and the alarm is activated.
  */
 export class DigitrafficSqsQueue extends Queue {
-    static create(
-        stack: DigitrafficStack,
-        name: string,
-        props: QueueProps
-    ): DigitrafficSqsQueue {
+    static create(stack: DigitrafficStack, name: string, props: QueueProps): DigitrafficSqsQueue {
         const queueName = `${stack.configuration.shortName}-${name}-Queue`;
         const queueProps = {
             ...props,
@@ -61,7 +54,7 @@ export class DigitrafficDLQueue {
 
         const dlqFunctionName = `${dlqName}-Function`;
         const lambda = MonitoredFunction.create(stack, dlqFunctionName, {
-            runtime: Runtime.NODEJS_16_X,
+            runtime: Runtime.NODEJS_18_X,
             logRetention: RetentionDays.ONE_YEAR,
             functionName: dlqFunctionName,
             code: getDlqCode(dlqBucket.bucketName),
@@ -100,8 +93,8 @@ function addDLQAlarm(stack: DigitrafficStack, dlqName: string, dlq: Queue) {
         .addAlarmAction(new SnsAction(stack.warningTopic));
 }
 
-function getDlqCode(bName: string): InlineCode {
-    const functionBody = DLQ_LAMBDA_CODE.replace("__bucketName__", bName)
+function getDlqCode(Bucket: string): InlineCode {
+    const functionBody = DLQ_LAMBDA_CODE.replace("__bucketName__", Bucket)
         .replace("__upload__", uploadToS3.toString())
         .replace("__doUpload__", doUpload.toString())
         .replace("__handler__", createHandler().toString().substring(23)); // remove function handler() from signature
@@ -109,42 +102,32 @@ function getDlqCode(bName: string): InlineCode {
     return new InlineCode(functionBody);
 }
 
-async function uploadToS3(
-    s3: S3,
-    bName: string,
-    body: string,
-    objectName: string
-): Promise<void> {
+async function uploadToS3(s3: S3 | S3Client, Bucket: string, Body: string, Key: string): Promise<void> {
     try {
-        console.info("writing %s to %s", objectName, bName);
-        await doUpload(s3, bName, body, objectName);
+        console.info("writing %s to %s", Key, Bucket);
+        await doUpload(s3, Bucket, Body, Key);
     } catch (error) {
         console.warn(error);
-        console.warn("method=uploadToS3 retrying upload to bucket %s", bName);
+        console.warn("method=uploadToS3 retrying upload to bucket %s", Bucket);
         try {
-            await doUpload(s3, bName, body, objectName);
+            await doUpload(s3, Bucket, Body, Key);
         } catch (e2) {
-            console.error(
-                "method=uploadToS3 failed retrying upload to bucket %s",
-                bName
-            );
+            console.error("method=uploadToS3 failed retrying upload to bucket %s", Bucket);
         }
     }
 }
 
-function doUpload(
-    s3: S3,
-    bName: string,
-    Body: string,
-    Key: string
-): Promise<ManagedUpload.SendData> {
-    return s3
-        .upload({
-            Bucket: bName,
-            Body,
-            Key,
-        })
-        .promise();
+async function doUpload(s3: S3 | S3Client, Bucket: string, Body: string, Key: string) {
+    try {
+        const upload = new Upload({
+            client: s3,
+            params: { Bucket, Key, Body },
+        });
+
+        await upload.done();
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 // bucketName is unused, will be overridden in the actual lambda code below
@@ -170,7 +153,9 @@ function createHandler(): SQSHandler {
     };
 }
 
-const DLQ_LAMBDA_CODE = `const AWS = require('aws-sdk');
+const DLQ_LAMBDA_CODE = `
+import { S3, S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
 const bucketName = "__bucketName__";
 
 __upload__
