@@ -26,7 +26,7 @@ export class DigitrafficSqsQueue extends Queue {
     static create(
         stack: DigitrafficStack,
         name: string,
-        props: QueueProps
+        props: QueueProps,
     ): DigitrafficSqsQueue {
         const queueName = `${stack.configuration.shortName}-${name}-Queue`;
         const queueProps = {
@@ -61,7 +61,7 @@ export class DigitrafficDLQueue {
 
         const dlqFunctionName = `${dlqName}-Function`;
         const lambda = MonitoredFunction.create(stack, dlqFunctionName, {
-            runtime: Runtime.NODEJS_16_X,
+            runtime: Runtime.NODEJS_20_X,
             logRetention: RetentionDays.ONE_YEAR,
             functionName: dlqFunctionName,
             code: getDlqCode(dlqBucket.bucketName),
@@ -113,7 +113,7 @@ async function uploadToS3(
     s3: S3,
     bName: string,
     body: string,
-    objectName: string
+    objectName: string,
 ): Promise<void> {
     try {
         console.info("writing %s to %s", objectName, bName);
@@ -126,7 +126,7 @@ async function uploadToS3(
         } catch (e2) {
             console.error(
                 "method=uploadToS3 failed retrying upload to bucket %s",
-                bName
+                bName,
             );
         }
     }
@@ -136,7 +136,7 @@ function doUpload(
     s3: S3,
     bName: string,
     Body: string,
-    Key: string
+    Key: string,
 ): Promise<ManagedUpload.SendData> {
     return s3
         .upload({
@@ -163,9 +163,9 @@ function createHandler(): SQSHandler {
                     new AWS.S3(),
                     bucketName,
                     e.body,
-                    `dlq-${millis}-${idx}.json`
-                )
-            )
+                    `dlq-${millis}-${idx}.json`,
+                ),
+            ),
         );
     };
 }

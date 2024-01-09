@@ -11,7 +11,7 @@ import _ from "lodash";
 import IntegrationProperty = CfnMethod.IntegrationProperty;
 
 const MAX_CONCURRENCY_LIMIT = 100;
-const NODE_RUNTIMES = [Runtime.NODEJS_16_X.name, Runtime.NODEJS_18_X.name];
+const NODE_RUNTIMES = [Runtime.NODEJS_20_X.name, Runtime.NODEJS_18_X.name];
 
 enum ResourceType {
     stackName = "STACK_NAME",
@@ -39,7 +39,7 @@ export class StackCheckingAspect implements IAspect {
     static create(stack: DigitrafficStack) {
         return new StackCheckingAspect(
             stack.configuration.shortName,
-            stack.configuration.whitelistedResources
+            stack.configuration.whitelistedResources,
         );
     }
 
@@ -65,7 +65,7 @@ export class StackCheckingAspect implements IAspect {
         node: IConstruct,
         key: ResourceType | string,
         message: string,
-        isError = true
+        isError = true,
     ) {
         const resourceKey = `${node.node.path}/${key}`;
         const isWhiteListed = this.isWhitelisted(resourceKey);
@@ -90,7 +90,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.stackName,
-                    "Production is set for Test-stack"
+                    "Production is set for Test-stack",
                 );
             }
 
@@ -102,7 +102,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.stackName,
-                    "Production is not set for Production-stack"
+                    "Production is not set for Production-stack",
                 );
             }
         }
@@ -114,7 +114,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.reservedConcurrentConcurrency,
-                    "Function must have reservedConcurrentConcurrency"
+                    "Function must have reservedConcurrentConcurrency",
                 );
             } else if (
                 node.reservedConcurrentExecutions > MAX_CONCURRENCY_LIMIT
@@ -122,7 +122,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.reservedConcurrentConcurrency,
-                    "Function reservedConcurrentConcurrency too high!"
+                    "Function reservedConcurrentConcurrency too high!",
                 );
             }
 
@@ -130,7 +130,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.functionTimeout,
-                    "Function must have timeout"
+                    "Function must have timeout",
                 );
             }
 
@@ -138,7 +138,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.functionMemorySize,
-                    "Function must have memorySize"
+                    "Function must have memorySize",
                 );
             }
 
@@ -149,7 +149,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.functionRuntime,
-                    `Function has wrong runtime ${node.runtime}!`
+                    `Function has wrong runtime ${node.runtime}!`,
                 );
             }
 
@@ -161,7 +161,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.functionName,
-                    `Function name does not begin with ${this.stackShortName}`
+                    `Function name does not begin with ${this.stackShortName}`,
                 );
             }
         }
@@ -173,7 +173,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.tagSolution,
-                    "Solution tag is missing"
+                    "Solution tag is missing",
                 );
             }
         }
@@ -195,7 +195,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.bucketPublicity,
-                    "Check bucket publicity"
+                    "Check bucket publicity",
                 );
             }
         }
@@ -224,7 +224,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.resourcePath,
-                    "Path part should be in kebab-case"
+                    "Path part should be in kebab-case",
                 );
             }
         } else if (node instanceof CfnMethod) {
@@ -245,7 +245,7 @@ export class StackCheckingAspect implements IAspect {
                         this.addAnnotation(
                             node,
                             name,
-                            "Querystring should be in snake_case"
+                            "Querystring should be in snake_case",
                         );
                     }
                 });
@@ -259,7 +259,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.queueEncryption,
-                    "Queue must have encryption enabled"
+                    "Queue must have encryption enabled",
                 );
             }
         }
@@ -277,7 +277,7 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(
                     node,
                     ResourceType.logGroupRetention,
-                    "Log group must define log group retention"
+                    "Log group must define log group retention",
                 );
             }
         }
