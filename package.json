@@ -15,7 +15,7 @@
     "eslint-report": "eslint . --format html",
     "ci:eslint-report": "eslint . --format html -o report.html || true",
     "clean": "rimraf dist output",
-    "test": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest",
+    "test": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --runInBand",
     "test:watch": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --watch",
     "prepare": "husky install",
     "prepublishOnly": "pnpm clean && pnpm build && pnpm test"
