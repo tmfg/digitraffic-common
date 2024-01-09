@@ -6,7 +6,7 @@ import { IConstruct } from "constructs";
 import { CfnMethod, CfnResource } from "aws-cdk-lib/aws-apigateway";
 import { CfnQueue } from "aws-cdk-lib/aws-sqs";
 import { LogRetention } from "aws-cdk-lib/aws-logs";
-import { paramCase } from "change-case";
+import { kebabCase } from "change-case";
 import _ from "lodash";
 import IntegrationProperty = CfnMethod.IntegrationProperty;
 
@@ -211,7 +211,7 @@ export class StackCheckingAspect implements IAspect {
             return this.isValidPath(path.split("{")[0]);
         }
 
-        return paramCase(path) === path;
+        return kebabCase(path) === path;
     }
 
     private static isValidQueryString(name: string) {
