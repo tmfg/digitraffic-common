@@ -57,7 +57,7 @@
     "axios": "^1.6.5",
     "change-case": "5.3.0",
     "constructs": "10.3.0",
-    "date-fns": "~3.1.0",
+    "date-fns": "~2.30.0",
     "date-fns-tz": "~2.0.0",
     "eslint": "~8.56.0",
     "eslint-config-prettier": "^9.1.0",
