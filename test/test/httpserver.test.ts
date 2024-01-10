@@ -91,12 +91,12 @@ async function withServer(
         }
     }
     console.info(`Using port ${openPort} to run the test`);
-    server.listen(openPort as number, props, false, statusCode);
+    server.listen(openPort, props, false, statusCode);
     threadLocalPort.enterWith(openPort);
     try {
         await fn(server);
     } finally {
-        const serverClosed = await server.close();
+        await server.close();
         console.info("Server closed");
     }
 }
