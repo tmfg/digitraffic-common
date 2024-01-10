@@ -11,7 +11,7 @@ import _ from "lodash";
 import IntegrationProperty = CfnMethod.IntegrationProperty;
 
 const MAX_CONCURRENCY_LIMIT = 100;
-const NODE_RUNTIMES = [Runtime.NODEJS_16_X.name, Runtime.NODEJS_18_X.name];
+const NODE_RUNTIMES = [Runtime.NODEJS_20_X.name, Runtime.NODEJS_18_X.name];
 
 enum ResourceType {
     stackName = "STACK_NAME",

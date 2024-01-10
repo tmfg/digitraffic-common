@@ -30,7 +30,7 @@ export class TestHttpServer {
         port: number,
         props: ListenProperties,
         debug = false,
-        statusCode = 200
+        statusCode = 200,
     ) {
         this.debug = debug;
         this.messageStack = [];
@@ -62,7 +62,7 @@ export class TestHttpServer {
                 res.setHeader("Access-Control-Allow-Origin", "*");
                 res.setHeader(
                     "Access-Control-Allow-Headers",
-                    "Authorization,X-User-Id,X-Auth-Token"
+                    "Authorization,X-User-Id,X-Auth-Token",
                 );
                 res.writeHead(statusCode);
 
@@ -85,11 +85,17 @@ export class TestHttpServer {
         this.server.listen(port);
     }
 
-    close() {
-        this.debuglog("Closing test server");
-        if (this.server !== undefined) {
-            this.server.close();
-        }
+    close(): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            this.debuglog("Closing test server");
+            if (this.server !== undefined) {
+                this.server.close((error) =>
+                    error != null ? reject(false) : resolve(true),
+                );
+            } else {
+                resolve(true);
+            }
+        });
     }
 
     private debuglog(str: string) {

@@ -24,7 +24,7 @@ export function databaseFunctionProps(
     environment: LambdaEnvironment,
     lambdaName: string,
     simpleLambdaName: string,
-    config?: Partial<FunctionParameters>
+    config?: Partial<FunctionParameters>,
 ): FunctionProps {
     const vpcSubnets = stack.vpc
         ? {
@@ -38,7 +38,7 @@ export function databaseFunctionProps(
             environment,
             lambdaName,
             simpleLambdaName,
-            config
+            config,
         ),
         ...{
             vpc: stack.vpc ?? undefined,
@@ -53,10 +53,10 @@ export function lambdaFunctionProps(
     environment: LambdaEnvironment,
     lambdaName: string,
     simpleLambdaName: string,
-    config?: Partial<FunctionParameters>
+    config?: Partial<FunctionParameters>,
 ): FunctionProps {
     return {
-        runtime: config?.runtime ?? Runtime.NODEJS_16_X,
+        runtime: config?.runtime ?? Runtime.NODEJS_20_X,
         architecture: config?.architecture ?? Architecture.ARM_64,
         memorySize: config?.memorySize ?? 128,
         functionName: lambdaName,
@@ -72,7 +72,7 @@ export function lambdaFunctionProps(
 
 function getAssetCode(
     simpleLambdaName: string,
-    isSingleLambda: boolean
+    isSingleLambda: boolean,
 ): AssetCode {
     const lambdaPath = isSingleLambda
         ? `dist/lambda/`
@@ -82,10 +82,10 @@ function getAssetCode(
 }
 
 export function defaultLambdaConfiguration(
-    config: FunctionParameters
+    config: FunctionParameters,
 ): FunctionProps {
     const props: FunctionProps = {
-        runtime: Runtime.NODEJS_16_X,
+        runtime: Runtime.NODEJS_20_X,
         memorySize: config.memorySize ?? 128,
         functionName: config.functionName,
         handler: config.handler,

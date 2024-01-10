@@ -54,7 +54,7 @@ export class DigitrafficDLQueue {
 
         const dlqFunctionName = `${dlqName}-Function`;
         const lambda = MonitoredFunction.create(stack, dlqFunctionName, {
-            runtime: Runtime.NODEJS_18_X,
+            runtime: Runtime.NODEJS_20_X,
             logRetention: RetentionDays.ONE_YEAR,
             functionName: dlqFunctionName,
             code: getDlqCode(dlqBucket.bucketName),
