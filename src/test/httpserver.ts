@@ -82,7 +82,6 @@ export class TestHttpServer {
                 });
             }
         });
-        this.server.keepAliveTimeout = 1;
         this.server.listen(port);
     }
 

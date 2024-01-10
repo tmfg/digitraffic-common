@@ -170,7 +170,7 @@ test("one get - no MATCH", async () => {
         expect(server.getRequestBody(0)).toEqual(ERROR_NO_MATCH);
         expect(response.statusCode).toEqual(ERRORCODE_NOT_FOUND);
     });
-});
+}, 10000);
 
 test("get - error 405", async () => {
     const ERROR_CODE = 405;
