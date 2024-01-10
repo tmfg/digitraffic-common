@@ -6,7 +6,7 @@ import { IConstruct } from "constructs";
 import { CfnMethod, CfnResource } from "aws-cdk-lib/aws-apigateway";
 import { CfnQueue } from "aws-cdk-lib/aws-sqs";
 import { LogRetention } from "aws-cdk-lib/aws-logs";
-import { paramCase } from "change-case";
+import { kebabCase } from "change-case";
 import _ from "lodash";
 import IntegrationProperty = CfnMethod.IntegrationProperty;
 
@@ -61,12 +61,7 @@ export class StackCheckingAspect implements IAspect {
         });
     }
 
-    private addAnnotation(
-        node: IConstruct,
-        key: ResourceType | string,
-        message: string,
-        isError = true
-    ) {
+    private addAnnotation(node: IConstruct, key: ResourceType | string, message: string, isError = true) {
         const resourceKey = `${node.node.path}/${key}`;
         const isWhiteListed = this.isWhitelisted(resourceKey);
         const annotationMessage = `${resourceKey}:${message}`;
@@ -83,20 +78,14 @@ export class StackCheckingAspect implements IAspect {
     private checkStack(node: IConstruct) {
         if (node instanceof DigitrafficStack) {
             if (
-                (node.stackName.includes("Test") ||
-                    node.stackName.includes("Tst")) &&
+                (node.stackName.includes("Test") || node.stackName.includes("Tst")) &&
                 node.configuration.production
             ) {
-                this.addAnnotation(
-                    node,
-                    ResourceType.stackName,
-                    "Production is set for Test-stack"
-                );
+                this.addAnnotation(node, ResourceType.stackName, "Production is set for Test-stack");
             }
 
             if (
-                (node.stackName.includes("Prod") ||
-                    node.stackName.includes("Prd")) &&
+                (node.stackName.includes("Prod") || node.stackName.includes("Prd")) &&
                 !node.configuration.production
             ) {
                 this.addAnnotation(
@@ -116,9 +105,7 @@ export class StackCheckingAspect implements IAspect {
                     ResourceType.reservedConcurrentConcurrency,
                     "Function must have reservedConcurrentConcurrency"
                 );
-            } else if (
-                node.reservedConcurrentExecutions > MAX_CONCURRENCY_LIMIT
-            ) {
+            } else if (node.reservedConcurrentExecutions > MAX_CONCURRENCY_LIMIT) {
                 this.addAnnotation(
                     node,
                     ResourceType.reservedConcurrentConcurrency,
@@ -127,25 +114,14 @@ export class StackCheckingAspect implements IAspect {
             }
 
             if (!node.timeout) {
-                this.addAnnotation(
-                    node,
-                    ResourceType.functionTimeout,
-                    "Function must have timeout"
-                );
+                this.addAnnotation(node, ResourceType.functionTimeout, "Function must have timeout");
             }
 
             if (!node.memorySize) {
-                this.addAnnotation(
-                    node,
-                    ResourceType.functionMemorySize,
-                    "Function must have memorySize"
-                );
+                this.addAnnotation(node, ResourceType.functionMemorySize, "Function must have memorySize");
             }
 
-            if (
-                node.runtime !== undefined &&
-                !NODE_RUNTIMES.includes(node.runtime)
-            ) {
+            if (node.runtime !== undefined && !NODE_RUNTIMES.includes(node.runtime)) {
                 this.addAnnotation(
                     node,
                     ResourceType.functionRuntime,
@@ -170,11 +146,7 @@ export class StackCheckingAspect implements IAspect {
     private checkTags(node: IConstruct) {
         if (node instanceof Stack) {
             if (!node.tags.tagValues()[SOLUTION_KEY]) {
-                this.addAnnotation(
-                    node,
-                    ResourceType.tagSolution,
-                    "Solution tag is missing"
-                );
+                this.addAnnotation(node, ResourceType.tagSolution, "Solution tag is missing");
             }
         }
     }
@@ -192,11 +164,7 @@ export class StackCheckingAspect implements IAspect {
                     !c.ignorePublicAcls ||
                     !c.restrictPublicBuckets)
             ) {
-                this.addAnnotation(
-                    node,
-                    ResourceType.bucketPublicity,
-                    "Check bucket publicity"
-                );
+                this.addAnnotation(node, ResourceType.bucketPublicity, "Check bucket publicity");
             }
         }
     }
@@ -211,7 +179,7 @@ export class StackCheckingAspect implements IAspect {
             return this.isValidPath(path.split("{")[0]);
         }
 
-        return paramCase(path) === path;
+        return kebabCase(path) === path;
     }
 
     private static isValidQueryString(name: string) {
@@ -221,16 +189,10 @@ export class StackCheckingAspect implements IAspect {
     private checkResourceCasing(node: IConstruct) {
         if (node instanceof CfnResource) {
             if (!StackCheckingAspect.isValidPath(node.pathPart)) {
-                this.addAnnotation(
-                    node,
-                    ResourceType.resourcePath,
-                    "Path part should be in kebab-case"
-                );
+                this.addAnnotation(node, ResourceType.resourcePath, "Path part should be in kebab-case");
             }
         } else if (node instanceof CfnMethod) {
-            const integration = node.integration as
-                | IntegrationProperty
-                | undefined;
+            const integration = node.integration as IntegrationProperty | undefined;
 
             if (integration?.requestParameters) {
                 Object.keys(integration.requestParameters).forEach((key) => {
@@ -238,15 +200,8 @@ export class StackCheckingAspect implements IAspect {
                     const type = split[2];
                     const name = split[3];
 
-                    if (
-                        type === "querystring" &&
-                        !StackCheckingAspect.isValidQueryString(name)
-                    ) {
-                        this.addAnnotation(
-                            node,
-                            name,
-                            "Querystring should be in snake_case"
-                        );
+                    if (type === "querystring" && !StackCheckingAspect.isValidQueryString(name)) {
+                        this.addAnnotation(node, name, "Querystring should be in snake_case");
                     }
                 });
             }
@@ -256,21 +211,14 @@ export class StackCheckingAspect implements IAspect {
     private checkQueueEncryption(node: IConstruct) {
         if (node instanceof CfnQueue) {
             if (!node.kmsMasterKeyId) {
-                this.addAnnotation(
-                    node,
-                    ResourceType.queueEncryption,
-                    "Queue must have encryption enabled"
-                );
+                this.addAnnotation(node, ResourceType.queueEncryption, "Queue must have encryption enabled");
             }
         }
     }
 
     private checkLogGroupRetention(node: IConstruct) {
         if (node instanceof LogRetention) {
-            const child = node.node.defaultChild as unknown as Record<
-                string,
-                Record<string, string>
-            >;
+            const child = node.node.defaultChild as unknown as Record<string, Record<string, string>>;
             const retention = child._cfnProperties.RetentionInDays;
 
             if (!retention) {
