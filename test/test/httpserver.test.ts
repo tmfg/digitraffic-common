@@ -71,21 +71,33 @@ const findOpenPort = async () => {
     }
     return openPort;
 };
-
+const usedPorts = new Set<number>();
 async function withServer(
     fn: (server: TestHttpServer) => unknown,
     props: ListenProperties = DEFAULT_PROPS,
     statusCode = 200,
 ) {
     const server = new TestHttpServer();
-    const openPort = await findOpenPort();
+    let openPort;
+    while (!openPort) {
+        const foundPort = await findOpenPort();
+        console.info(`foundPort ${foundPort}`);
+        if (!usedPorts.has(foundPort)) {
+            usedPorts.add(foundPort);
+            openPort = foundPort;
+        }
+    }
     console.info(`Using port ${openPort} to run the test`);
-    server.listen(openPort, props, false, statusCode);
+    server.listen(openPort as number, props, false, statusCode);
     threadLocalPort.enterWith(openPort);
     try {
         await fn(server);
     } finally {
-        await server.close();
+        const serverClosed = await server.close();
+        if (serverClosed) {
+            usedPorts.delete(openPort);
+            threadLocalPort.enterWith(null);
+        }
     }
 }
 
