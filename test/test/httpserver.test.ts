@@ -17,7 +17,7 @@ const DEFAULT_PROPS: ListenProperties = {
     "/": () => "",
 };
 
-const findOpenPort = async () => {
+const findOpenPort = async (excludedPorts: Set<number>) => {
     const ephemeralPorts = Array.from(
         { length: 65535 - 1024 + 1 },
         (v, i) => 1024 + i,
@@ -37,6 +37,9 @@ const findOpenPort = async () => {
     for (const testPort of ephemeralPorts) {
         if (openPort !== null) {
             break;
+        }
+        if (excludedPorts.has(testPort)) {
+            continue;
         }
         const portConnected: Promise<number | null> = new Promise((resolve) => {
             const socket = new net.Socket();
@@ -80,7 +83,7 @@ async function withServer(
     const server = new TestHttpServer();
     let openPort;
     while (!openPort) {
-        const foundPort = await findOpenPort();
+        const foundPort = await findOpenPort(usedPorts);
         console.info(`foundPort ${foundPort}`);
         if (!usedPorts.has(foundPort)) {
             usedPorts.add(foundPort);
@@ -94,10 +97,7 @@ async function withServer(
         await fn(server);
     } finally {
         const serverClosed = await server.close();
-        if (serverClosed) {
-            usedPorts.delete(openPort);
-            threadLocalPort.enterWith(null);
-        }
+        console.info("Server closed");
     }
 }
 
@@ -170,7 +170,7 @@ test("one get - no MATCH", async () => {
         expect(server.getRequestBody(0)).toEqual(ERROR_NO_MATCH);
         expect(response.statusCode).toEqual(ERRORCODE_NOT_FOUND);
     });
-}, 10000);
+});
 
 test("get - error 405", async () => {
     const ERROR_CODE = 405;
