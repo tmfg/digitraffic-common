@@ -6,12 +6,70 @@ import {
 } from "../../src/test/httpserver";
 import { IncomingMessage } from "http";
 import http = require("http");
+import net = require("net");
+import { AsyncLocalStorage } from "node:async_hooks";
+
+const threadLocalPort = new AsyncLocalStorage();
 
 const DEFAULT_PATH = "/";
-const PORT = 8091;
 
 const DEFAULT_PROPS: ListenProperties = {
     "/": () => "",
+};
+
+const findOpenPort = async () => {
+    const ephemeralPorts = Array.from(
+        { length: 65535 - 1024 + 1 },
+        (v, i) => 1024 + i,
+    );
+    const allSocketEvents = [
+        "close",
+        "connect",
+        "data",
+        "drain",
+        "end",
+        "error",
+        "lookup",
+        "ready",
+        "timeout",
+    ];
+    let openPort: number | null = null;
+    for (const testPort of ephemeralPorts) {
+        if (openPort !== null) {
+            break;
+        }
+        const portConnected: Promise<number | null> = new Promise((resolve) => {
+            const socket = new net.Socket();
+            socket.setTimeout(500);
+            for (const socketEvent of allSocketEvents) {
+                if (socketEvent === "error") {
+                    socket.on(
+                        socketEvent,
+                        (error: Error & { code: string }) => {
+                            socket.destroy();
+                            if (error.code === "ECONNREFUSED") {
+                                resolve(testPort);
+                            } else {
+                                resolve(null);
+                            }
+                        },
+                    );
+                } else {
+                    socket.on(socketEvent, () => {
+                        socket.destroy();
+                        resolve(null);
+                    });
+                }
+            }
+            // connect method is asynchronous. That is why we wrap this thing inside of a promise.
+            socket.connect({ port: testPort, host: "127.0.0.1" });
+        });
+        openPort = await portConnected;
+    }
+    if (openPort === null) {
+        throw Error("All ephemeral ports in use!");
+    }
+    return openPort;
 };
 
 async function withServer(
@@ -20,9 +78,10 @@ async function withServer(
     statusCode = 200,
 ) {
     const server = new TestHttpServer();
-
-    server.listen(PORT, props, false, statusCode);
-
+    const openPort = await findOpenPort();
+    console.info(`Using port ${openPort} to run the test`);
+    server.listen(openPort, props, false, statusCode);
+    threadLocalPort.enterWith(openPort);
     try {
         await fn(server);
     } finally {
@@ -47,10 +106,11 @@ function sendRequest(
     body?: string,
 ): Promise<IncomingMessage> {
     return new Promise((resolve, reject) => {
+        const port = threadLocalPort.getStore() as number;
         const request = http.request(
             {
                 path,
-                port: PORT,
+                port,
                 method,
             },
             (response: IncomingMessage) => {
