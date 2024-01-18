@@ -1,5 +1,5 @@
 import { parseISO } from "date-fns";
-import * as CommonDateUtils from "../../src/utils/date-utils";
+import * as CommonDateUtils from "../../src/utils/date-utils.js";
 
 const ISO = "2022-01-02T01:02:03.004Z";
 

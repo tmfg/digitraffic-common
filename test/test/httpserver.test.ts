@@ -3,11 +3,11 @@ import {
     ListenProperties,
     ERROR_NO_MATCH,
     ERRORCODE_NOT_FOUND,
-} from "../../src/test/httpserver";
+} from "../../src/test/httpserver.js";
 import { IncomingMessage } from "http";
-import http = require("http");
-import net = require("net");
+import * as net from "net";
 import { AsyncLocalStorage } from "node:async_hooks";
+import * as http from "http";
 
 const threadLocalPort = new AsyncLocalStorage();
 

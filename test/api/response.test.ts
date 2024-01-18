@@ -1,8 +1,9 @@
-import { RESPONSE_DEFAULT_LAMBDA } from "../../src/aws/infra/api/response";
+import { RESPONSE_DEFAULT_LAMBDA } from "../../src/aws/infra/api/response.js";
 import etag from "etag";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
-const velocity = require("velocityjs");
+//const velocity = require("velocityjs");
+import velocity from "velocityjs"
 
 const TEST_BODY = "Hello world!";
 
@@ -63,6 +64,7 @@ describe("response tests", () => {
         });
 
         // eslint-disable-next-line
+        // @ts-ignore
         return [output as string, compile.context.context];
     }
 
