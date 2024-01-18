@@ -17,7 +17,7 @@
     "eslint-report": "eslint . --format html",
     "ci:eslint-report": "eslint . --format html -o report.html || true",
     "clean": "rimraf dist output",
-    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" pnpm dlx jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest",
+    "test": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest",
     "test:watch": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --watch",
     "prepublishOnly": "pnpm clean && pnpm build && pnpm test"
   },
