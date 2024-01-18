@@ -1,5 +1,5 @@
 import { StringParameter } from "aws-cdk-lib/aws-ssm";
-import { Construct } from "constructs/lib/construct";
+import { type Construct } from "constructs";
 
 const SSM_ROOT = "/digitraffic" as const;
 const MONITORING_ROOT = "/monitoring" as const;

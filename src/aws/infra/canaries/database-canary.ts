@@ -4,9 +4,9 @@ import { CfnCanary } from "aws-cdk-lib/aws-synthetics";
 import { Schedule } from "aws-cdk-lib/aws-events";
 import { Duration } from "aws-cdk-lib";
 
-import { CanaryParameters } from "./canary-parameters";
-import { DigitrafficCanary } from "./canary";
-import { DigitrafficStack } from "../stack/stack";
+import { CanaryParameters } from "./canary-parameters.js";
+import { DigitrafficCanary } from "./canary.js";
+import { DigitrafficStack } from "../stack/stack.js";
 
 export class DatabaseCanary extends DigitrafficCanary {
     constructor(

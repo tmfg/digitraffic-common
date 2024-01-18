@@ -1,7 +1,7 @@
-import { GenericSecret, getSecret } from "./secret";
-import { checkExpectedSecretKeys } from "./dbsecret";
-import { getEnvVariable } from "../../../utils/utils";
-import { logger } from "../dt-logger-default";
+import { GenericSecret, getSecret } from "./secret.js";
+import { checkExpectedSecretKeys } from "./dbsecret.js";
+import { getEnvVariable } from "../../../utils/utils.js";
+import { logger } from "../dt-logger-default.js";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
 const NodeTtl = require("node-ttl");

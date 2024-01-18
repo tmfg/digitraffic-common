@@ -1,7 +1,8 @@
 {
   "name": "@digitraffic/common",
-  "version": "2024.1.10-1",
+  "version": "2024.1.18-1",
   "description": "",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/tmfg/digitraffic-common.git"
@@ -27,6 +28,9 @@
     "dist/**/*.d.ts",
     "src/**/*.ts"
   ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "peerDependencies": {
     "@types/geojson": "^7946.0.12",
     "aws-cdk-lib": "^2.103.0",

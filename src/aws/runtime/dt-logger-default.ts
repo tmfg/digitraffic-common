@@ -1,9 +1,9 @@
-import { DtLogger } from "./dt-logger";
+import { DtLogger } from "./dt-logger.js";
 
 /**
  * You can use this for method name definition to match DtLogger LoggableType.method parameter.
  */
-export type { LoggerMethodType } from "./dt-logger";
+export type { LoggerMethodType } from "./dt-logger.js";
 
 /**
  * You can use this for your logging needs or create one locally and configure it as you wish.

@@ -2,15 +2,15 @@ import { Function, FunctionProps } from "aws-cdk-lib/aws-lambda";
 import { Stack } from "aws-cdk-lib";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { ComparisonOperator, Metric } from "aws-cdk-lib/aws-cloudwatch";
-import { DigitrafficStack } from "../stack/stack";
+import { DigitrafficStack } from "./stack.js";
 import { ITopic } from "aws-cdk-lib/aws-sns";
 import {
     databaseFunctionProps,
     LambdaEnvironment,
     MonitoredFunctionParameters,
-} from "../stack/lambda-configs";
-import { DigitrafficLogSubscriptions } from "../stack/subscription";
-import { TrafficType } from "../../../types/traffictype";
+} from "./lambda-configs.js";
+import { DigitrafficLogSubscriptions } from "./subscription.js";
+import { TrafficType } from "../../../types/traffictype.js";
 
 import _ from "lodash";
 

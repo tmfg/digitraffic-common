@@ -1,13 +1,13 @@
-import { MediaType } from "../../types/mediatypes";
+import { MediaType } from "../../types/mediatypes.js";
 import {
     JsonSchema,
     JsonSchemaType,
     JsonSchemaVersion,
     MethodResponse,
     Model,
+  type IModel
 } from "aws-cdk-lib/aws-apigateway";
-import { IModel } from "aws-cdk-lib/aws-apigateway/lib/model";
-import { dateFromIsoString } from "../../../utils/date-utils";
+import { dateFromIsoString } from "../../../utils/date-utils.js";
 
 /**
  * This is velocity-script, that assumes the response to be LambdaResponse(status and body).

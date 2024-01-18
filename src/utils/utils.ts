@@ -1,6 +1,6 @@
-import { AwsEnv } from "../types/aws-env";
-import { Either } from "../types/either";
-import { EnvKeys } from "../aws/runtime/environment";
+import { AwsEnv } from "../types/aws-env.js";
+import { Either } from "../types/either.js";
+import { EnvKeys } from "../aws/runtime/environment.js";
 
 /**
  * Check if arrays have only elements that also exists also in other array.

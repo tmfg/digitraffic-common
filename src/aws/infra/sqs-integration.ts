@@ -4,10 +4,10 @@ import {
     PassthroughBehavior,
     RequestValidator,
     Resource,
+  IModel
 } from "aws-cdk-lib/aws-apigateway";
 import { Queue } from "aws-cdk-lib/aws-sqs";
 import { PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
-import { IModel } from "aws-cdk-lib/aws-apigateway/lib/model";
 import { Construct } from "constructs";
 
 export function attachQueueToApiGatewayResource(
