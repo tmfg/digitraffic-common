@@ -63,7 +63,7 @@ describe("response tests", () => {
             },
         });
 
-        // @ts-ignore
+        // @ts-expect-error
         // eslint-disable-next-line
         return [output as string, compile.context.context];
     }
