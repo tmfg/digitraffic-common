@@ -21,4 +21,5 @@ module.exports = {
         "(.+)\\.js": "$1"
     },
     extensionsToTreatAsEsm: [".ts"],
+    workerIdleMemoryLimit: "1500MB"
 }

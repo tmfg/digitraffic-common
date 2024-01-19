@@ -149,8 +149,7 @@ function sendRequest(
     });
 }
 
-test("foo", () => {expect(true)})
-/*test("no calls", () => {
+test("no calls", () => {
     return withServer((server: TestHttpServer) => {
         expect(server.getCallCount()).toEqual(0);
     });
@@ -197,4 +196,4 @@ test("one post", async () => {
         expect(server.getCallCount()).toEqual(1);
         expect(server.getRequestBody(0)).toEqual(testBody);
     });
-});*/
+});
