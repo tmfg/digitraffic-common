@@ -63,7 +63,7 @@ describe("response tests", () => {
             },
         });
 
-        // @ts-expect-error
+        // @ts-expect-error: context is not in the type definition
         // eslint-disable-next-line
         return [output as string, compile.context.context];
     }
