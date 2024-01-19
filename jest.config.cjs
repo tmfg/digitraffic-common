@@ -14,12 +14,12 @@ module.exports = {
     },
     transform: {
         "\\.[jt]s?$": ["ts-jest", {
-            "useESM": true
+            useESM: true,
+            tsconfig: "<rootDir>/tsconfig.test.json"
         }],
     },
     moduleNameMapper: {
         "(.+)\\.js": "$1"
     },
-    extensionsToTreatAsEsm: [".ts"],
-    workerIdleMemoryLimit: "1500MB"
+    extensionsToTreatAsEsm: [".ts"]
 }

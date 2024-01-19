@@ -73,11 +73,13 @@ export function createFeatureCollection(
 }
 
 export function isValidGeoJson<T>(json: T): boolean {
-    return geoJsonValidator.valid(json);
+    // Tests complain about this method returning type string[] which is obviously wrong. Therefore, this casting.
+    return geoJsonValidator.valid(json) as unknown as boolean;
 }
 
 export function isFeatureCollection<T>(json: T): boolean {
-    return geoJsonValidator.isFeatureCollection(json);
+    // Tests complain about this method returning type string[] which is obviously wrong. Therefore, this casting.
+    return geoJsonValidator.isFeatureCollection(json) as unknown as boolean;
 }
 
 const DEGREES_TO_RADIANS = 0.017453292519943295; // = Math.PI / 180

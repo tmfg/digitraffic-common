@@ -16,6 +16,7 @@
 !/pnpm-lock.yaml
 !/README.md
 !/tsconfig.json
+!/tsconfig.test.json
 !/tsconfig.eslint.json
 
 !src/
