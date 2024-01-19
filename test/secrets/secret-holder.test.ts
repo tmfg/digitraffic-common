@@ -1,14 +1,14 @@
-import { mockSecret, stubSecretsManager } from "../../src/test/secrets-manager.js";
+//import { mockSecret, stubSecretsManager } from "../../src/test/secrets-manager.js";
 
-import * as sinon from "sinon";
+//import * as sinon from "sinon";
 
-const SECRET_WITH_PREFIX = {
+/*const SECRET_WITH_PREFIX = {
     "prefix.value": "value",
     "prefix.name": "name",
     "wrong.value": "value",
     username: "DB_USER",
 };
-const SECRET_EMPTY = {};
+const SECRET_EMPTY = {};*/
 
 test("foo", () => {expect(true)})
 

@@ -12,8 +12,8 @@ const logger = new DtLogger();
 describe("handler-factory tests", () => {
     test("test defaults", async () => {
         const factory = new HandlerFactory();
-        const method = jest.fn((method: any) => {
-            return method;
+        const method = jest.fn((method: unknown) => {
+            return method as Promise<LambdaResponse>;
         });
         const handler = factory.createEventHandler(method, logger);
 
@@ -29,8 +29,8 @@ describe("handler-factory tests", () => {
             }
         );
         const factory = new HandlerFactory().withLoggingHandler(loggingHandler);
-        const method = jest.fn((method: any) => {
-            return method;
+        const method = jest.fn((method: unknown) => {
+            return method as Promise<LambdaResponse>;
         });
         const handler = factory.createEventHandler(method, logger);
 
@@ -41,8 +41,8 @@ describe("handler-factory tests", () => {
     });
 
     test("test error handling", async () => {
-        const eh: ErrorHandler = jest.fn((method: any) => {
-            return method;
+        const eh: ErrorHandler = jest.fn((method: unknown) => {
+            return method as LambdaResponse;
         });
         const factory = new HandlerFactory().withErrorHandler(eh);
         const method = jest.fn(() => {
