@@ -1,9 +1,9 @@
-import { DTDatabase, inDatabaseReadonly } from "../../../database/database";
-import { ProxyHolder } from "../../runtime/secrets/proxy-holder";
-import { RdsHolder } from "../../runtime/secrets/rds-holder";
-import { getEnvVariable } from "../../../utils/utils";
-import { Countable } from "../../../database/models";
-import { logger } from "../../runtime/dt-logger-default";
+import { DTDatabase, inDatabaseReadonly } from "../../../database/database.js";
+import { ProxyHolder } from "../../runtime/secrets/proxy-holder.js";
+import { RdsHolder } from "../../runtime/secrets/rds-holder.js";
+import { getEnvVariable } from "../../../utils/utils.js";
+import { Countable } from "../../../database/models.js";
+import { logger } from "../../runtime/dt-logger-default.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const synthetics = require("Synthetics");

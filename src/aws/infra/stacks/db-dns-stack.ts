@@ -1,14 +1,14 @@
 import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib";
-import { Construct } from "constructs/lib/construct";
+import { type Construct } from "constructs";
 import {
     PrivateHostedZone,
     RecordSet,
     RecordTarget,
     RecordType,
 } from "aws-cdk-lib/aws-route53";
-import { InfraStackConfiguration } from "./intra-stack-configuration";
-import { importVpc } from "../import-util";
-import { getParameterValue } from "../stack/parameters";
+import { InfraStackConfiguration } from "./intra-stack-configuration.js";
+import { importVpc } from "../import-util.js";
+import { getParameterValue } from "../stack/parameters.js";
 
 const DEFAULT_RECORD_TTL = Duration.seconds(30);
 

@@ -4,8 +4,8 @@ import {
     PassthroughBehavior,
 } from "aws-cdk-lib/aws-apigateway";
 import { IFunction } from "aws-cdk-lib/aws-lambda";
-import { MediaType } from "../../types/mediatypes";
-import { DigitrafficIntegrationResponse } from "../../runtime/digitraffic-integration-response";
+import { MediaType } from "../../types/mediatypes.js";
+import { DigitrafficIntegrationResponse } from "../../runtime/digitraffic-integration-response.js";
 
 type ParameterType =
     | "path"

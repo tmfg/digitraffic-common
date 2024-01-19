@@ -1,4 +1,4 @@
-import { GenericSecret } from "./secret";
+import { GenericSecret } from "./secret.js";
 
 export enum RdsProxySecretKey {
     username = "username",

@@ -3,11 +3,12 @@ import {
     ListenProperties,
     ERROR_NO_MATCH,
     ERRORCODE_NOT_FOUND,
-} from "../../src/test/httpserver";
+} from "../../src/test/httpserver.js";
 import { IncomingMessage } from "http";
-import http = require("http");
-import net = require("net");
+import {Socket} from "net";
 import { AsyncLocalStorage } from "node:async_hooks";
+import * as http from "http";
+import {expect} from "@jest/globals";
 
 const threadLocalPort = new AsyncLocalStorage();
 
@@ -42,7 +43,7 @@ const findOpenPort = async (excludedPorts: Set<number>) => {
             continue;
         }
         const portConnected: Promise<number | null> = new Promise((resolve) => {
-            const socket = new net.Socket();
+            const socket = new Socket();
             socket.setTimeout(500);
             for (const socketEvent of allSocketEvents) {
                 if (socketEvent === "error") {

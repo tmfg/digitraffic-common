@@ -1,5 +1,5 @@
 import { PreparedStatement } from "pg-promise";
-import { DTDatabase, DTTransaction } from "./database";
+import { DTDatabase, DTTransaction } from "./database.js";
 
 export interface CachedValue<T> {
     content: T;

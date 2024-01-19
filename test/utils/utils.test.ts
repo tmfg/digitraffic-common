@@ -1,4 +1,4 @@
-import * as ArrayUtils from "../../src/utils/utils";
+import * as ArrayUtils from "../../src/utils/utils.js";
 
 describe("ArrayUtils", () => {
     test("bothArraysHasSameValues", () => {

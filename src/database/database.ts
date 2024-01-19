@@ -1,7 +1,7 @@
 import { IDatabase, ITask } from "pg-promise";
-import { getEnvVariable, getEnvVariableOrElse } from "../utils/utils";
-import { logger } from "../aws/runtime/dt-logger-default";
-import { logException } from "../utils/logging";
+import { getEnvVariable, getEnvVariableOrElse } from "../utils/utils.js";
+import { logger } from "../aws/runtime/dt-logger-default.js";
+import { logException } from "../utils/logging.js";
 
 export enum DatabaseEnvironmentKeys {
     DB_USER = "DB_USER",

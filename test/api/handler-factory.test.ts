@@ -1,17 +1,20 @@
-import { HandlerFactory } from "../../src/aws/infra/api/handler-factory";
+import { HandlerFactory } from "../../src/aws/infra/api/handler-factory.js";
 import {
     ErrorHandler,
     LoggingHandler,
-} from "../../src/aws/infra/api/handler-factory";
-import { DtLogger } from "../../src/aws/runtime/dt-logger";
-import { LambdaResponse } from "../../src/aws/types/lambda-response";
+} from "../../src/aws/infra/api/handler-factory.js";
+import { DtLogger } from "../../src/aws/runtime/dt-logger.js";
+import { LambdaResponse } from "../../src/aws/types/lambda-response.js";
+import {jest} from '@jest/globals';
 
 const logger = new DtLogger();
 
 describe("handler-factory tests", () => {
     test("test defaults", async () => {
         const factory = new HandlerFactory();
-        const method = jest.fn();
+        const method = jest.fn((method: unknown) => {
+            return method as Promise<LambdaResponse>;
+        });
         const handler = factory.createEventHandler(method, logger);
 
         await handler({});
@@ -26,7 +29,9 @@ describe("handler-factory tests", () => {
             }
         );
         const factory = new HandlerFactory().withLoggingHandler(loggingHandler);
-        const method = jest.fn();
+        const method = jest.fn((method: unknown) => {
+            return method as Promise<LambdaResponse>;
+        });
         const handler = factory.createEventHandler(method, logger);
 
         await handler({});
@@ -36,7 +41,9 @@ describe("handler-factory tests", () => {
     });
 
     test("test error handling", async () => {
-        const eh: ErrorHandler = jest.fn();
+        const eh: ErrorHandler = jest.fn((method: unknown) => {
+            return method as LambdaResponse;
+        });
         const factory = new HandlerFactory().withErrorHandler(eh);
         const method = jest.fn(() => {
             throw new Error("MAGIC");

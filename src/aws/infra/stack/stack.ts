@@ -1,15 +1,14 @@
 import { Aspects, Stack, StackProps } from "aws-cdk-lib";
-import { IVpc, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
-import { ISecurityGroup } from "aws-cdk-lib/aws-ec2/lib/security-group";
+import { type ISecurityGroup, IVpc, SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { ITopic, Topic } from "aws-cdk-lib/aws-sns";
 import { StringParameter } from "aws-cdk-lib/aws-ssm";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Function as AWSFunction } from "aws-cdk-lib/aws-lambda";
 
-import { StackCheckingAspect } from "./stack-checking-aspect";
+import { StackCheckingAspect } from "./stack-checking-aspect.js";
 import { Construct } from "constructs";
-import { TrafficType } from "../../../types/traffictype";
-import { DBLambdaEnvironment } from "./lambda-configs";
+import { TrafficType } from "../../../types/traffictype.js";
+import { DBLambdaEnvironment } from "./lambda-configs.js";
 
 const SSM_ROOT = "/digitraffic";
 export const SOLUTION_KEY = "Solution";
