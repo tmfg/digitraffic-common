@@ -5,8 +5,7 @@ import { getEnvVariable } from "../../../utils/utils.js";
 import { Countable } from "../../../database/models.js";
 import { logger } from "../../runtime/dt-logger-default.js";
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
-const synthetics = require("Synthetics");
+const synthetics = await import("Synthetics");
 
 abstract class DatabaseCheck<T> {
     readonly name: string;
@@ -88,7 +87,6 @@ export class DatabaseCountChecker {
 
     private constructor(credentialsFunction: () => Promise<void>) {
         this.credentialsFunction = credentialsFunction;
-
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         synthetics.getConfiguration().disableRequestMetrics();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
@@ -152,7 +150,6 @@ export class DatabaseCountChecker {
                     check.check(value);
                 };
 
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 synthetics.executeStep(check.name, checkFunction, stepConfig);
             }
         });

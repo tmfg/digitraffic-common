@@ -135,15 +135,12 @@ const bucketName = "";
 
 function createHandler(): SQSHandler {
     return async function handler(event: SQSEvent): Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
-        const AWS = require("aws-sdk");
 
         const millis = new Date().getTime();
         await Promise.all(
             event.Records.map((e: SQSRecord, idx: number) =>
                 uploadToS3(
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-                    new AWS.S3(),
+                    new S3(),
                     bucketName,
                     e.body,
                     `dlq-${millis}-${idx}.json`

@@ -3,8 +3,8 @@ import { checkExpectedSecretKeys } from "./dbsecret.js";
 import { getEnvVariable } from "../../../utils/utils.js";
 import { logger } from "../dt-logger-default.js";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
-const NodeTtl = require("node-ttl");
+const NodeTtlImport = await import("node-ttl");
+const NodeTtl = NodeTtlImport.default;
 
 const DEFAULT_PREFIX = "";
 const DEFAULT_SECRET_KEY = "SECRET";

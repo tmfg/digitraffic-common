@@ -1,9 +1,10 @@
-import { IDatabase, ITask } from "pg-promise";
+import { type IDatabase, type ITask } from "pg-promise";
+import pgPromise from "pg-promise"
 import { getEnvVariable, getEnvVariableOrElse } from "../utils/utils.js";
 import { logger } from "../aws/runtime/dt-logger-default.js";
 import { logException } from "../utils/logging.js";
 
-export enum DatabaseEnvironmentKeys {
+  export enum DatabaseEnvironmentKeys {
     DB_USER = "DB_USER",
     DB_PASS = "DB_PASS",
     DB_URI = "DB_URI",
@@ -11,8 +12,8 @@ export enum DatabaseEnvironmentKeys {
     DB_APPLICATION = "DB_APPLICATION",
 }
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-const pgp = require("pg-promise")();
+const pgpImport = await import("pg-promise");
+const pgp = pgpImport.default();
 
 // convert numeric types to number instead of string
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
