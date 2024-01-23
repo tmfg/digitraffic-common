@@ -25,9 +25,9 @@
   "license": "EUPL-1.2",
   "private": false,
   "files": [
-    "dist/**/*.js",
-    "dist/**/*.d.ts",
-    "src/**/*.ts"
+    "dist/**/*.mjs",
+    "dist/**/*.d.mts",
+    "src/**/*.mts"
   ],
   "exports": {
     ".": "./dist/index.js",
