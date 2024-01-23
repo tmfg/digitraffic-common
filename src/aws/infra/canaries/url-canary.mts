@@ -1,12 +1,12 @@
 import { Role } from "aws-cdk-lib/aws-iam";
 import { ISecret } from "aws-cdk-lib/aws-secretsmanager";
 import { CfnCanary } from "aws-cdk-lib/aws-synthetics";
-import { LambdaEnvironment } from "../stack/lambda-configs.js";
-import { DigitrafficRestApi } from "../stack/rest_apis.js";
-import { DigitrafficStack } from "../stack/stack.js";
-import { DigitrafficCanary } from "./canary.js";
-import { ENV_API_KEY, ENV_HOSTNAME, ENV_SECRET } from "./canary-keys.js";
-import { CanaryParameters } from "./canary-parameters.js";
+import { LambdaEnvironment } from "../stack/lambda-configs.mjs";
+import { DigitrafficRestApi } from "../stack/rest_apis.mjs";
+import { DigitrafficStack } from "../stack/stack.mjs";
+import { DigitrafficCanary } from "./canary.mjs";
+import { ENV_API_KEY, ENV_HOSTNAME, ENV_SECRET } from "./canary-keys.mjs";
+import { CanaryParameters } from "./canary-parameters.mjs";
 
 export interface UrlCanaryParameters extends CanaryParameters {
     readonly hostname: string;

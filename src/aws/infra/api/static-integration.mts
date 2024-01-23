@@ -4,8 +4,8 @@ import {
     PassthroughBehavior,
     Resource,
 } from "aws-cdk-lib/aws-apigateway";
-import { MediaType } from "../../types/mediatypes.js";
-import { RESPONSE_CORS_INTEGRATION } from "./responses.js";
+import { MediaType } from "../../types/mediatypes.mjs";
+import { RESPONSE_CORS_INTEGRATION } from "./responses.mjs";
 
 const INTEGRATION_RESPONSE_200 = `{
     "statusCode": 200

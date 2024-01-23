@@ -1,7 +1,7 @@
-import { SecretHolder } from "./secret-holder.js";
-import { RdsSecret, RdsSecretKey } from "./dbsecret.js";
-import { getEnvVariable } from "../../../utils/utils.js";
-import { DatabaseEnvironmentKeys } from "../../../database/database.js";
+import { SecretHolder } from "./secret-holder.mjs";
+import { RdsSecret, RdsSecretKey } from "./dbsecret.mjs";
+import { getEnvVariable } from "../../../utils/utils.mjs";
+import { DatabaseEnvironmentKeys } from "../../../database/database.mjs";
 
 const RDS_SECRET_KEYS = Object.values(RdsSecretKey);
 

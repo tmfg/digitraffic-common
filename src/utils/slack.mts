@@ -1,6 +1,6 @@
 import axios from "axios";
-import { logger } from "../aws/runtime/dt-logger-default.js";
-import { logException } from "./logging.js";
+import { logger } from "../aws/runtime/dt-logger-default.mjs";
+import { logException } from "./logging.mjs";
 
 export class SlackApi {
     private readonly url: string;

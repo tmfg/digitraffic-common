@@ -1,7 +1,7 @@
 import { Annotations, IAspect, Stack } from "aws-cdk-lib";
 import { CfnFunction, Runtime } from "aws-cdk-lib/aws-lambda";
 import { CfnBucket } from "aws-cdk-lib/aws-s3";
-import { DigitrafficStack, SOLUTION_KEY } from "./stack.js";
+import { DigitrafficStack, SOLUTION_KEY } from "./stack.mjs";
 import { IConstruct } from "constructs";
 import { CfnMethod, CfnResource } from "aws-cdk-lib/aws-apigateway";
 import { CfnQueue } from "aws-cdk-lib/aws-sqs";

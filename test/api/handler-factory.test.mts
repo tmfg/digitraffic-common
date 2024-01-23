@@ -1,10 +1,10 @@
-import { HandlerFactory } from "../../src/aws/infra/api/handler-factory.js";
+import { HandlerFactory } from "../../src/aws/infra/api/handler-factory.mjs";
 import {
     ErrorHandler,
     LoggingHandler,
-} from "../../src/aws/infra/api/handler-factory.js";
-import { DtLogger } from "../../src/aws/runtime/dt-logger.js";
-import { LambdaResponse } from "../../src/aws/types/lambda-response.js";
+} from "../../src/aws/infra/api/handler-factory.mjs";
+import { DtLogger } from "../../src/aws/runtime/dt-logger.mjs";
+import { LambdaResponse } from "../../src/aws/types/lambda-response.mjs";
 import {jest} from '@jest/globals';
 
 const logger = new DtLogger();

@@ -1,7 +1,7 @@
 let AWS = await import("aws-sdk");
 import * as sinon from "sinon";
-import { EnvKeys } from "../aws/runtime/environment.js";
-import { setEnvVariable } from "../utils/utils.js";
+import { EnvKeys } from "../aws/runtime/environment.mjs";
+import { setEnvVariable } from "../utils/utils.mjs";
 
 setEnvVariable(EnvKeys.AWS_REGION, "eu-west-1");
 const secretValue = sinon.stub();

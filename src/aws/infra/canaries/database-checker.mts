@@ -1,9 +1,9 @@
-import { DTDatabase, inDatabaseReadonly } from "../../../database/database.js";
-import { ProxyHolder } from "../../runtime/secrets/proxy-holder.js";
-import { RdsHolder } from "../../runtime/secrets/rds-holder.js";
-import { getEnvVariable } from "../../../utils/utils.js";
-import { Countable } from "../../../database/models.js";
-import { logger } from "../../runtime/dt-logger-default.js";
+import { DTDatabase, inDatabaseReadonly } from "../../../database/database.mjs";
+import { ProxyHolder } from "../../runtime/secrets/proxy-holder.mjs";
+import { RdsHolder } from "../../runtime/secrets/rds-holder.mjs";
+import { getEnvVariable } from "../../../utils/utils.mjs";
+import { Countable } from "../../../database/models.mjs";
+import { logger } from "../../runtime/dt-logger-default.mjs";
 
 const synthetics = await import("Synthetics");
 

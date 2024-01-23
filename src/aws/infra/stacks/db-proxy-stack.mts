@@ -7,12 +7,12 @@ import {
 } from "aws-cdk-lib/aws-rds";
 import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { IVpc, SecurityGroup } from "aws-cdk-lib/aws-ec2";
-import { InfraStackConfiguration } from "./intra-stack-configuration.js";
-import { DbStack } from "./db-stack.js";
-import { exportValue, importVpc } from "../import-util.js";
-import { createParameter } from "../stack/parameters.js";
+import { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
+import { DbStack } from "./db-stack.mjs";
+import { exportValue, importVpc } from "../import-util.mjs";
+import { createParameter } from "../stack/parameters.mjs";
 import { Stack, Duration } from "aws-cdk-lib/core";
-import { Construct } from "constructs/lib/construct.js";
+import { Construct } from "constructs/lib/construct.mjs";
 
 export interface ProxyConfiguration {
     readonly secretArn: string;

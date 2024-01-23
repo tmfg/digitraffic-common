@@ -1,6 +1,6 @@
 import { SecretsManager } from "aws-sdk";
-import { getEnvVariable, getEnvVariableOrElse } from "../../../utils/utils.js";
-import { EnvKeys } from "../environment.js";
+import { getEnvVariable, getEnvVariableOrElse } from "../../../utils/utils.mjs";
+import { EnvKeys } from "../environment.mjs";
 
 // SECRET_OVERRIDE_AWS_REGION might not have been set before import of
 // secret, so we need to lazy initialize SecretsManager

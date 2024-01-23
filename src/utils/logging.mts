@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
-import { DtLogger } from "../aws/runtime/dt-logger.js";
-import { getEnvVariableOrElse } from "./utils.js";
+import { DtLogger } from "../aws/runtime/dt-logger.mjs";
+import { getEnvVariableOrElse } from "./utils.mjs";
 
 const functionName = getEnvVariableOrElse("AWS_LAMBDA_FUNCTION_NAME", "test");
 

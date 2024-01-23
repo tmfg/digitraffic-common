@@ -10,7 +10,7 @@
 !/.npmrc
 !/.prettierignore
 !/.prettierrc.json
-!/jest.config.cjs
+!/jest.config.mjs
 !/LICENSE
 !/package.json
 !/pnpm-lock.yaml

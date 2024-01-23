@@ -1,6 +1,6 @@
-import { HttpError } from "../types/http-error.js";
-import { AsyncTimeoutError } from "../types/async-timeout-error.js";
-import { logger } from "../aws/runtime/dt-logger-default.js";
+import { HttpError } from "../types/http-error.mjs";
+import { AsyncTimeoutError } from "../types/async-timeout-error.mjs";
+import { logger } from "../aws/runtime/dt-logger-default.mjs";
 
 export enum RetryLogError {
     LOG_ALL_AS_ERRORS,

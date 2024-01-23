@@ -9,8 +9,8 @@ import { Duration } from "aws-cdk-lib";
 import { IVpc, SubnetSelection } from "aws-cdk-lib/aws-ec2";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { Role } from "aws-cdk-lib/aws-iam";
-import { DigitrafficStack } from "./stack.js";
-import { MonitoredFunctionAlarmProps } from "./monitoredfunction.js";
+import { DigitrafficStack } from "./stack.mjs";
+import { MonitoredFunctionAlarmProps } from "./monitoredfunction.mjs";
 
 export type LambdaEnvironment = Record<string, string>;
 

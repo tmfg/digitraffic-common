@@ -6,9 +6,9 @@ import {
     RecordTarget,
     RecordType,
 } from "aws-cdk-lib/aws-route53";
-import { InfraStackConfiguration } from "./intra-stack-configuration.js";
-import { importVpc } from "../import-util.js";
-import { getParameterValue } from "../stack/parameters.js";
+import { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
+import { importVpc } from "../import-util.mjs";
+import { getParameterValue } from "../stack/parameters.mjs";
 
 const DEFAULT_RECORD_TTL = Duration.seconds(30);
 

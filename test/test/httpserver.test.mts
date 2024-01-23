@@ -3,7 +3,7 @@ import {
     ListenProperties,
     ERROR_NO_MATCH,
     ERRORCODE_NOT_FOUND,
-} from "../../src/test/httpserver.js";
+} from "../../src/test/httpserver.mjs";
 import { IncomingMessage } from "http";
 import {Socket} from "net";
 import { AsyncLocalStorage } from "node:async_hooks";

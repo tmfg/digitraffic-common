@@ -17,12 +17,12 @@ import {
     IParameterGroup,
     ParameterGroup,
 } from "aws-cdk-lib/aws-rds";
-import { Construct } from "constructs/lib/construct.js";
+import { Construct } from "constructs/lib/construct.mjs";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
-import { InfraStackConfiguration } from "./intra-stack-configuration.js";
-import { exportValue, importVpc } from "../import-util.js";
+import { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
+import { exportValue, importVpc } from "../import-util.mjs";
 import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib/core";
-import { createParameter } from "../stack/parameters.js";
+import { createParameter } from "../stack/parameters.mjs";
 
 export interface DbConfiguration {
     readonly cluster?: ClusterConfiguration;

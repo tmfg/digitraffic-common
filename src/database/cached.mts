@@ -1,5 +1,5 @@
 import pg from "pg-promise";
-import { DTDatabase, DTTransaction } from "./database.js";
+import { DTDatabase, DTTransaction } from "./database.mjs";
 
 const { PreparedStatement } = pg;
 

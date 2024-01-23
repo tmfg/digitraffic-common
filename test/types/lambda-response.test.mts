@@ -1,4 +1,4 @@
-import { LambdaResponse } from "../../src/aws/types/lambda-response.js";
+import { LambdaResponse } from "../../src/aws/types/lambda-response.mjs";
 
 describe("lambda-response", () => {
     const TEST_MESSAGE = "HELLO";

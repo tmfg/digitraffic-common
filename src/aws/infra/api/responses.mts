@@ -3,7 +3,7 @@ import {
     XmlResponseTemplate,
     NotFoundResponseTemplate,
     BadRequestResponseTemplate,
-} from "./response.js";
+} from "./response.mjs";
 import {
     LambdaIntegration,
     MethodResponse,
@@ -16,8 +16,8 @@ import {
     BAD_REQUEST_MESSAGE,
     ERROR_MESSAGE,
     NOT_FOUND_MESSAGE,
-} from "../../types/errors.js";
-import { MediaType } from "../../types/mediatypes.js";
+} from "../../types/errors.mjs";
+import { MediaType } from "../../types/mediatypes.mjs";
 
 /// @deprecated
 export const RESPONSE_200_OK: IntegrationResponse = {

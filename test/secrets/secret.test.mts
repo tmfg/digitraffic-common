@@ -1,4 +1,4 @@
-//import { mockSecret, stubSecretsManager } from "../../src/test/secrets-manager.js";
+//import { mockSecret, stubSecretsManager } from "../../src/test/secrets-manager.mjs";
 
 //import * as sinon from "sinon";
 

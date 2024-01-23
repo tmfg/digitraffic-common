@@ -19,12 +19,12 @@ import {
     PolicyStatement,
 } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
-import { getModelReference } from "../../../utils/api-model.js";
-import { MediaType } from "../../types/mediatypes.js";
-import { ModelWithReference } from "../../types/model-with-reference.js";
-import { DocumentationPart, DocumentationProperties } from "../documentation.js";
-import { createDefaultUsagePlan, createUsagePlan } from "../usage-plans.js";
-import { DigitrafficStack } from "./stack.js";
+import { getModelReference } from "../../../utils/api-model.mjs";
+import { MediaType } from "../../types/mediatypes.mjs";
+import { ModelWithReference } from "../../types/model-with-reference.mjs";
+import { DocumentationPart, DocumentationProperties } from "../documentation.mjs";
+import { createDefaultUsagePlan, createUsagePlan } from "../usage-plans.mjs";
+import { DigitrafficStack } from "./stack.mjs";
 
 import _ from "lodash";
 

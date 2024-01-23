@@ -1,4 +1,4 @@
-//import { mockSecret, stubSecretsManager } from "../../src/test/secrets-manager.js";
+//import { mockSecret, stubSecretsManager } from "../../src/test/secrets-manager.mjs";
 
 //import * as sinon from "sinon";
 
@@ -14,8 +14,8 @@ test("foo", () => {expect(true)})
 
 /*const stubSM = stubSecretsManager();
 
-import { SecretHolder } from "../../src/aws/runtime/secrets/secret-holder.js";
-import { DatabaseEnvironmentKeys } from "../../src/database/database.js";
+import { SecretHolder } from "../../src/aws/runtime/secrets/secret-holder.mjs";
+import { DatabaseEnvironmentKeys } from "../../src/database/database.mjs";
 
 describe("SecretHolder - tests", () => {
     beforeEach(() => {

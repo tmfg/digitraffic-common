@@ -1,7 +1,7 @@
-import { GenericSecret, getSecret } from "./secret.js";
-import { checkExpectedSecretKeys } from "./dbsecret.js";
-import { getEnvVariable } from "../../../utils/utils.js";
-import { logger } from "../dt-logger-default.js";
+import { GenericSecret, getSecret } from "./secret.mjs";
+import { checkExpectedSecretKeys } from "./dbsecret.mjs";
+import { getEnvVariable } from "../../../utils/utils.mjs";
+import { logger } from "../dt-logger-default.mjs";
 
 const NodeTtlImport = await import("node-ttl");
 const NodeTtl = NodeTtlImport.default;

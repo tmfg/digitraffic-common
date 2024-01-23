@@ -10,8 +10,8 @@ import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { S3, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { SQSEvent, SQSHandler, SQSRecord } from "aws-lambda";
-import { DigitrafficStack } from "./stack/stack.js";
-import { MonitoredFunction } from "./stack/monitoredfunction.js";
+import { DigitrafficStack } from "./stack/stack.mjs";
+import { MonitoredFunction } from "./stack/monitoredfunction.mjs";
 
 /**
  * Construct for creating SQS-queues.

@@ -1,17 +1,17 @@
 import { IncomingMessage, RequestOptions } from "http";
-import { Asserter } from "../../../test/asserter.js";
+import { Asserter } from "../../../test/asserter.mjs";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 const synthetics = await import("Synthetics");
 import zlib = require("zlib");
-import { MediaType } from "../../types/mediatypes.js";
-import { getApiKeyFromAPIGateway } from "../../runtime/apikey.js";
+import { MediaType } from "../../types/mediatypes.mjs";
+import { getApiKeyFromAPIGateway } from "../../runtime/apikey.mjs";
 import { FeatureCollection } from "geojson";
-import { isValidGeoJson } from "../../../utils/geometry.js";
-import { getEnvVariable } from "../../../utils/utils.js";
-import { ENV_API_KEY, ENV_HOSTNAME } from "./canary-keys.js";
-import { logger } from "../../runtime/dt-logger-default.js";
-import { logException } from "../../../utils/logging.js";
+import { isValidGeoJson } from "../../../utils/geometry.mjs";
+import { getEnvVariable } from "../../../utils/utils.mjs";
+import { ENV_API_KEY, ENV_HOSTNAME } from "./canary-keys.mjs";
+import { logger } from "../../runtime/dt-logger-default.mjs";
+import { logException } from "../../../utils/logging.mjs";
 
 export const API_KEY_HEADER = "x-api-key";
 

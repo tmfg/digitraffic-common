@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
 import { Writable } from "stream";
-import { DtLogger } from "../../src/aws/runtime/dt-logger.js";
-import { logException } from "../../src/utils/logging.js";
+import { DtLogger } from "../../src/aws/runtime/dt-logger.mjs";
+import { logException } from "../../src/utils/logging.mjs";
 
 interface ErrorLogLine {
     type: string;

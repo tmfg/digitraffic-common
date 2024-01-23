@@ -1,9 +1,9 @@
-module.exports = {
+const config = {
     roots: [
         '<rootDir>/test',
     ],
     testMatch: [
-        '**/*.test.ts',
+        "**/?(*.)+(spec|test).m[jt]s?(x)"
     ],
     testResultsProcessor: 'jest-junit',
     preset: 'ts-jest',
@@ -13,13 +13,16 @@ module.exports = {
         },
     },
     transform: {
-        "\\.[jt]s?$": ["ts-jest", {
+        "\\.m[jt]s?$": ["ts-jest", {
             useESM: true,
             tsconfig: "<rootDir>/tsconfig.test.json"
         }],
     },
     moduleNameMapper: {
-        "(.+)\\.js": "$1"
+        "(.+)\\.mjs": "$1"
     },
-    extensionsToTreatAsEsm: [".ts"]
+    extensionsToTreatAsEsm: [".mts"],
+    moduleFileExtensions: ["js", "mts", "mjs"]
 }
+
+export default config;

@@ -1,6 +1,6 @@
 import { Writable } from "stream";
-import { DtLogger, LoggerConfiguration } from "../../src/aws/runtime/dt-logger.js";
-import { LoggableType } from "../../src/aws/runtime/dt-logger.js";
+import { DtLogger, LoggerConfiguration } from "../../src/aws/runtime/dt-logger.mjs";
+import { LoggableType } from "../../src/aws/runtime/dt-logger.mjs";
 
 const LOG_LINE: LoggableType = {
     method: "dt-logger.test",
