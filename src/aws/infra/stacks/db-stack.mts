@@ -17,7 +17,7 @@ import {
     IParameterGroup,
     ParameterGroup,
 } from "aws-cdk-lib/aws-rds";
-import { Construct } from "constructs/lib/construct.mjs";
+import { Construct } from "constructs/lib/construct.js";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
 import { exportValue, importVpc } from "../import-util.mjs";

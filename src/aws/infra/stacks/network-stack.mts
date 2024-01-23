@@ -2,7 +2,7 @@ import { IpAddresses, IVpc, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
 import { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
 import { exportValue } from "../import-util.mjs";
 import { Stack } from "aws-cdk-lib/core";
-import { Construct } from "constructs/lib/construct.mjs";
+import { Construct } from "constructs/lib/construct.js";
 
 export interface NetworkConfiguration {
     readonly vpcName: string;
