@@ -17,6 +17,6 @@
     "noFallthroughCasesInSwitch": true,
     "experimentalDecorators": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.mts"],
   "$schema": "https://json.schemastore.org/tsconfig"
 }
