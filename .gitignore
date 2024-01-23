@@ -22,10 +22,12 @@
 !src/
 !src/**/
 !src/**/*.ts
+!src/**/*.mts
 
 !test/
 !test/**/
 !test/**/*.ts
+!test/**/*.mts
 
 !.github/
 !.github/**/
