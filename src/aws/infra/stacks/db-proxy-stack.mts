@@ -12,7 +12,7 @@ import { DbStack } from "./db-stack.mjs";
 import { exportValue, importVpc } from "../import-util.mjs";
 import { createParameter } from "../stack/parameters.mjs";
 import { Stack, Duration } from "aws-cdk-lib/core";
-import { Construct } from "constructs/lib/construct.mjs";
+import { Construct } from "constructs/lib/construct.js";
 
 export interface ProxyConfiguration {
     readonly secretArn: string;
