@@ -7,9 +7,9 @@
 !/dist/
 !/dist/**/
 !/dist/**/*.json
-!/dist/**/*.js
-!/dist/**/*.d.ts
+!/dist/**/*.mjs
+!/dist/**/*.d.mts
 
 !/src/
 !/src/**/
-!/src/**/*.ts
+!/src/**/*.mts
