@@ -1,4 +1,4 @@
-let AWS = await import("aws-sdk");
+const AWS = await import("aws-sdk");
 import * as sinon from "sinon";
 import { EnvKeys } from "../aws/runtime/environment.mjs";
 import { setEnvVariable } from "../utils/utils.mjs";

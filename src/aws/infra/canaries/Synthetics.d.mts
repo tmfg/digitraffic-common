@@ -17,5 +17,5 @@ declare module 'Synthetics' {
     ): Promise<void>;
     export function getConfiguration(): SyntheticsConfiguration;
 
-    export function executeStep(s: string, f: Function, c: Record<string, boolean>)
+    export function executeStep(s: string, f: ()=>void, c: Record<string, boolean>)
 };

@@ -4,6 +4,7 @@ import { getEnvVariable } from "../../../utils/utils.mjs";
 import { logger } from "../dt-logger-default.mjs";
 
 const NodeTtlImport = await import("node-ttl");
+//eslint-disable-next-line
 const NodeTtl = NodeTtlImport.default;
 
 const DEFAULT_PREFIX = "";
@@ -96,14 +97,12 @@ export class SecretHolder<Secret extends GenericSecret> {
     }
 
     private async getSecret<S>(): Promise<S> {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         const secret: S | undefined = this.secretCache.get(DEFAULT_SECRET_KEY);
 
         if (!secret) {
             await this.initSecret();
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        return secret ?? (this.secretCache.get(DEFAULT_SECRET_KEY) as S);
+        return secret ?? (this.secretCache.get(DEFAULT_SECRET_KEY));
     }
 }

@@ -1,8 +1,8 @@
 {
   "env": {
     "browser": false,
-    "commonjs": true,
-    "es2021": true
+    "commonjs": false,
+    "es2022": true
   },
   "root": true,
   "parser": "@typescript-eslint/parser",
