@@ -5,7 +5,7 @@ import { getEnvVariable } from "../../../utils/utils.mjs";
 import { Countable } from "../../../database/models.mjs";
 import { logger } from "../../runtime/dt-logger-default.mjs";
 
-const synthetics = await import("Synthetics");
+import synthetics from "Synthetics";
 
 abstract class DatabaseCheck<T> {
     readonly name: string;
