@@ -3,7 +3,7 @@ import { Asserter } from "../../../test/asserter.mjs";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 import synthetics from "Synthetics";
-import zlib = require("zlib");
+import zlib from "zlib";
 import { MediaType } from "../../types/mediatypes.mjs";
 import { getApiKeyFromAPIGateway } from "../../runtime/apikey.mjs";
 import { FeatureCollection } from "geojson";
