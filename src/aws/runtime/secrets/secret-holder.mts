@@ -3,9 +3,7 @@ import { checkExpectedSecretKeys } from "./dbsecret.mjs";
 import { getEnvVariable } from "../../../utils/utils.mjs";
 import { logger } from "../dt-logger-default.mjs";
 
-const NodeTtlImport = await import("node-ttl");
-//eslint-disable-next-line
-const NodeTtl = NodeTtlImport.default;
+import NodeTtl from "node-ttl";
 
 const DEFAULT_PREFIX = "";
 const DEFAULT_SECRET_KEY = "SECRET";

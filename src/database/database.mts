@@ -10,9 +10,8 @@ export enum DatabaseEnvironmentKeys {
     DB_RO_URI = "DB_RO_URI",
     DB_APPLICATION = "DB_APPLICATION",
 }
-
-const pgpImport = await import("pg-promise");
-const pgp = pgpImport.default();
+import pgpImport from "pg-promise";
+const pgp = pgpImport();
 
 // convert numeric types to number instead of string
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
