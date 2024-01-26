@@ -1,169 +1,413 @@
-test("Importit ok?", async () => {
-  const index = import("../index.mjs");
-const database = import("../database/database.mjs");
-const cached = import("../database/cached.mjs");
-const models = import("../database/models.mjs");
-const lastUpdated = import("../database/last-updated.mjs");
-const urn = import("../types/urn.mjs");
-const utilTypes = import("../types/util-types.mjs");
-const either = import("../types/either.mjs");
-const validator = import("../types/validator.mjs");
-const nullable = import("../types/nullable.mjs");
-const awsEnv = import("../types/aws-env.mjs");
-const asyncTimeoutError = import("../types/async-timeout-error.mjs");
-const inputError = import("../types/input-error.mjs");
-const httpError = import("../types/http-error.mjs");
-const language = import("../types/language.mjs");
-const traffictype = import("../types/traffictype.mjs");
-const testutils = import("../test/testutils.mjs");
-const dbTestutils = import("../test/db-testutils.mjs");
-const httpserver = import("../test/httpserver.mjs");
-const secretsManager = import("../test/secrets-manager.mjs");
-const asserter = import("../test/asserter.mjs");
-const rtz = import("../marine/rtz.mjs");
-const idUtils = import("../marine/id_utils.mjs");
-const apiModel = import("../utils/api-model.mjs");
-const logging = import("../utils/logging.mjs");
-const base64 = import("../utils/base64.mjs");
-const dateUtils = import("../utils/date-utils.mjs");
-const geojsonTypes = import("../utils/geojson-types.mjs");
-const slack = import("../utils/slack.mjs");
-const utils = import("../utils/utils.mjs");
-const retry = import("../utils/retry.mjs");
-const geometry = import("../utils/geometry.mjs");
-const sqsIntegration = import("../aws/infra/sqs-integration.mjs");
-const networkStack = import("../aws/infra/stacks/network-stack.mjs");
-const dbStack = import("../aws/infra/stacks/db-stack.mjs");
-const dbProxyStack = import("../aws/infra/stacks/db-proxy-stack.mjs");
-const intraStackConfiguration = import("../aws/infra/stacks/intra-stack-configuration.mjs");
-const dbDnsStack = import("../aws/infra/stacks/db-dns-stack.mjs");
-const documentation = import("../aws/infra/documentation.mjs");
-const usagePlans = import("../aws/infra/usage-plans.mjs");
-const scheduler = import("../aws/infra/scheduler.mjs");
-const importUtil = import("../aws/infra/import-util.mjs");
-const sqsQueue = import("../aws/infra/sqs-queue.mjs");
-const response = import("../aws/infra/api/response.mjs");
-const staticIntegration = import("../aws/infra/api/static-integration.mjs");
-const responses = import("../aws/infra/api/responses.mjs");
-const handlerFactory = import("../aws/infra/api/handler-factory.mjs");
-const integration = import("../aws/infra/api/integration.mjs");
-const stackCheckingAspect = import("../aws/infra/stack/stack-checking-aspect.mjs");
-const restApis = import("../aws/infra/stack/rest_apis.mjs");
-const lambdaConfigs = import("../aws/infra/stack/lambda-configs.mjs");
-const monitoredfunction = import("../aws/infra/stack/monitoredfunction.mjs");
-const subscription = import("../aws/infra/stack/subscription.mjs");
-const parameters = import("../aws/infra/stack/parameters.mjs");
-const stack = import("../aws/infra/stack/stack.mjs");
-const securityRule = import("../aws/infra/security-rule.mjs");
-//const databaseChecker = import("../aws/infra/canaries/database-checker.mjs");
-const canary = import("../aws/infra/canaries/canary.mjs");
-//const urlChecker = import("../aws/infra/canaries/url-checker.mjs");
-const databaseCanary = import("../aws/infra/canaries/database-canary.mjs");
-const canaryAlarm = import("../aws/infra/canaries/canary-alarm.mjs");
-const canaryRole = import("../aws/infra/canaries/canary-role.mjs");
-const urlCanary = import("../aws/infra/canaries/url-canary.mjs");
-const canaryParameters = import("../aws/infra/canaries/canary-parameters.mjs");
-const canaryKeys = import("../aws/infra/canaries/canary-keys.mjs");
-const proxytypes = import("../aws/types/proxytypes.mjs");
-const tags = import("../aws/types/tags.mjs");
-const mediatypes = import("../aws/types/mediatypes.mjs");
-const modelWithReference = import("../aws/types/model-with-reference.mjs");
-const errors= import("../aws/types/errors.mjs");
-const lambdaResponse = import("../aws/types/lambda-response.mjs");
-const dtLoggerDefault = import("../aws/runtime/dt-logger-default.mjs");
-const secret = import("../aws/runtime/secrets/secret.mjs");
-const proxyHolder = import("../aws/runtime/secrets/proxy-holder.mjs");
-const dbsecret = import("../aws/runtime/secrets/dbsecret.mjs");
-const rdsHolder = import("../aws/runtime/secrets/rds-holder.mjs");
-const secretHolder = import("../aws/runtime/secrets/secret-holder.mjs");
-const dtLogger = import("../aws/runtime/dt-logger.mjs");
-const s3 = import("../aws/runtime/s3.mjs");
-const messaging = import("../aws/runtime/messaging.mjs");
-const apikey = import("../aws/runtime/apikey.mjs");
-const environment = import("../aws/runtime/environment.mjs");
-const digitrafficIntegrationResponse = import("../aws/runtime/digitraffic-integration-response.mjs");
+import {expect} from "@jest/globals";
 
-  await expect(index).resolves.toBeDefined();
-  await expect(database).resolves.toBeDefined();
-  await expect(cached).resolves.toBeDefined();
-  await expect(models).resolves.toBeDefined();
-  await expect(lastUpdated).resolves.toBeDefined();
-  await expect(urn).resolves.toBeDefined();
-  await expect(utilTypes).resolves.toBeDefined();
-  await expect(either).resolves.toBeDefined();
-  await expect(validator).resolves.toBeDefined();
-  await expect(nullable).resolves.toBeDefined();
-  await expect(awsEnv).resolves.toBeDefined();
-  await expect(asyncTimeoutError).resolves.toBeDefined();
-  await expect(inputError).resolves.toBeDefined();
-  await expect(httpError).resolves.toBeDefined();
-  await expect(language).resolves.toBeDefined();
-  await expect(traffictype).resolves.toBeDefined();
-  await expect(testutils).resolves.toBeDefined();
-  await expect(dbTestutils).resolves.toBeDefined();
-  await expect(httpserver).resolves.toBeDefined();
-  await expect(secretsManager).resolves.toBeDefined();
-  await expect(asserter).resolves.toBeDefined();
-  await expect(rtz).resolves.toBeDefined();
-  await expect(idUtils).resolves.toBeDefined();
-  await expect(apiModel).resolves.toBeDefined();
-  await expect(logging).resolves.toBeDefined();
-  await expect(base64).resolves.toBeDefined();
-  await expect(dateUtils).resolves.toBeDefined();
-  await expect(geojsonTypes).resolves.toBeDefined();
-  await expect(slack).resolves.toBeDefined();
-  await expect(utils).resolves.toBeDefined();
-  await expect(retry).resolves.toBeDefined();
-  await expect(geometry).resolves.toBeDefined();
-  await expect(sqsIntegration).resolves.toBeDefined();
-  await expect(networkStack).resolves.toBeDefined();
-  await expect(dbStack).resolves.toBeDefined();
-  await expect(dbProxyStack).resolves.toBeDefined();
-  await expect(intraStackConfiguration).resolves.toBeDefined();
-  await expect(dbDnsStack).resolves.toBeDefined();
-  await expect(documentation).resolves.toBeDefined();
-  await expect(usagePlans).resolves.toBeDefined();
-  await expect(scheduler).resolves.toBeDefined();
-  await expect(importUtil).resolves.toBeDefined();
-  await expect(sqsQueue).resolves.toBeDefined();
-  await expect(response).resolves.toBeDefined();
-  await expect(staticIntegration).resolves.toBeDefined();
-  await expect(responses).resolves.toBeDefined();
-  await expect(handlerFactory).resolves.toBeDefined();
-  await expect(integration).resolves.toBeDefined();
-  await expect(stackCheckingAspect).resolves.toBeDefined();
-  await expect(restApis).resolves.toBeDefined();
-  await expect(lambdaConfigs).resolves.toBeDefined();
-  await expect(monitoredfunction).resolves.toBeDefined();
-  await expect(subscription).resolves.toBeDefined();
-  await expect(parameters).resolves.toBeDefined();
-  await expect(stack).resolves.toBeDefined();
-  await expect(securityRule).resolves.toBeDefined();
-  //await expect(databaseChecker).resolves.toBeDefined();
-  await expect(canary).resolves.toBeDefined();
-  //await expect(urlChecker).resolves.toBeDefined();
-  await expect(databaseCanary).resolves.toBeDefined();
-  await expect(canaryAlarm).resolves.toBeDefined();
-  await expect(canaryRole).resolves.toBeDefined();
-  await expect(urlCanary).resolves.toBeDefined();
-  await expect(canaryParameters).resolves.toBeDefined();
-  await expect(canaryKeys).resolves.toBeDefined();
-  await expect(proxytypes).resolves.toBeDefined();
-  await expect(tags).resolves.toBeDefined();
-  await expect(mediatypes).resolves.toBeDefined();
-  await expect(modelWithReference).resolves.toBeDefined();
-  await expect(errors).resolves.toBeDefined();
-  await expect(lambdaResponse).resolves.toBeDefined();
-  await expect(dtLoggerDefault).resolves.toBeDefined();
-  await expect(secret).resolves.toBeDefined();
-  await expect(proxyHolder).resolves.toBeDefined();
-  await expect(dbsecret).resolves.toBeDefined();
-  await expect(rdsHolder).resolves.toBeDefined();
-  await expect(secretHolder).resolves.toBeDefined();
-  await expect(dtLogger).resolves.toBeDefined();
-  await expect(s3).resolves.toBeDefined();
-  await expect(messaging).resolves.toBeDefined();
-  await expect(apikey).resolves.toBeDefined();
-  await expect(environment).resolves.toBeDefined();
-  await expect(digitrafficIntegrationResponse).resolves.toBeDefined();
-})
+test("index import ok?", () => {
+  const index = import("../index.mjs");
+  return expect(index).resolves.toBeDefined();
+});
+
+test('database import ok?', () => {
+  const database = import("../database/database.mjs");
+  return expect(database).resolves.toBeDefined();
+});
+
+test('cached import ok?', () => {
+  const cached = import("../database/cached.mjs");
+  return expect(cached).resolves.toBeDefined();
+});
+
+test('models import ok?', () => {
+  const models = import("../database/models.mjs");
+  return expect(models).resolves.toBeDefined();
+});
+
+test('lastUpdated import ok?', () => {
+  const lastUpdated = import("../database/last-updated.mjs");
+  return expect(lastUpdated).resolves.toBeDefined();
+});
+
+test('urn import ok?', () => {
+  const urn = import("../types/urn.mjs");
+  return expect(urn).resolves.toBeDefined();
+});
+
+test('utilTypes import ok?', () => {
+  const utilTypes = import("../types/util-types.mjs");
+  return expect(utilTypes).resolves.toBeDefined();
+});
+
+test('either import ok?', () => {
+  const either = import("../types/either.mjs");
+  return expect(either).resolves.toBeDefined();
+});
+
+test('validator import ok?', () => {
+  const validator = import("../types/validator.mjs");
+  return expect(validator).resolves.toBeDefined();
+});
+
+test('nullable import ok?', () => {
+  const nullable = import("../types/nullable.mjs");
+  return expect(nullable).resolves.toBeDefined();
+});
+
+test('awsEnv import ok?', () => {
+  const awsEnv = import("../types/aws-env.mjs");
+  return expect(awsEnv).resolves.toBeDefined();
+});
+
+test('asyncTimeoutError import ok?', () => {
+  const asyncTimeoutError = import("../types/async-timeout-error.mjs");
+  return expect(asyncTimeoutError).resolves.toBeDefined();
+});
+
+test('inputError import ok?', () => {
+  const inputError = import("../types/input-error.mjs");
+  return expect(inputError).resolves.toBeDefined();
+});
+
+test('httpError import ok?', () => {
+  const httpError = import("../types/http-error.mjs");
+  return expect(httpError).resolves.toBeDefined();
+});
+
+test('language import ok?', () => {
+  const language = import("../types/language.mjs");
+  return expect(language).resolves.toBeDefined();
+});
+
+test('traffictype import ok?', () => {
+  const traffictype = import("../types/traffictype.mjs");
+  return expect(traffictype).resolves.toBeDefined();
+});
+
+test('testutils import ok?', () => {
+  const testutils = import("../test/testutils.mjs");
+  return expect(testutils).resolves.toBeDefined();
+});
+
+test('dbTestutils import ok?', () => {
+  const dbTestutils = import("../test/db-testutils.mjs");
+  return expect(dbTestutils).resolves.toBeDefined();
+});
+
+test('httpserver import ok?', () => {
+  const httpserver = import("../test/httpserver.mjs");
+  return expect(httpserver).resolves.toBeDefined();
+});
+
+test('secretsManager import ok?', () => {
+  const secretsManager = import("../test/secrets-manager.mjs");
+  return expect(secretsManager).resolves.toBeDefined();
+});
+
+test('asserter import ok?', () => {
+  const asserter = import("../test/asserter.mjs");
+  return expect(asserter).resolves.toBeDefined();
+});
+
+test('rtz import ok?', () => {
+  const rtz = import("../marine/rtz.mjs");
+  return expect(rtz).resolves.toBeDefined();
+});
+
+test('idUtils import ok?', () => {
+  const idUtils = import("../marine/id_utils.mjs");
+  return expect(idUtils).resolves.toBeDefined();
+});
+
+test('apiModel import ok?', () => {
+  const apiModel = import("../utils/api-model.mjs");
+  return expect(apiModel).resolves.toBeDefined();
+});
+
+test('logging import ok?', () => {
+  const logging = import("../utils/logging.mjs");
+  return expect(logging).resolves.toBeDefined();
+});
+
+test('base64 import ok?', () => {
+  const base64 = import("../utils/base64.mjs");
+  return expect(base64).resolves.toBeDefined();
+});
+
+test('dateUtils import ok?', () => {
+  const dateUtils = import("../utils/date-utils.mjs");
+  return expect(dateUtils).resolves.toBeDefined();
+});
+
+test('geojsonTypes import ok?', () => {
+  const geojsonTypes = import("../utils/geojson-types.mjs");
+  return expect(geojsonTypes).resolves.toBeDefined();
+});
+
+test('slack import ok?', () => {
+  const slack = import("../utils/slack.mjs");
+  return expect(slack).resolves.toBeDefined();
+});
+
+test('utils import ok?', () => {
+  const utils = import("../utils/utils.mjs");
+  return expect(utils).resolves.toBeDefined();
+});
+
+test('retry import ok?', () => {
+  const retry = import("../utils/retry.mjs");
+  return expect(retry).resolves.toBeDefined();
+});
+
+test('geometry import ok?', () => {
+  const geometry = import("../utils/geometry.mjs");
+  return expect(geometry).resolves.toBeDefined();
+});
+
+test('sqsIntegration import ok?', () => {
+  const sqsIntegration = import("../aws/infra/sqs-integration.mjs");
+  return expect(sqsIntegration).resolves.toBeDefined();
+});
+
+test('networkStack import ok?', () => {
+  const networkStack = import("../aws/infra/stacks/network-stack.mjs");
+  return expect(networkStack).resolves.toBeDefined();
+});
+
+test('dbStack import ok?', () => {
+  const dbStack = import("../aws/infra/stacks/db-stack.mjs");
+  return expect(dbStack).resolves.toBeDefined();
+});
+
+test('dbProxyStack import ok?', () => {
+  const dbProxyStack = import("../aws/infra/stacks/db-proxy-stack.mjs");
+  return expect(dbProxyStack).resolves.toBeDefined();
+});
+
+test('intraStackConfiguration import ok?', () => {
+  const intraStackConfiguration = import("../aws/infra/stacks/intra-stack-configuration.mjs");
+  return expect(intraStackConfiguration).resolves.toBeDefined();
+});
+
+test('dbDnsStack import ok?', () => {
+  const dbDnsStack = import("../aws/infra/stacks/db-dns-stack.mjs");
+  return expect(dbDnsStack).resolves.toBeDefined();
+});
+
+test('documentation import ok?', () => {
+  const documentation = import("../aws/infra/documentation.mjs");
+  return expect(documentation).resolves.toBeDefined();
+});
+
+test('usagePlans import ok?', () => {
+  const usagePlans = import("../aws/infra/usage-plans.mjs");
+  return expect(usagePlans).resolves.toBeDefined();
+});
+
+test('scheduler import ok?', () => {
+  const scheduler = import("../aws/infra/scheduler.mjs");
+  return expect(scheduler).resolves.toBeDefined();
+});
+
+test('importUtil import ok?', () => {
+  const importUtil = import("../aws/infra/import-util.mjs");
+  return expect(importUtil).resolves.toBeDefined();
+});
+
+test('sqsQueue import ok?', () => {
+  const sqsQueue = import("../aws/infra/sqs-queue.mjs");
+  return expect(sqsQueue).resolves.toBeDefined();
+});
+
+test('response import ok?', () => {
+  const response = import("../aws/infra/api/response.mjs");
+  return expect(response).resolves.toBeDefined();
+});
+
+test('staticIntegration import ok?', () => {
+  const staticIntegration = import("../aws/infra/api/static-integration.mjs");
+  return expect(staticIntegration).resolves.toBeDefined();
+});
+
+test('responses import ok?', () => {
+  const responses = import("../aws/infra/api/responses.mjs");
+  return expect(responses).resolves.toBeDefined();
+});
+
+test('handlerFactory import ok?', () => {
+  const handlerFactory = import("../aws/infra/api/handler-factory.mjs");
+  return expect(handlerFactory).resolves.toBeDefined();
+});
+
+test('integration import ok?', () => {
+  const integration = import("../aws/infra/api/integration.mjs");
+  return expect(integration).resolves.toBeDefined();
+});
+
+test('stackCheckingAspect import ok?', () => {
+  const stackCheckingAspect = import("../aws/infra/stack/stack-checking-aspect.mjs");
+  return expect(stackCheckingAspect).resolves.toBeDefined();
+});
+
+test('restApis import ok?', () => {
+  const restApis = import("../aws/infra/stack/rest_apis.mjs");
+  return expect(restApis).resolves.toBeDefined();
+});
+
+test('lambdaConfigs import ok?', () => {
+  const lambdaConfigs = import("../aws/infra/stack/lambda-configs.mjs");
+  return expect(lambdaConfigs).resolves.toBeDefined();
+});
+
+test('monitoredfunction import ok?', () => {
+  const monitoredfunction = import("../aws/infra/stack/monitoredfunction.mjs");
+  return expect(monitoredfunction).resolves.toBeDefined();
+});
+
+test('subscription import ok?', () => {
+  const subscription = import("../aws/infra/stack/subscription.mjs");
+  return expect(subscription).resolves.toBeDefined();
+});
+
+test('parameters import ok?', () => {
+  const parameters = import("../aws/infra/stack/parameters.mjs");
+  return expect(parameters).resolves.toBeDefined();
+});
+
+test('stack import ok?', () => {
+  const stack = import("../aws/infra/stack/stack.mjs");
+  return expect(stack).resolves.toBeDefined();
+});
+
+test('securityRule import ok?', () => {
+  const securityRule = import("../aws/infra/security-rule.mjs");
+  return expect(securityRule).resolves.toBeDefined();
+});
+
+test('canary import ok?', () => {
+  const canary = import("../aws/infra/canaries/canary.mjs");
+  return expect(canary).resolves.toBeDefined();
+});
+
+test('databaseCanary import ok?', () => {
+  const databaseCanary = import("../aws/infra/canaries/database-canary.mjs");
+  return expect(databaseCanary).resolves.toBeDefined();
+});
+
+test('canaryAlarm import ok?', () => {
+  const canaryAlarm = import("../aws/infra/canaries/canary-alarm.mjs");
+  return expect(canaryAlarm).resolves.toBeDefined();
+});
+
+test('canaryRole import ok?', () => {
+  const canaryRole = import("../aws/infra/canaries/canary-role.mjs");
+  return expect(canaryRole).resolves.toBeDefined();
+});
+
+test('urlCanary import ok?', () => {
+  const urlCanary = import("../aws/infra/canaries/url-canary.mjs");
+  return expect(urlCanary).resolves.toBeDefined();
+});
+
+test('canaryParameters import ok?', () => {
+  const canaryParameters = import("../aws/infra/canaries/canary-parameters.mjs");
+  return expect(canaryParameters).resolves.toBeDefined();
+});
+
+test('canaryKeys import ok?', () => {
+  const canaryKeys = import("../aws/infra/canaries/canary-keys.mjs");
+  return expect(canaryKeys).resolves.toBeDefined();
+});
+
+test('proxytypes import ok?', () => {
+  const proxytypes = import("../aws/types/proxytypes.mjs");
+  return expect(proxytypes).resolves.toBeDefined();
+});
+
+test('tags import ok?', () => {
+  const tags = import("../aws/types/tags.mjs");
+  return expect(tags).resolves.toBeDefined();
+});
+
+test('mediatypes import ok?', () => {
+  const mediatypes = import("../aws/types/mediatypes.mjs");
+  return expect(mediatypes).resolves.toBeDefined();
+});
+
+test('modelWithReference import ok?', () => {
+  const modelWithReference = import("../aws/types/model-with-reference.mjs");
+  return expect(modelWithReference).resolves.toBeDefined();
+});
+
+test('errors import ok?', () => {
+  const errors= import("../aws/types/errors.mjs");
+  return expect(errors).resolves.toBeDefined();
+});
+
+test('lambdaResponse import ok?', () => {
+  const lambdaResponse = import("../aws/types/lambda-response.mjs");
+  return expect(lambdaResponse).resolves.toBeDefined();
+});
+
+test('dtLoggerDefault import ok?', () => {
+  const dtLoggerDefault = import("../aws/runtime/dt-logger-default.mjs");
+  return expect(dtLoggerDefault).resolves.toBeDefined();
+});
+
+test('secret import ok?', () => {
+  const secret = import("../aws/runtime/secrets/secret.mjs");
+  return expect(secret).resolves.toBeDefined();
+});
+
+test('proxyHolder import ok?', () => {
+  const proxyHolder = import("../aws/runtime/secrets/proxy-holder.mjs");
+  return expect(proxyHolder).resolves.toBeDefined();
+});
+
+test('dbsecret import ok?', () => {
+  const dbsecret = import("../aws/runtime/secrets/dbsecret.mjs");
+  return expect(dbsecret).resolves.toBeDefined();
+});
+
+test('rdsHolder import ok?', () => {
+  const rdsHolder = import("../aws/runtime/secrets/rds-holder.mjs");
+  return expect(rdsHolder).resolves.toBeDefined();
+});
+
+test('secretHolder import ok?', () => {
+  const secretHolder = import("../aws/runtime/secrets/secret-holder.mjs");
+  return expect(secretHolder).resolves.toBeDefined();
+});
+
+test('dtLogger import ok?', () => {
+  const dtLogger = import("../aws/runtime/dt-logger.mjs");
+  return expect(dtLogger).resolves.toBeDefined();
+});
+
+test('s3 import ok?', () => {
+  const s3 = import("../aws/runtime/s3.mjs");
+  return expect(s3).resolves.toBeDefined();
+});
+
+test('messaging import ok?', () => {
+  const messaging = import("../aws/runtime/messaging.mjs");
+  return expect(messaging).resolves.toBeDefined();
+});
+
+test('apikey import ok?', () => {
+  const apikey = import("../aws/runtime/apikey.mjs");
+  return expect(apikey).resolves.toBeDefined();
+});
+
+test('environment import ok?', () => {
+  const environment = import("../aws/runtime/environment.mjs");
+  return expect(environment).resolves.toBeDefined();
+});
+
+test('digitrafficIntegrationResponse import ok?', () => {
+  const digitrafficIntegrationResponse = import("../aws/runtime/digitraffic-integration-response.mjs");
+  return expect(digitrafficIntegrationResponse).resolves.toBeDefined();
+});
+
+/*
+ * Näitä ei testata, koska ne importtaa synthetics kirjaston, jolle ei ole mitään vastinetta npm:ssä. Lambdaympäristöstä
+ * löytyy toi kirjasto.
+ */
+//const databaseChecker = import("../aws/infra/canaries/database-checker.mjs");
+//const urlChecker = import("../aws/infra/canaries/url-checker.mjs");

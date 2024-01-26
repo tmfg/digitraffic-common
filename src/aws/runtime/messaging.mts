@@ -1,4 +1,4 @@
-import {SNS} from "aws-sdk";
+import type { SNS as SNSType } from "aws-sdk";
 
 /**
  * Utility function for publishing SNS messages.
@@ -8,7 +8,7 @@ import {SNS} from "aws-sdk";
  * @param topicArn
  * @param sns
  */
-export async function snsPublish(message: string, topicArn: string, sns: SNS) {
+export async function snsPublish(message: string, topicArn: string, sns: SNSType) {
     const publishParams = {
         Message: message,
         TopicArn: topicArn,

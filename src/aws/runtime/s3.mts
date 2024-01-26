@@ -1,6 +1,9 @@
-import {S3} from "aws-sdk";
+import awsSdk from "aws-sdk";
+import type { S3 as S3Type } from "aws-sdk";
 
-export async function uploadToS3<Body extends S3.Body | undefined>(
+const { S3 } = awsSdk;
+
+export async function uploadToS3<Body extends S3Type.Body | undefined>(
     bucketName: string,
     body: Body,
     objectName: string,
@@ -25,8 +28,8 @@ export async function uploadToS3<Body extends S3.Body | undefined>(
     }
 }
 
-function doUpload<Body extends S3.Body | undefined>(
-    s3: S3,
+function doUpload<Body extends S3Type.Body | undefined>(
+    s3: S3Type,
     bucketName: string,
     body: Body,
     filename: string,
