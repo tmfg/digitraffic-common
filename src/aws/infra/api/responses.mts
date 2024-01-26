@@ -6,8 +6,8 @@ import {
 } from "./response.mjs";
 import {
     LambdaIntegration,
-    MethodResponse,
-    IntegrationResponse,
+    type MethodResponse,
+    type IntegrationResponse,
     PassthroughBehavior,
   type IModel
 } from "aws-cdk-lib/aws-apigateway";

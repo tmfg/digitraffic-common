@@ -1,13 +1,13 @@
-import { Function, FunctionProps } from "aws-cdk-lib/aws-lambda";
+import { Function, type FunctionProps } from "aws-cdk-lib/aws-lambda";
 import { Stack } from "aws-cdk-lib";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { ComparisonOperator, Metric } from "aws-cdk-lib/aws-cloudwatch";
 import { DigitrafficStack } from "./stack.mjs";
-import { ITopic } from "aws-cdk-lib/aws-sns";
+import type { ITopic } from "aws-cdk-lib/aws-sns";
 import {
     databaseFunctionProps,
-    LambdaEnvironment,
-    MonitoredFunctionParameters,
+    type LambdaEnvironment,
+    type MonitoredFunctionParameters,
 } from "./lambda-configs.mjs";
 import { DigitrafficLogSubscriptions } from "./subscription.mjs";
 import { TrafficType } from "../../../types/traffictype.mjs";

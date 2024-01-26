@@ -1,12 +1,12 @@
 import {
     RestApi,
     Model,
-    JsonSchema,
+    type JsonSchema,
     RequestValidator,
     JsonSchemaType,
     JsonSchemaVersion,
 } from 'aws-cdk-lib/aws-apigateway';
-import {ModelWithReference} from "../aws/types/model-with-reference.mjs";
+import type {ModelWithReference} from "../aws/types/model-with-reference.mjs";
 
 /**
  * Get a reference to an OpenAPI model object in a REST API.

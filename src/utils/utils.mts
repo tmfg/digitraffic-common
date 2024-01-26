@@ -1,5 +1,5 @@
-import { AwsEnv } from "../types/aws-env.mjs";
-import { Either } from "../types/either.mjs";
+import type { AwsEnv } from "../types/aws-env.mjs";
+import type { Either } from "../types/either.mjs";
 import { EnvKeys } from "../aws/runtime/environment.mjs";
 
 /**
@@ -68,10 +68,10 @@ function getFirstOrLast<T>(
     const index = getFirst ? 0 : array.length - 1;
 
     if (sortFunction) {
-        return array.sort(sortFunction)[index];
+        return array.sort(sortFunction)[index] as T;
     }
 
-    return array[index];
+    return array[index] as T;
 }
 
 /**

@@ -1,5 +1,5 @@
 import {
-    MethodResponse,
+    type MethodResponse,
     MockIntegration,
     PassthroughBehavior,
     Resource,

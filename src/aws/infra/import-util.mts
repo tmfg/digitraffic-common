@@ -1,4 +1,4 @@
-import { IVpc, Vpc } from "aws-cdk-lib/aws-ec2";
+import { type IVpc, Vpc } from "aws-cdk-lib/aws-ec2";
 import { CfnOutput, Fn, Stack } from "aws-cdk-lib";
 import { Construct } from "constructs";
 

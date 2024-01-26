@@ -6,7 +6,7 @@ import {
     RecordTarget,
     RecordType,
 } from "aws-cdk-lib/aws-route53";
-import { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
+import type { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
 import { importVpc } from "../import-util.mjs";
 import { getParameterValue } from "../stack/parameters.mjs";
 

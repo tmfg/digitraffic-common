@@ -4,7 +4,7 @@ import {
     PassthroughBehavior,
     RequestValidator,
     Resource,
-  IModel
+  type IModel
 } from "aws-cdk-lib/aws-apigateway";
 import { Queue } from "aws-cdk-lib/aws-sqs";
 import { PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";

@@ -1,7 +1,7 @@
 /**
  * GeoJSON functions and tools
  */
-import { Feature, FeatureCollection, Geometry, Position } from "geojson";
+import type { Feature, FeatureCollection, Geometry, Position } from "geojson";
 import * as geoJsonValidator from "geojson-validation";
 import { logger } from "../aws/runtime/dt-logger-default.mjs";
 
@@ -116,7 +116,10 @@ function distanceBetweenWGS84PointsInKm(
  * @param pos2
  */
 export function distanceBetweenPositionsInKm(pos1: Position, pos2: Position) {
-    return distanceBetweenWGS84PointsInKm(pos1[0], pos1[1], pos2[0], pos2[1]);
+    if (pos1.length !== 2 && pos2.length !== 2) {
+        throw Error(`Positions ${pos1.toString()} and ${pos2.toString()} both must be arrays of length two`)
+    }
+    return distanceBetweenWGS84PointsInKm(pos1[0] as number, pos1[1] as number, pos2[0] as number, pos2[1] as number);
 }
 
 export function areDistinctPositions(previous: Position, next: Position) {

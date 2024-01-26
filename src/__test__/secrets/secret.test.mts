@@ -1,4 +1,4 @@
-//import { mockSecret, stubSecretsManager } from "../../src/test/secrets-manager.mjs";
+//import { mockSecret, stubSecretsManager } from "../../test/secrets-manager.mjs";
 
 //import * as sinon from "sinon";
 
@@ -14,7 +14,7 @@ test("foo", () => {expect(true)})
 
 /*stubSecretsManager();
 
-import { getSecret } from "../../src/aws/runtime/secrets/secret";
+import { getSecret } from "../../aws/runtime/secrets/secret";
 
 describe("secret - test", () => {
     afterEach(() => {

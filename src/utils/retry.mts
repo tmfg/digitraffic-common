@@ -17,7 +17,7 @@ export type RetryPredicate = (error: unknown) => boolean;
 export const timeoutFunctions = (function () {
     return {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        noTimeout: (retryCount: number): number => {
+        noTimeout: (_: number): number => {
             return 0;
         },
         exponentialTimeout: (retryCount: number): number => {
@@ -44,7 +44,7 @@ export const retryPredicates = (function () {
             return false;
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        alwaysRetry: (error: unknown): boolean => {
+        alwaysRetry: (_: unknown): boolean => {
             return true;
         },
     };

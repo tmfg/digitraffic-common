@@ -1,14 +1,13 @@
-import { Annotations, IAspect, Stack } from "aws-cdk-lib";
+import { Annotations, type IAspect, Stack } from "aws-cdk-lib";
 import { CfnFunction, Runtime } from "aws-cdk-lib/aws-lambda";
 import { CfnBucket } from "aws-cdk-lib/aws-s3";
 import { DigitrafficStack, SOLUTION_KEY } from "./stack.mjs";
-import { IConstruct } from "constructs";
+import type { IConstruct } from "constructs";
 import { CfnMethod, CfnResource } from "aws-cdk-lib/aws-apigateway";
 import { CfnQueue } from "aws-cdk-lib/aws-sqs";
 import { LogRetention } from "aws-cdk-lib/aws-logs";
 import { kebabCase } from "change-case";
 import _ from "lodash";
-import IntegrationProperty = CfnMethod.IntegrationProperty;
 
 const MAX_CONCURRENCY_LIMIT = 100;
 const NODE_RUNTIMES = [Runtime.NODEJS_20_X.name, Runtime.NODEJS_18_X.name];
@@ -172,11 +171,11 @@ export class StackCheckingAspect implements IAspect {
     private static isValidPath(path: string): boolean {
         // if path includes . or { check only the trailing part of path
         if (path.includes(".")) {
-            return this.isValidPath(path.split(".")[0]);
+            return this.isValidPath(path.split(".")[0] as string);
         }
 
         if (path.includes("{")) {
-            return this.isValidPath(path.split("{")[0]);
+            return this.isValidPath(path.split("{")[0] as string);
         }
 
         return kebabCase(path) === path;
@@ -192,13 +191,17 @@ export class StackCheckingAspect implements IAspect {
                 this.addAnnotation(node, ResourceType.resourcePath, "Path part should be in kebab-case");
             }
         } else if (node instanceof CfnMethod) {
-            const integration = node.integration as IntegrationProperty | undefined;
+            const integration = node.integration as CfnMethod.IntegrationProperty | undefined;
 
             if (integration?.requestParameters) {
                 Object.keys(integration.requestParameters).forEach((key) => {
                     const split = key.split(".");
                     const type = split[2];
                     const name = split[3];
+
+                    if (name === undefined) {
+                        throw Error('Name should not be undefined');
+                    }
 
                     if (type === "querystring" && !StackCheckingAspect.isValidQueryString(name)) {
                         this.addAnnotation(node, name, "Querystring should be in snake_case");
@@ -219,7 +222,7 @@ export class StackCheckingAspect implements IAspect {
     private checkLogGroupRetention(node: IConstruct) {
         if (node instanceof LogRetention) {
             const child = node.node.defaultChild as unknown as Record<string, Record<string, string>>;
-            const retention = child._cfnProperties.RetentionInDays;
+            const retention = child?.['_cfnProperties']?.['RetentionInDays'];
 
             if (!retention) {
                 this.addAnnotation(

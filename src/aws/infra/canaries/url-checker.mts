@@ -1,4 +1,4 @@
-import { IncomingMessage, RequestOptions } from "http";
+import { IncomingMessage, type RequestOptions } from "http";
 import { Asserter } from "../../../test/asserter.mjs";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
@@ -6,7 +6,7 @@ import synthetics from "Synthetics";
 import zlib from "zlib";
 import { MediaType } from "../../types/mediatypes.mjs";
 import { getApiKeyFromAPIGateway } from "../../runtime/apikey.mjs";
-import { FeatureCollection } from "geojson";
+import type { FeatureCollection } from "geojson";
 import { isValidGeoJson } from "../../../utils/geometry.mjs";
 import { getEnvVariable } from "../../../utils/utils.mjs";
 import { ENV_API_KEY, ENV_HOSTNAME } from "./canary-keys.mjs";

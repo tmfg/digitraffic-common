@@ -1,6 +1,6 @@
 import { Writable } from "stream";
-import { DtLogger, LoggerConfiguration } from "../../src/aws/runtime/dt-logger.mjs";
-import { LoggableType } from "../../src/aws/runtime/dt-logger.mjs";
+import { DtLogger, type LoggerConfiguration } from "../../aws/runtime/dt-logger.mjs";
+import type { LoggableType } from "../../aws/runtime/dt-logger.mjs";
 
 const LOG_LINE: LoggableType = {
     method: "dt-logger.test",
@@ -57,7 +57,7 @@ describe("dt-logger", () => {
 
         expect(logged.length).toBe(1);
 
-        const loggedLine = JSON.parse(logged[0]) as unknown as Record<
+        const loggedLine = JSON.parse(logged[0] as string) as unknown as Record<
             string,
             unknown
         >;
@@ -68,8 +68,8 @@ describe("dt-logger", () => {
             "stack" in expected &&
             expected.stack
         ) {
-            const stack = loggedLine.stack;
-            delete loggedLine.stack;
+            const stack = loggedLine['stack'];
+            delete loggedLine['stack'];
             delete expected.stack;
 
             expect(stack).toBeDefined();

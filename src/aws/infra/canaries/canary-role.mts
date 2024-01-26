@@ -1,7 +1,7 @@
 import {
     ManagedPolicy,
     PolicyStatement,
-    PolicyStatementProps,
+    type PolicyStatementProps,
     Role,
     ServicePrincipal,
 } from "aws-cdk-lib/aws-iam";

@@ -17,7 +17,8 @@
     "eslint-report": "eslint . --format html",
     "ci:eslint-report": "eslint . --format html -o report.html || true",
     "clean": "rimraf dist output",
-    "test": "node --experimental-vm-modules --max-old-space-size=1536 --expose-gc ./node_modules/jest/bin/jest.js --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --logHeapUsage --runInBand",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' heft test --clean --max-workers=1",
+    "test:jest": "node --trace-warnings --experimental-vm-modules --max-old-space-size=1536 --expose-gc ./node_modules/jest/bin/jest.js --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --logHeapUsage --runInBand --verbose",
     "test:inspect": "node --inspect-brk --expose-gc ./node_modules/jest/bin/jest.js --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --logHeapUsage --runInBand",
     "test:watch": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --watch",
     "prepublishOnly": "pnpm clean && pnpm build && pnpm test"
@@ -26,8 +27,7 @@
   "private": false,
   "files": [
     "dist/**/*.mjs",
-    "dist/**/*.d.mts",
-    "src/**/*.mts"
+    "dist/**/*.d.mts"
   ],
   "exports": {
     ".": "./dist/index.mjs",
@@ -133,6 +133,10 @@
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
+    "@rushstack/heft": "^0.64.3",
+    "@rushstack/heft-jest-plugin": "^0.11.3",
+    "@rushstack/heft-lint-plugin": "^0.3.3",
+    "@rushstack/heft-typescript-plugin": "^0.3.3",
     "@types/aws-lambda": "8.10.131",
     "@types/etag": "1.8.3",
     "@types/geojson": "7946.0.13",
@@ -145,7 +149,7 @@
     "@typescript-eslint/parser": "^6.19.1",
     "aws-cdk-lib": "~2.118.0",
     "aws-sdk": "~2.1531.0",
-    "axios": "^1.6.5",
+    "axios": "^1.6.7",
     "change-case": "5.3.0",
     "constructs": "10.3.0",
     "date-fns": "~2.30.0",

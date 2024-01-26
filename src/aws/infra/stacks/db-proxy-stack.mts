@@ -5,9 +5,9 @@ import {
     DatabaseProxy,
     ProxyTarget,
 } from "aws-cdk-lib/aws-rds";
-import { ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
-import { IVpc, SecurityGroup } from "aws-cdk-lib/aws-ec2";
-import { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
+import { type ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
+import { type IVpc, SecurityGroup } from "aws-cdk-lib/aws-ec2";
+import type { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
 import { DbStack } from "./db-stack.mjs";
 import { exportValue, importVpc } from "../import-util.mjs";
 import { createParameter } from "../stack/parameters.mjs";

@@ -23,7 +23,7 @@ export class TestHttpServer {
     }
 
     getRequestBody(callNumber: number): string {
-        return this.messageStack[callNumber];
+        return this.messageStack[callNumber] ?? '';
     }
 
     listen(
@@ -69,7 +69,8 @@ export class TestHttpServer {
                 req.on("end", () => {
                     // assume sent data is in JSON format
                     this.messageStack[this.messageStack.length] = dataStr;
-                    res.end(props[path](req.url, dataStr));
+                    const invokable = props[path];
+                    res.end((invokable as (url?: string, data?: string)=>string)(req.url, dataStr));
                 });
             } else {
                 this.debuglog(`..no match for ${path}`);

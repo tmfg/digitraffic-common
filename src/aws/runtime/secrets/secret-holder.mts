@@ -1,4 +1,4 @@
-import { GenericSecret, getSecret } from "./secret.mjs";
+import { type GenericSecret, getSecret } from "./secret.mjs";
 import { checkExpectedSecretKeys } from "./dbsecret.mjs";
 import { getEnvVariable } from "../../../utils/utils.mjs";
 import { logger } from "../dt-logger-default.mjs";
@@ -87,7 +87,8 @@ export class SecretHolder<Secret extends GenericSecret> {
 
         for (const key in secret) {
             if (key.startsWith(prefix)) {
-                parsed[key.substring(skip)] = secret[key];
+                const withoutPrefix:string = key.substring(skip);
+                parsed[withoutPrefix] = secret[key] as string;
             }
         }
 

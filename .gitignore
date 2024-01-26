@@ -24,10 +24,9 @@
 !src/**/*.ts
 !src/**/*.mts
 
-!test/
-!test/**/
-!test/**/*.ts
-!test/**/*.mts
+!config/
+!config/**/
+!config/**/*.json
 
 !.github/
 !.github/**/

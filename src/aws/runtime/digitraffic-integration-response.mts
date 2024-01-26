@@ -1,4 +1,4 @@
-import { IntegrationResponse } from "aws-cdk-lib/aws-apigateway";
+import type { IntegrationResponse } from "aws-cdk-lib/aws-apigateway";
 import { MediaType } from "../types/mediatypes.mjs";
 import {
     getDeprecatedDefaultLambdaResponse,

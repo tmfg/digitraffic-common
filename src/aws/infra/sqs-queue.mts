@@ -1,4 +1,4 @@
-import { Queue, QueueEncryption, QueueProps } from "aws-cdk-lib/aws-sqs";
+import { Queue, QueueEncryption, type QueueProps } from "aws-cdk-lib/aws-sqs";
 import { Duration } from "aws-cdk-lib";
 import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
 import { PolicyStatement } from "aws-cdk-lib/aws-iam";
@@ -9,7 +9,7 @@ import { ComparisonOperator, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { S3, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
-import { SQSEvent, SQSHandler, SQSRecord } from "aws-lambda";
+import type { SQSEvent, SQSHandler, SQSRecord } from "aws-lambda";
 import { DigitrafficStack } from "./stack/stack.mjs";
 import { MonitoredFunction } from "./stack/monitoredfunction.mjs";
 

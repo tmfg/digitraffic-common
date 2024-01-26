@@ -2,15 +2,15 @@ import {
     CfnDocumentationPart,
     EndpointType,
     GatewayResponse,
-    IResource,
-    JsonSchema,
+    type IResource,
+    type JsonSchema,
     MethodLoggingLevel,
     MockIntegration,
     Model,
     Resource,
     ResponseType,
     RestApi,
-    RestApiProps,
+    type RestApiProps,
 } from "aws-cdk-lib/aws-apigateway";
 import {
     AnyPrincipal,
@@ -21,8 +21,8 @@ import {
 import { Construct } from "constructs";
 import { getModelReference } from "../../../utils/api-model.mjs";
 import { MediaType } from "../../types/mediatypes.mjs";
-import { ModelWithReference } from "../../types/model-with-reference.mjs";
-import { DocumentationPart, DocumentationProperties } from "../documentation.mjs";
+import type { ModelWithReference } from "../../types/model-with-reference.mjs";
+import { DocumentationPart, type DocumentationProperties } from "../documentation.mjs";
 import { createDefaultUsagePlan, createUsagePlan } from "../usage-plans.mjs";
 import { DigitrafficStack } from "./stack.mjs";
 

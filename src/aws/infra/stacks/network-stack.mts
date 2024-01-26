@@ -1,5 +1,5 @@
-import { IpAddresses, IVpc, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
-import { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
+import { IpAddresses, type IVpc, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
+import type { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
 import { exportValue } from "../import-util.mjs";
 import { Stack } from "aws-cdk-lib/core";
 import { Construct } from "constructs/lib/construct.js";
@@ -23,6 +23,15 @@ export class NetworkStack extends Stack {
         });
 
         this.vpc = this.createVpc(configuration);
+
+        if (this.vpc.publicSubnets[0] === undefined ||
+          this.vpc.publicSubnets[1] === undefined ||
+          this.vpc.privateSubnets[0] === undefined ||
+          this.vpc.privateSubnets[1] === undefined
+        ) {
+            throw Error('Subnets are not set correctly');
+        }
+
         exportValue(this, isc.environmentName, "VPCID", this.vpc.vpcId);
         exportValue(
             this,

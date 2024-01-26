@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
 import { Writable } from "stream";
-import { DtLogger } from "../../src/aws/runtime/dt-logger.mjs";
-import { logException } from "../../src/utils/logging.mjs";
+import { DtLogger } from "../../aws/runtime/dt-logger.mjs";
+import { logException } from "../../utils/logging.mjs";
 
 interface ErrorLogLine {
     type: string;
@@ -50,7 +50,7 @@ describe("dt-logger", () => {
 
         expect(logged.length).toBe(1);
 
-        const loggedLine = JSON.parse(logged[0]) as unknown as ErrorLogLine;
+        const loggedLine = JSON.parse(logged[0] as string) as unknown as ErrorLogLine;
         console.info(loggedLine);
 
         if (expected.stack) {
