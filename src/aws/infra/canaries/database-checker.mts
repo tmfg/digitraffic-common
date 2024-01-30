@@ -1,8 +1,8 @@
-import { DTDatabase, inDatabaseReadonly } from "../../../database/database.mjs";
+import { type DTDatabase, inDatabaseReadonly } from "../../../database/database.mjs";
 import { ProxyHolder } from "../../runtime/secrets/proxy-holder.mjs";
 import { RdsHolder } from "../../runtime/secrets/rds-holder.mjs";
 import { getEnvVariable } from "../../../utils/utils.mjs";
-import { Countable } from "../../../database/models.mjs";
+import type { Countable } from "../../../database/models.mjs";
 import { logger } from "../../runtime/dt-logger-default.mjs";
 
 import synthetics from "Synthetics";

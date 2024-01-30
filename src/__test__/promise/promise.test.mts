@@ -1,6 +1,6 @@
-import { getRandomInteger } from "../../src/test/testutils.mjs";
-import { retry, RetryLogError } from "../../src/utils/retry.mjs";
-import { logger } from "../../src/aws/runtime/dt-logger-default.mjs";
+import { getRandomInteger } from "../../test/testutils.mjs";
+import { retry, RetryLogError } from "../../utils/retry.mjs";
+import { logger } from "../../aws/runtime/dt-logger-default.mjs";
 import {jest} from '@jest/globals';
 
 jest.useFakeTimers();

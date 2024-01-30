@@ -1,5 +1,5 @@
 import { SecretHolder } from "./secret-holder.mjs";
-import { RdsProxySecretKey, RdsProxySecret } from "./dbsecret.mjs";
+import { RdsProxySecretKey, type RdsProxySecret } from "./dbsecret.mjs";
 import { getEnvVariable } from "../../../utils/utils.mjs";
 import { DatabaseEnvironmentKeys } from "../../../database/database.mjs";
 

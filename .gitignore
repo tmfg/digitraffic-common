@@ -5,6 +5,7 @@
 !/.editorconfig
 !/.eslintignore
 !/.eslintrc.json
+!/.gitattributes
 !/.gitignore
 !/.npmignore
 !/.npmrc
@@ -24,10 +25,9 @@
 !src/**/*.ts
 !src/**/*.mts
 
-!test/
-!test/**/
-!test/**/*.ts
-!test/**/*.mts
+!config/
+!config/**/
+!config/**/*.json
 
 !.github/
 !.github/**/

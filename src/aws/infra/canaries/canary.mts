@@ -8,9 +8,9 @@ import {
 } from "aws-cdk-lib/aws-synthetics";
 import { Role } from "aws-cdk-lib/aws-iam";
 import { CanaryAlarm } from "./canary-alarm.mjs";
-import { CanaryParameters } from "./canary-parameters.mjs";
+import type { CanaryParameters } from "./canary-parameters.mjs";
 import { Construct } from "constructs";
-import { LambdaEnvironment } from "../stack/lambda-configs.mjs";
+import type { LambdaEnvironment } from "../stack/lambda-configs.mjs";
 
 export class DigitrafficCanary extends Canary {
     constructor(

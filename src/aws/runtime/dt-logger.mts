@@ -91,8 +91,8 @@ export class DtLogger {
      */
     constructor(config?: LoggerConfiguration) {
         this.lambdaName =
-            config?.lambdaName ?? process.env.AWS_LAMBDA_FUNCTION_NAME;
-        this.runtime = config?.runTime ?? process.env.AWS_EXECUTION_ENV;
+            config?.lambdaName ?? process.env['AWS_LAMBDA_FUNCTION_NAME'];
+        this.runtime = config?.runTime ?? process.env['AWS_EXECUTION_ENV'];
         this.writeStream = config?.writeStream ?? process.stdout;
     }
 

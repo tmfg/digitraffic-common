@@ -2,15 +2,15 @@ import {
     Architecture,
     AssetCode,
     Code,
-    FunctionProps,
+    type FunctionProps,
     Runtime,
 } from "aws-cdk-lib/aws-lambda";
 import { Duration } from "aws-cdk-lib";
-import { IVpc, SubnetSelection } from "aws-cdk-lib/aws-ec2";
+import type { IVpc, SubnetSelection } from "aws-cdk-lib/aws-ec2";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { Role } from "aws-cdk-lib/aws-iam";
 import { DigitrafficStack } from "./stack.mjs";
-import { MonitoredFunctionAlarmProps } from "./monitoredfunction.mjs";
+import type { MonitoredFunctionAlarmProps } from "./monitoredfunction.mjs";
 
 export type LambdaEnvironment = Record<string, string>;
 
@@ -49,7 +49,7 @@ export function databaseFunctionProps(
 }
 
 export function lambdaFunctionProps(
-    stack: DigitrafficStack,
+    _: DigitrafficStack,
     environment: LambdaEnvironment,
     lambdaName: string,
     simpleLambdaName: string,

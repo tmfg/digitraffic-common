@@ -1,4 +1,4 @@
-import { ValueOf } from "./util-types.mjs";
+import type { ValueOf } from "./util-types.mjs";
 
 /**
  * Adds `null` as an accepted type to all properties in given type.

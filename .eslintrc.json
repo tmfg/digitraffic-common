@@ -21,9 +21,11 @@
   "rules": {
     "deprecation/deprecation": "warn",
     "@typescript-eslint/no-extraneous-class": "off",
-    "@typescript-eslint/no-non-null-assertion": "error",
-    "@typescript-eslint/non-nullable-type-assertion-style": "error",
     "@typescript-eslint/no-throw-literal": "error",
-    "@typescript-eslint/no-explicit-any": "error"
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/non-nullable-type-assertion-style": "error",
+    "@typescript-eslint/no-dynamic-delete": "off"
   }
 }
+

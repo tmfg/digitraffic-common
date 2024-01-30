@@ -1,4 +1,4 @@
-import * as ArrayUtils from "../../src/utils/utils.mjs";
+import * as ArrayUtils from "../../utils/utils.mjs";
 
 describe("ArrayUtils", () => {
     test("bothArraysHasSameValues", () => {

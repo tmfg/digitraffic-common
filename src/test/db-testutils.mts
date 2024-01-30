@@ -1,9 +1,9 @@
 import {
     DatabaseEnvironmentKeys,
-    DTDatabase,
+    type DTDatabase,
     initDbConnection,
 } from "../database/database.mjs";
-import { Countable } from "../database/models.mjs";
+import type { Countable } from "../database/models.mjs";
 
 export async function assertCount(db: DTDatabase, sql: string, count: number) {
     await db.one(sql).then((x: Countable) => expect(x.count).toEqual(count));
@@ -16,7 +16,7 @@ export function dbTestBase(
     dbPass: string,
     dbUri: string
 ): () => void {
-    const theDbUri = process.env.DB_URI ?? dbUri;
+    const theDbUri = process.env['DB_URI'] ?? dbUri;
     console.log(`Test database URI: ${theDbUri}`);
 
     return () => {

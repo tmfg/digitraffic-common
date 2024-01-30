@@ -1,5 +1,5 @@
-import * as IdUtils from "../../src/marine/id_utils.mjs";
-import { getRandomNumber } from "../../src/test/testutils.mjs";
+import * as IdUtils from "../../marine/id_utils.mjs";
+import { getRandomNumber } from "../../test/testutils.mjs";
 
 describe("IdUtils tests", () => {
     test("isValidLOCODE - success", () => {

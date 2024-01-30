@@ -1,6 +1,6 @@
 import {
     InstanceType,
-    IVpc,
+    type IVpc,
     SecurityGroup,
     SubnetType,
   type ISecurityGroup,
@@ -12,14 +12,14 @@ import {
     DatabaseCluster,
     DatabaseClusterEngine,
     DatabaseClusterFromSnapshot,
-    DatabaseClusterProps,
+    type DatabaseClusterProps,
     InstanceUpdateBehaviour,
-    IParameterGroup,
+    type IParameterGroup,
     ParameterGroup,
 } from "aws-cdk-lib/aws-rds";
 import { Construct } from "constructs/lib/construct.js";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
-import { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
+import type { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
 import { exportValue, importVpc } from "../import-util.mjs";
 import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib/core";
 import { createParameter } from "../stack/parameters.mjs";
@@ -255,6 +255,10 @@ export class DbStack extends Stack {
         const vpc = configuration.vpc
             ? configuration.vpc
             : importVpc(this, isc.environmentName);
+
+        if (parameterGroups[0] === undefined) {
+            throw Error('ParameterGroups should not be empty')
+        }
 
         const parameters = this.createClusterParameters(
             configuration.secretArn,

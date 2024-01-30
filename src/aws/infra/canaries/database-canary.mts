@@ -1,10 +1,10 @@
 import { Role } from "aws-cdk-lib/aws-iam";
-import { ISecret } from "aws-cdk-lib/aws-secretsmanager";
+import type { ISecret } from "aws-cdk-lib/aws-secretsmanager";
 import { CfnCanary } from "aws-cdk-lib/aws-synthetics";
 import { Schedule } from "aws-cdk-lib/aws-events";
 import { Duration } from "aws-cdk-lib";
 
-import { CanaryParameters } from "./canary-parameters.mjs";
+import type { CanaryParameters } from "./canary-parameters.mjs";
 import { DigitrafficCanary } from "./canary.mjs";
 import { DigitrafficStack } from "../stack/stack.mjs";
 

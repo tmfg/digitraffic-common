@@ -1,25 +1,26 @@
-//import { mockSecret, stubSecretsManager } from "../../src/test/secrets-manager.mjs";
+import { mockSecret, stubSecretsManager } from "../../test/secrets-manager.mjs";
 
-//import * as sinon from "sinon";
+import sinon from "sinon";
 
-/*const SECRET_WITH_PREFIX = {
+const SECRET_WITH_PREFIX = {
     "prefix.value": "value",
     "prefix.name": "name",
     "wrong.value": "value",
     username: "DB_USER",
 };
-const SECRET_EMPTY = {};*/
+const SECRET_EMPTY = {}
 
-test("foo", () => {expect(true)})
 
-/*const stubSM = stubSecretsManager();
+const stubSM = stubSecretsManager();
 
-import { SecretHolder } from "../../src/aws/runtime/secrets/secret-holder.mjs";
-import { DatabaseEnvironmentKeys } from "../../src/database/database.mjs";
+const secretHolder = await import("../../aws/runtime/secrets/secret-holder.mjs");
+const database = await import("../../database/database.mjs");
+const { SecretHolder } = secretHolder;
+const { DatabaseEnvironmentKeys } = database;
 
 describe("SecretHolder - tests", () => {
     beforeEach(() => {
-        process.env.SECRET_ID = "test-id";
+        process.env['SECRET_ID'] = "test-id";
     });
 
     afterEach(() => {
@@ -29,57 +30,56 @@ describe("SecretHolder - tests", () => {
         delete process.env[DatabaseEnvironmentKeys.DB_USER];
     });
 
-    test("get - no secret", async () => {
+    test("get - no secret", () => {
         mockSecret(null);
 
         const holder = SecretHolder.create();
-        await expect(async () => {
-            await holder.get();
-        }).rejects.toThrowError("No secret found!");
-    });
+        const secret = holder.get();
+        return expect(secret).rejects.toThrowError("No secret found!");
+    }, 10000);
 
-    test("get - empty secret", async () => {
+    test("get - empty secret", () => {
         mockSecret(SECRET_EMPTY);
 
         const holder = SecretHolder.create();
-        const secret = await holder.get();
+        const secret = holder.get();
 
-        expect(secret).toEqual(SECRET_EMPTY);
+        return expect(secret).resolves.toEqual(SECRET_EMPTY);
     });
 
-    test("get - no prefix", async () => {
+    test("get - no prefix", () => {
         mockSecret(SECRET_WITH_PREFIX);
 
         const holder = SecretHolder.create();
-        const secret = await holder.get();
+        const secret = holder.get();
 
-        expect(secret).toEqual(SECRET_WITH_PREFIX);
+        return expect(secret).resolves.toEqual(SECRET_WITH_PREFIX);
     });
 
-    test("get - check keys - not found", async () => {
+    test("get - check keys - not found", () => {
         mockSecret(SECRET_WITH_PREFIX);
 
         const holder = SecretHolder.create("", ["not_found"]);
-        await expect(async () => {
-            await holder.get();
-        }).rejects.toThrow();
+        const secret = holder.get();
+
+        return expect(secret).rejects.toThrow();
     });
 
-    test("get - check keys - found", async () => {
+    test("get - check keys - found", () => {
         mockSecret(SECRET_WITH_PREFIX);
 
         const holder = SecretHolder.create("", ["prefix.value", "username"]);
 
-        await holder.get();
+        return expect(holder.get()).resolves.toBeDefined();
     });
 
-    test("getSecret - with prefix", async () => {
+    test("getSecret - with prefix", () => {
         mockSecret(SECRET_WITH_PREFIX);
 
         const holder = SecretHolder.create("prefix");
-        const secret = await holder.get();
+        const secret = holder.get();
 
-        expect(secret).toEqual({
+        return expect(secret).resolves.toEqual({
             value: "value",
             name: "name",
         });
@@ -120,4 +120,3 @@ describe("SecretHolder - tests", () => {
         expect(stubSM.callCount).toEqual(callCount + 2);
     });
 });
-*/

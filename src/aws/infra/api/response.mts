@@ -1,9 +1,9 @@
 import { MediaType } from "../../types/mediatypes.mjs";
 import {
-    JsonSchema,
+    type JsonSchema,
     JsonSchemaType,
     JsonSchemaVersion,
-    MethodResponse,
+    type MethodResponse,
     Model,
   type IModel
 } from "aws-cdk-lib/aws-apigateway";

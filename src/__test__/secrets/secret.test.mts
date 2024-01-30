@@ -1,20 +1,20 @@
-//import { mockSecret, stubSecretsManager } from "../../src/test/secrets-manager.mjs";
+import { mockSecret, stubSecretsManager } from "../../test/secrets-manager.mjs";
 
-//import * as sinon from "sinon";
+import sinon from "sinon";
 
-/*const SECRET_ID = "test_secret";
+const SECRET_ID = "test_secret";
 const SECRET_WITH_PREFIX = {
     "prefix.value": "value",
     "prefix.name": "name",
     "wrong.value": "value",
 };
-const SECRET_EMPTY = {};*/
+const SECRET_EMPTY = {};
 
-test("foo", () => {expect(true)})
 
-/*stubSecretsManager();
+stubSecretsManager();
 
-import { getSecret } from "../../src/aws/runtime/secrets/secret";
+const secret = await import("../../aws/runtime/secrets/secret.mjs");
+const { getSecret } = secret;
 
 describe("secret - test", () => {
     afterEach(() => {
@@ -49,4 +49,3 @@ describe("secret - test", () => {
         });
     });
 });
-*/
