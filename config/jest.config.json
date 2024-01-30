@@ -12,6 +12,10 @@
     "!dist/**/__fixtures__/**",
     "!dist/**/__mocks__/**"
   ],
+  "reporters": [
+    "default",
+    "jest-junit"
+  ],
   "coveragePathIgnorePatterns": ["/node_modules/"],
   "coverageThreshold": {
     "global": {
