@@ -171,11 +171,11 @@ export class StackCheckingAspect implements IAspect {
     private static isValidPath(path: string): boolean {
         // if path includes . or { check only the trailing part of path
         if (path.includes(".")) {
-            return this.isValidPath(path.split(".")[0] as string);
+            return this.isValidPath(path.split(".")[0]!);
         }
 
         if (path.includes("{")) {
-            return this.isValidPath(path.split("{")[0] as string);
+            return this.isValidPath(path.split("{")[0]!);
         }
 
         return kebabCase(path) === path;

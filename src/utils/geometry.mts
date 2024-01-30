@@ -119,7 +119,7 @@ export function distanceBetweenPositionsInKm(pos1: Position, pos2: Position) {
     if (pos1.length !== 2 && pos2.length !== 2) {
         throw Error(`Positions ${pos1.toString()} and ${pos2.toString()} both must be arrays of length two`)
     }
-    return distanceBetweenWGS84PointsInKm(pos1[0] as number, pos1[1] as number, pos2[0] as number, pos2[1] as number);
+    return distanceBetweenWGS84PointsInKm(pos1[0]!, pos1[1]!, pos2[0]!, pos2[1]!);
 }
 
 export function areDistinctPositions(previous: Position, next: Position) {

@@ -50,7 +50,7 @@ describe("dt-logger", () => {
 
         expect(logged.length).toBe(1);
 
-        const loggedLine = JSON.parse(logged[0] as string) as unknown as ErrorLogLine;
+        const loggedLine = JSON.parse(logged[0]!) as unknown as ErrorLogLine;
         console.info(loggedLine);
 
         if (expected.stack) {

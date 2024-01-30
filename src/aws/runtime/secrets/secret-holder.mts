@@ -88,7 +88,7 @@ export class SecretHolder<Secret extends GenericSecret> {
         for (const key in secret) {
             if (key.startsWith(prefix)) {
                 const withoutPrefix:string = key.substring(skip);
-                parsed[withoutPrefix] = secret[key] as string;
+                parsed[withoutPrefix] = secret[key]!;
             }
         }
 
