@@ -5,6 +5,7 @@
 !/.editorconfig
 !/.eslintignore
 !/.eslintrc.mjs
+!/.gitattributes
 !/.gitignore
 !/.npmignore
 !/.npmrc
