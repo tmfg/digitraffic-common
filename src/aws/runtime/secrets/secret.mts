@@ -8,7 +8,7 @@ const { SecretsManager } = await import("@aws-sdk/client-secrets-manager");
 // SECRET_OVERRIDE_AWS_REGION might not have been set before import of
 // secret, so we need to lazy initialize SecretsManager
 let smClient: SecretsManagerType | undefined;
-async function getSmClient(): Promise<SecretsManagerType> {
+function getSmClient(): SecretsManagerType {
     if (!smClient) {
         smClient = new SecretsManager({
             region: getEnvVariableOrElse<string>(

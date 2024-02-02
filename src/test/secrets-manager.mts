@@ -18,7 +18,7 @@ SecretsManagerStubInstance.getSecretValue.resolves(emptySecret);
  * To mock the actual secret, call mockSecret()
  */
 export function stubSecretsManager(): any {
-    jest.unstable_mockModule("@aws-sdk/client-secrets-manager", async function () {
+    jest.unstable_mockModule("@aws-sdk/client-secrets-manager", function () {
         return {
             SecretsManager: sinon.stub().returns(SecretsManagerStubInstance)
         };
