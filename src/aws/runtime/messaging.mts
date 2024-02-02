@@ -1,4 +1,4 @@
-import { SNS as SNSType } from '@aws-sdk/client-sns';
+import { SNS as SNSType } from "@aws-sdk/client-sns";
 
 /**
  * Utility function for publishing SNS messages.
@@ -8,7 +8,11 @@ import { SNS as SNSType } from '@aws-sdk/client-sns';
  * @param topicArn
  * @param sns
  */
-export async function snsPublish(message: string, topicArn: string, sns: SNSType) {
+export async function snsPublish(
+    message: string,
+    topicArn: string,
+    sns: SNSType
+) {
     const publishParams = {
         Message: message,
         TopicArn: topicArn,
@@ -16,11 +20,11 @@ export async function snsPublish(message: string, topicArn: string, sns: SNSType
     try {
         await sns.publish(publishParams);
     } catch (error) {
-        console.error('method=snsPublish error, retrying', error);
+        console.error("method=snsPublish error, retrying", error);
         try {
             await sns.publish(publishParams);
         } catch (e2) {
-            console.error('method=snsPublish error after retry', e2);
+            console.error("method=snsPublish error after retry", e2);
         }
     }
 }

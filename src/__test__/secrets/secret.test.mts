@@ -8,7 +8,6 @@ const SECRET_WITH_PREFIX = {
 };
 const SECRET_EMPTY = {};
 
-
 stubSecretsManager();
 
 const secret = await import("../../aws/runtime/secrets/secret.mjs");
@@ -19,7 +18,7 @@ describe("secret - test", () => {
         mockSecret(null);
         await expect(async () => {
             await getSecret(SECRET_ID, "");
-        }).rejects.toThrowError("No secret found!");
+        }).rejects.toThrow("No secret found!");
     });
 
     test("getSecret - empty secret", async () => {

@@ -17,14 +17,14 @@ SecretsManagerStubInstance.getSecretValue.resolves(emptySecret);
  *
  * To mock the actual secret, call mockSecret()
  */
-export function stubSecretsManager(): any {
+export function stubSecretsManager(): sinon.SinonStubbedInstance<SecretsManager> {
     jest.unstable_mockModule("@aws-sdk/client-secrets-manager", function () {
         return {
             SecretsManager: sinon.stub().returns(SecretsManagerStubInstance)
         };
     });
 
-    return SecretsManagerStubInstance.getSecretValue;
+    return SecretsManagerStubInstance;
 }
 
 export function mockSecret<Secret>(secret: Secret) {
