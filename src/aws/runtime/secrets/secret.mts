@@ -1,14 +1,14 @@
-import awsSdk from "aws-sdk";
-import type { SecretsManager as SecretsManagerType } from "aws-sdk";
+import type { SecretsManager as SecretsManagerType } from "@aws-sdk/client-secrets-manager";
 import { getEnvVariable, getEnvVariableOrElse } from "../../../utils/utils.mjs";
 import { EnvKeys } from "../environment.mjs";
 
-const { SecretsManager } = awsSdk;
+const { SecretsManager } = await import("@aws-sdk/client-secrets-manager");
+
 
 // SECRET_OVERRIDE_AWS_REGION might not have been set before import of
 // secret, so we need to lazy initialize SecretsManager
 let smClient: SecretsManagerType | undefined;
-function getSmClient(): SecretsManagerType {
+async function getSmClient(): Promise<SecretsManagerType> {
     if (!smClient) {
         smClient = new SecretsManager({
             region: getEnvVariableOrElse<string>(
@@ -26,11 +26,11 @@ export async function getSecret<Secret>(
     secretId: string,
     prefix = ""
 ): Promise<Secret> {
-    const secretObj = await getSmClient()
+    const client = await getSmClient();
+    const secretObj = await client
         .getSecretValue({
             SecretId: secretId,
-        })
-        .promise();
+        });
 
     if (!secretObj.SecretString) {
         throw new Error("No secret found!");

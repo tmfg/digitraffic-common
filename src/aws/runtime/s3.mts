@@ -1,16 +1,15 @@
-import awsSdk from "aws-sdk";
-import type { S3 as S3Type } from "aws-sdk";
+import { Upload } from '@aws-sdk/lib-storage';
+import { S3 } from '@aws-sdk/client-s3';
+import type { ObjectCannedACL } from '@aws-sdk/client-s3';
+import { Readable } from "node:stream";
 
-const { S3 } = awsSdk;
-
-export async function uploadToS3<Body extends S3Type.Body | undefined>(
+export async function uploadToS3(
     bucketName: string,
-    body: Body,
+    body: Readable,
     objectName: string,
-    cannedAcl?: string,
+    cannedAcl?: ObjectCannedACL,
     contentType?: string,
 ) {
-
     const s3 = new S3();
     try {
         await doUpload(
@@ -28,20 +27,22 @@ export async function uploadToS3<Body extends S3Type.Body | undefined>(
     }
 }
 
-function doUpload<Body extends S3Type.Body | undefined>(
-    s3: S3Type,
+function doUpload(
+    s3: S3,
     bucketName: string,
-    body: Body,
+    body: Readable,
     filename: string,
-    cannedAcl?: string,
+    cannedAcl?: ObjectCannedACL,
     contentType?: string,
 ) {
-
-    return s3.upload({
-        Bucket: bucketName,
-        Body: body,
-        Key: filename,
-        ACL: cannedAcl,
-        ContentType: contentType,
-    }).promise();
+    return new Upload({
+        client: s3,
+        params: {
+            Bucket: bucketName,
+            Body: body,
+            Key: filename,
+            ACL: cannedAcl,
+            ContentType: contentType,
+        },
+    }).done();
 }

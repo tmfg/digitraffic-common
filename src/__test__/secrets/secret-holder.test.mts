@@ -1,7 +1,5 @@
 import { mockSecret, stubSecretsManager } from "../../test/secrets-manager.mjs";
 
-import sinon from "sinon";
-
 const SECRET_WITH_PREFIX = {
     "prefix.value": "value",
     "prefix.name": "name",
@@ -24,8 +22,6 @@ describe("SecretHolder - tests", () => {
     });
 
     afterEach(() => {
-        sinon.restore();
-        sinon.reset();
         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete process.env[DatabaseEnvironmentKeys.DB_USER];
     });

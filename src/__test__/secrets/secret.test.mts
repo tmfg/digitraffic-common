@@ -1,7 +1,5 @@
 import { mockSecret, stubSecretsManager } from "../../test/secrets-manager.mjs";
 
-import sinon from "sinon";
-
 const SECRET_ID = "test_secret";
 const SECRET_WITH_PREFIX = {
     "prefix.value": "value",
@@ -17,10 +15,6 @@ const secret = await import("../../aws/runtime/secrets/secret.mjs");
 const { getSecret } = secret;
 
 describe("secret - test", () => {
-    afterEach(() => {
-        sinon.restore();
-    });
-
     test("getSecret - no secret", async () => {
         mockSecret(null);
         await expect(async () => {

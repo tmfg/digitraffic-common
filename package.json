@@ -118,7 +118,6 @@
   "peerDependencies": {
     "@types/geojson": "^7946.0.12",
     "aws-cdk-lib": "^2.103.0",
-    "aws-sdk": "^2.1481.0",
     "axios": "^1.6.2",
     "change-case": "5.0.0",
     "constructs": "^10.3.0",
@@ -149,7 +148,6 @@
     "@typescript-eslint/eslint-plugin": "~6.18.1",
     "@typescript-eslint/parser": "^6.20.0",
     "aws-cdk-lib": "~2.118.0",
-    "aws-sdk": "~2.1531.0",
     "axios": "^1.6.7",
     "change-case": "5.3.0",
     "constructs": "10.3.0",
@@ -174,6 +172,9 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "~3.472.0",
-    "@aws-sdk/lib-storage": "~3.472.0"
+    "@aws-sdk/lib-storage": "~3.472.0",
+    "@aws-sdk/client-secrets-manager": "~3.496.0",
+    "@aws-sdk/client-api-gateway": "~3.496.0",
+    "@aws-sdk/client-sns": "~3.496.0"
   }
 }
