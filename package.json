@@ -116,6 +116,11 @@
     "./dist/aws/runtime/digitraffic-integration-response": "./dist/aws/runtime/digitraffic-integration-response.mjs"
   },
   "peerDependencies": {
+    "@aws-sdk/client-s3": "^3.496.0",
+    "@aws-sdk/lib-storage": "^3.496.0",
+    "@aws-sdk/client-secrets-manager": "^3.496.0",
+    "@aws-sdk/client-api-gateway": "^3.496.0",
+    "@aws-sdk/client-sns": "^3.496.0",
     "@types/geojson": "^7946.0.12",
     "aws-cdk-lib": "^2.103.0",
     "axios": "^1.6.2",
@@ -131,6 +136,11 @@
     "pg-promise": "^11.5.4"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "3.496.0",
+    "@aws-sdk/lib-storage": "3.496.0",
+    "@aws-sdk/client-secrets-manager": "3.496.0",
+    "@aws-sdk/client-api-gateway": "3.496.0",
+    "@aws-sdk/client-sns": "3.496.0",
     "@jest/globals": "^29.7.0",
     "@rushstack/eslint-config": "^3.6.2",
     "@rushstack/heft": "^0.64.3",
@@ -170,11 +180,5 @@
     "typescript": "~5.3.3",
     "velocityjs": "2.0.6"
   },
-  "dependencies": {
-    "@aws-sdk/client-s3": "~3.472.0",
-    "@aws-sdk/lib-storage": "~3.472.0",
-    "@aws-sdk/client-secrets-manager": "~3.496.0",
-    "@aws-sdk/client-api-gateway": "~3.496.0",
-    "@aws-sdk/client-sns": "~3.496.0"
-  }
+  "dependencies": {}
 }
