@@ -1,12 +1,12 @@
-import awsSdk from "aws-sdk";
-import type { APIGateway as APIGatewayType } from "aws-sdk";
+import { APIGateway } from "@aws-sdk/client-api-gateway";
+import type { UpdateApiKeyCommandOutput } from "@aws-sdk/client-api-gateway";
 
-const { APIGateway } = awsSdk;
-
-export function getApiKeyFromAPIGateway(keyId: string): Promise<APIGatewayType.Types.ApiKey> {
+export function getApiKeyFromAPIGateway(
+    keyId: string
+): Promise<UpdateApiKeyCommandOutput> {
     const agw = new APIGateway();
     return agw.getApiKey({
         apiKey: keyId,
         includeValue: true,
-    }).promise();
+    });
 }

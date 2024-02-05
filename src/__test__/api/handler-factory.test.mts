@@ -5,7 +5,7 @@ import type {
 } from "../../aws/infra/api/handler-factory.mjs";
 import { DtLogger } from "../../aws/runtime/dt-logger.mjs";
 import { LambdaResponse } from "../../aws/types/lambda-response.mjs";
-import {jest} from '@jest/globals';
+import { jest } from "@jest/globals";
 
 const logger = new DtLogger();
 
@@ -19,7 +19,7 @@ describe("handler-factory tests", () => {
 
         await handler({});
 
-        expect(method).toBeCalledTimes(1);
+        expect(method).toHaveBeenCalledTimes(1);
     });
 
     test("test logging", async () => {
@@ -36,8 +36,8 @@ describe("handler-factory tests", () => {
 
         await handler({});
 
-        expect(method).toBeCalledTimes(1);
-        expect(loggingHandler).toBeCalledTimes(1);
+        expect(method).toHaveBeenCalledTimes(1);
+        expect(loggingHandler).toHaveBeenCalledTimes(1);
     });
 
     test("test error handling", async () => {
@@ -52,7 +52,7 @@ describe("handler-factory tests", () => {
 
         await handler({});
 
-        expect(method).toBeCalledTimes(1);
-        expect(eh).toBeCalledTimes(1);
+        expect(method).toHaveBeenCalledTimes(1);
+        expect(eh).toHaveBeenCalledTimes(1);
     });
 });

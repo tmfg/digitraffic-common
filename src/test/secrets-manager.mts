@@ -1,10 +1,15 @@
-import AWS from "aws-sdk";
+import { type GetSecretValueCommandOutput, SecretsManager } from "@aws-sdk/client-secrets-manager";
 import sinon from "sinon";
 import { EnvKeys } from "../aws/runtime/environment.mjs";
 import { setEnvVariable } from "../utils/utils.mjs";
+import { jest } from '@jest/globals';
+
 
 setEnvVariable(EnvKeys.AWS_REGION, "eu-west-1");
-const secretValue = sinon.stub();
+
+const emptySecret: GetSecretValueCommandOutput = { $metadata: {} };
+const SecretsManagerStubInstance = sinon.createStubInstance(SecretsManager);
+SecretsManagerStubInstance.getSecretValue.resolves(emptySecret);
 
 /**
  * Stub Secrets Manager for tests.  You must call this
@@ -12,26 +17,20 @@ const secretValue = sinon.stub();
  *
  * To mock the actual secret, call mockSecret()
  */
-export function stubSecretsManager() {
-    const smStub = {
-        getSecretValue: secretValue,
-    };
+export function stubSecretsManager(): sinon.SinonStubbedInstance<SecretsManager> {
+    jest.unstable_mockModule("@aws-sdk/client-secrets-manager", function () {
+        return {
+            SecretsManager: sinon.stub().returns(SecretsManagerStubInstance)
+        };
+    });
 
-    sinon.stub(AWS, "SecretsManager").returns(smStub);
-
-    return smStub.getSecretValue;
+    return SecretsManagerStubInstance;
 }
 
 export function mockSecret<Secret>(secret: Secret) {
     if (!secret) {
-        secretValue.returns({
-            promise: sinon.stub().returns({}),
-        });
+        SecretsManagerStubInstance.getSecretValue.resolves({ ...emptySecret });
     } else {
-        secretValue.returns({
-            promise: sinon.stub().returns({
-                SecretString: JSON.stringify(secret),
-            }),
-        });
+        SecretsManagerStubInstance.getSecretValue.resolves({ SecretString: JSON.stringify(secret) });
     }
 }
