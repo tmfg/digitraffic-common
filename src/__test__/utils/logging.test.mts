@@ -13,6 +13,10 @@ interface ErrorLogLine {
 
 const TEST_METHODNAME = "test.logException";
 
+interface LikeAxiosError extends Error {
+  code?: string;
+}
+
 describe("dt-logger", () => {
     function assertLogError(
         error: Error | string,
@@ -21,6 +25,12 @@ describe("dt-logger", () => {
     ) {
         assertWrite((logger: DtLogger) => {
             logException(logger, error, includeStack);
+        }, expected);
+    }
+
+    function assertAxiosError(error: LikeAxiosError, expected: ErrorLogLine) {
+        assertWrite((logger: DtLogger) => {
+            logException(logger, error);
         }, expected);
     }
 
@@ -93,5 +103,18 @@ describe("dt-logger", () => {
             },
             true
         );
+    });
+
+    test("log error - AxiosError", () => {
+        const ERROR: LikeAxiosError = new Error("ErrorFromAxios");
+        ERROR.code = "12";
+
+        assertAxiosError(ERROR, {
+            type: "Error",
+            method: TEST_METHODNAME,
+            message: ERROR.message,
+            level: "ERROR",
+            code: ERROR.code,
+        });
     });
 });
