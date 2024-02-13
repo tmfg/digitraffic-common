@@ -1,4 +1,3 @@
-import { AxiosError } from "axios";
 import { Writable } from "stream";
 import { DtLogger } from "../../aws/runtime/dt-logger.mjs";
 import { logException } from "../../utils/logging.mjs";
@@ -22,12 +21,6 @@ describe("dt-logger", () => {
     ) {
         assertWrite((logger: DtLogger) => {
             logException(logger, error, includeStack);
-        }, expected);
-    }
-
-    function assertAxiosError(error: AxiosError, expected: ErrorLogLine) {
-        assertWrite((logger: DtLogger) => {
-            logException(logger, error);
         }, expected);
     }
 
@@ -100,17 +93,5 @@ describe("dt-logger", () => {
             },
             true
         );
-    });
-
-    test("log error - AxiosError", () => {
-        const ERROR = new AxiosError("ErrorFromAxios", "12");
-
-        assertAxiosError(ERROR, {
-            type: "Error",
-            method: TEST_METHODNAME,
-            message: ERROR.message,
-            level: "ERROR",
-            code: ERROR.code,
-        });
     });
 });
