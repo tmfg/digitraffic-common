@@ -51,6 +51,7 @@
     "./dist/test/httpserver": "./dist/test/httpserver.mjs",
     "./dist/test/secrets-manager": "./dist/test/secrets-manager.mjs",
     "./dist/test/asserter": "./dist/test/asserter.mjs",
+    "./dist/test/mock-ky": "./dist/test/mock-ky.mjs",
     "./dist/marine/rtz": "./dist/marine/rtz.mjs",
     "./dist/marine/id_utils": "./dist/marine/id_utils.mjs",
     "./dist/index": "./dist/index.mjs",
