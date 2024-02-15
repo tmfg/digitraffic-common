@@ -1,4 +1,3 @@
-import { AxiosError } from "axios";
 import { DtLogger } from "../aws/runtime/dt-logger.mjs";
 import { getEnvVariableOrElse } from "./utils.mjs";
 
@@ -63,7 +62,8 @@ export function logException(
     const stack =
         error instanceof Error && includeStack ? error.stack : undefined;
 
-    const customCode = error instanceof AxiosError ? error.code : undefined;
+    // In case error is AxiosError, log the custom code property.
+    const customCode = (error as Record<string, string>)["code"];
 
     logger.error({
         type: "Error",

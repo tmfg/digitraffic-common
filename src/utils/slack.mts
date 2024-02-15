@@ -1,4 +1,4 @@
-import axios from "axios";
+import ky from "ky";
 import { logger } from "../aws/runtime/dt-logger-default.mjs";
 import { logException } from "./logging.mjs";
 
@@ -16,8 +16,8 @@ export class SlackApi {
                 message: "Sending slack notification",
             });
 
-            await axios.post(this.url, {
-                text,
+            await ky.post(this.url, {
+                body: text
             });
         } catch (error) {
             logException(logger, error);

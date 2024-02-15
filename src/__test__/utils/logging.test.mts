@@ -1,4 +1,3 @@
-import { AxiosError } from "axios";
 import { Writable } from "stream";
 import { DtLogger } from "../../aws/runtime/dt-logger.mjs";
 import { logException } from "../../utils/logging.mjs";
@@ -14,6 +13,10 @@ interface ErrorLogLine {
 
 const TEST_METHODNAME = "test.logException";
 
+interface LikeAxiosError extends Error {
+  code?: string;
+}
+
 describe("dt-logger", () => {
     function assertLogError(
         error: Error | string,
@@ -25,7 +28,7 @@ describe("dt-logger", () => {
         }, expected);
     }
 
-    function assertAxiosError(error: AxiosError, expected: ErrorLogLine) {
+    function assertAxiosError(error: LikeAxiosError, expected: ErrorLogLine) {
         assertWrite((logger: DtLogger) => {
             logException(logger, error);
         }, expected);
@@ -103,7 +106,8 @@ describe("dt-logger", () => {
     });
 
     test("log error - AxiosError", () => {
-        const ERROR = new AxiosError("ErrorFromAxios", "12");
+        const ERROR: LikeAxiosError = new Error("ErrorFromAxios");
+        ERROR.code = "12";
 
         assertAxiosError(ERROR, {
             type: "Error",
