@@ -28,13 +28,15 @@ export class DigitrafficStaticIntegration extends MockIntegration {
         mediaType: MediaType,
         response: string,
         enableCors = true,
-        apiKeyRequired = true
+        apiKeyRequired = true,
+        headers: Record<string, string> = {}
     ) {
         const integrationResponse =
             DigitrafficStaticIntegration.createIntegrationResponse(
                 response,
                 mediaType,
-                enableCors
+                enableCors,
+                headers
             );
 
         super({
@@ -49,9 +51,7 @@ export class DigitrafficStaticIntegration extends MockIntegration {
             resource.addMethod(httpMethod, this, {
                 apiKeyRequired,
                 methodResponses: [
-                    DigitrafficStaticIntegration.createMethodResponse(
-                        enableCors
-                    ),
+                    DigitrafficStaticIntegration.createMethodResponse(enableCors, headers),
                 ],
             });
         });
@@ -72,16 +72,18 @@ export class DigitrafficStaticIntegration extends MockIntegration {
         );
     }
 
-    private static createIntegrationResponse(
+    static createIntegrationResponse(
         response: string,
         mediaType: MediaType,
-        enableCors: boolean
+        enableCors: boolean,
+        headers: Record<string, string> = {}
     ) {
         const integrationResponse = {
             statusCode: "200",
             responseTemplates: {
                 [mediaType]: response,
             },
+            headers: headers
         };
 
         return enableCors
@@ -89,20 +91,35 @@ export class DigitrafficStaticIntegration extends MockIntegration {
             : integrationResponse;
     }
 
-    private static createMethodResponse(enableCors: boolean) {
-        return enableCors
-            ? corsMethod(METHOD_RESPONSE_200)
-            : METHOD_RESPONSE_200;
+    static createMethodResponse(enableCors: boolean, headers: Record<string, string>) {
+        const allowedHeaders = [
+            ...Object.keys(headers),
+            ...(enableCors ? ["Access-Control-Allow-Origin"] : [])
+        ];
+
+        const entries = Object.fromEntries(allowedHeaders.map((key) => [key, true]));
+        const allowedHeaderParams = prefixKeys("method.response.header.", entries);
+
+        return {
+            ...METHOD_RESPONSE_200,
+            ...{
+                responseParameters: {
+                    ...allowedHeaderParams
+                },
+            }
+        }
     }
 }
 
-function corsMethod(response: MethodResponse): MethodResponse {
-    return {
-        ...response,
-        ...{
-            responseParameters: {
-                "method.response.header.Access-Control-Allow-Origin": true,
-            },
-        },
-    };
+/**
+ * Create a new Record with prefix added to each of the keys.
+ *
+ * @param prefix
+ * @param obj
+ */
+function prefixKeys<T>(prefix: string, obj: Record<string, T>): Record<string, T> {
+    return Object.entries(obj).reduce((acc: Record<string, T>, entry: [string, T]) => {
+        acc[prefix + entry[0]] = entry[1];
+        return acc;
+    }, {})
 }
