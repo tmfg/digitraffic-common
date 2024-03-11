@@ -1,16 +1,12 @@
-import { Function, type FunctionProps } from "aws-cdk-lib/aws-lambda";
-import { Stack } from "aws-cdk-lib";
-import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
-import { ComparisonOperator, Metric } from "aws-cdk-lib/aws-cloudwatch";
-import { DigitrafficStack } from "./stack.mjs";
-import type { ITopic } from "aws-cdk-lib/aws-sns";
-import {
-    databaseFunctionProps,
-    type LambdaEnvironment,
-    type MonitoredFunctionParameters,
-} from "./lambda-configs.mjs";
-import { DigitrafficLogSubscriptions } from "./subscription.mjs";
-import { TrafficType } from "../../../types/traffictype.mjs";
+import {Function, type FunctionProps, LoggingFormat} from "aws-cdk-lib/aws-lambda";
+import {Stack} from "aws-cdk-lib";
+import {SnsAction} from "aws-cdk-lib/aws-cloudwatch-actions";
+import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
+import {DigitrafficStack} from "./stack.mjs";
+import type {ITopic} from "aws-cdk-lib/aws-sns";
+import {databaseFunctionProps, type LambdaEnvironment, type MonitoredFunctionParameters,} from "./lambda-configs.mjs";
+import {DigitrafficLogSubscriptions} from "./subscription.mjs";
+import {TrafficType} from "../../../types/traffictype.mjs";
 
 import _ from "lodash";
 
@@ -159,7 +155,8 @@ export class MonitoredFunction extends Function {
         trafficType: TrafficType | null,
         props?: MonitoredFunctionProps
     ) {
-        super(scope, id, functionProps);
+        // Set default loggingFormat to JSON if not explicitly set to TEXT
+        super(scope, id, {...{loggingFormat: LoggingFormat.JSON}, ...functionProps});
 
         if (functionProps.functionName === undefined) {
             throw new Error("Function name not provided");
