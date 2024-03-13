@@ -1,11 +1,5 @@
 import { Duration } from "aws-cdk-lib";
-import {
-    AssetCode,
-    Canary,
-    Runtime,
-    Schedule,
-    Test,
-} from "aws-cdk-lib/aws-synthetics";
+import { AssetCode, Canary, Runtime, Schedule, Test } from "aws-cdk-lib/aws-synthetics";
 import { Role } from "aws-cdk-lib/aws-iam";
 import { CanaryAlarm } from "./canary-alarm.mjs";
 import type { CanaryParameters } from "./canary-parameters.mjs";
@@ -18,10 +12,10 @@ export class DigitrafficCanary extends Canary {
         canaryName: string,
         role: Role,
         params: CanaryParameters,
-        environmentVariables: LambdaEnvironment
+        environmentVariables: LambdaEnvironment,
     ) {
         super(scope, canaryName, {
-            runtime: Runtime.SYNTHETICS_NODEJS_PUPPETEER_4_0,
+            runtime: params.runtime ?? Runtime.SYNTHETICS_NODEJS_PUPPETEER_6_2,
             role,
             test: Test.custom({
                 code: new AssetCode("dist", {

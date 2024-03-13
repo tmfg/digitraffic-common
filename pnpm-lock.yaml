@@ -69,8 +69,8 @@ devDependencies:
     specifier: ^6.20.0
     version: 6.20.0(eslint@8.56.0)(typescript@5.3.3)
   aws-cdk-lib:
-    specifier: ~2.132.0
-    version: 2.132.0(constructs@10.3.0)
+    specifier: ~2.132.1
+    version: 2.132.1(constructs@10.3.0)
   change-case:
     specifier: 5.3.0
     version: 5.3.0
@@ -3059,8 +3059,8 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /aws-cdk-lib@2.132.0(constructs@10.3.0):
-    resolution: {integrity: sha512-auztTTYy8j62MmRZNdM7Vd8eQ5eP3xLMhrrILhDZf3DiSDD0lyYL0hv98VD4XPkWGMQ8yOmo5nZ3s/zD7cnKlw==}
+  /aws-cdk-lib@2.132.1(constructs@10.3.0):
+    resolution: {integrity: sha512-VheC7WcvmxiteNaZPucS9J9haGQZwbUtwNiNqsbTaEiru6ETUhf/yIOIamLto1kOKEPxCw2bfLkgYrWoCzwOpw==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
       constructs: ^10.0.0
