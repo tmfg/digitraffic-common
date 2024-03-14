@@ -1,7 +1,10 @@
 import type { AwsEnv } from "../types/aws-env.mjs";
 import type { Either } from "../types/either.mjs";
 import { EnvKeys } from "../aws/runtime/environment.mjs";
-import { GenericSecret, getSecret } from "../aws/runtime/secrets/secret.mjs";
+import {
+    type GenericSecret,
+    getSecret,
+} from "../aws/runtime/secrets/secret.mjs";
 
 /**
  * Check if arrays have only elements that also exists also in other array.
