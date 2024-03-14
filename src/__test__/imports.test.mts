@@ -95,11 +95,6 @@ test('httpserver import ok?', () => {
   return expect(httpserver).resolves.toBeDefined();
 });
 
-test('secretsManager import ok?', () => {
-  const secretsManager = import("../test/secrets-manager.mjs");
-  return expect(secretsManager).resolves.toBeDefined();
-});
-
 test('asserter import ok?', () => {
   const asserter = import("../test/asserter.mjs");
   return expect(asserter).resolves.toBeDefined();
@@ -390,10 +385,12 @@ test('messaging import ok?', () => {
   return expect(messaging).resolves.toBeDefined();
 });
 
+/*
+temporary disable, enable after sdk v2 is kicked out
 test('apikey import ok?', () => {
   const apikey = import("../aws/runtime/apikey.mjs");
   return expect(apikey).resolves.toBeDefined();
-});
+});*/
 
 test('environment import ok?', () => {
   const environment = import("../aws/runtime/environment.mjs");

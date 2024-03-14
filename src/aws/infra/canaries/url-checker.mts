@@ -56,10 +56,10 @@ export class UrlChecker {
             .withFailedCanaryMetric(true);
     }
 
-    static create(hostname: string, apiKeyId: string): Promise<UrlChecker> {
-        return getApiKeyFromAPIGateway(apiKeyId).then((apiKey) => {
-            return new UrlChecker(hostname, apiKey.value);
-        });
+    static async create(hostname: string, apiKeyId: string): Promise<UrlChecker> {
+        const apiKey = await getApiKeyFromAPIGateway(apiKeyId);
+
+        return new UrlChecker(hostname, apiKey.value);
     }
 
     static createV2(): Promise<UrlChecker> {

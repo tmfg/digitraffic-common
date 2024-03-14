@@ -1,13 +1,11 @@
-import type { SecretsManager as SecretsManagerType } from "@aws-sdk/client-secrets-manager";
+import { SecretsManager } from "@aws-sdk/client-secrets-manager";
 import { getEnvVariable, getEnvVariableOrElse } from "../../../utils/utils.mjs";
 import { EnvKeys } from "../environment.mjs";
 
-const { SecretsManager } = await import("@aws-sdk/client-secrets-manager");
-
 // SECRET_OVERRIDE_AWS_REGION might not have been set before import of
 // secret, so we need to lazy initialize SecretsManager
-let smClient: SecretsManagerType | undefined;
-function getSmClient(): SecretsManagerType {
+let smClient: SecretsManager | undefined;
+function getSmClient(): SecretsManager {
     if (!smClient) {
         smClient = new SecretsManager({
             region: getEnvVariableOrElse<string>(
