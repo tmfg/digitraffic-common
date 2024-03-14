@@ -1,6 +1,7 @@
 import type { AwsEnv } from "../types/aws-env.mjs";
 import type { Either } from "../types/either.mjs";
 import { EnvKeys } from "../aws/runtime/environment.mjs";
+import { GenericSecret, getSecret } from "../aws/runtime/secrets/secret.mjs";
 
 /**
  * Check if arrays have only elements that also exists also in other array.
@@ -25,7 +26,7 @@ import { EnvKeys } from "../aws/runtime/environment.mjs";
  */
 export function bothArraysHasSameValues(
     a: null | undefined | unknown[],
-    b: null | undefined | unknown[]
+    b: null | undefined | unknown[],
 ): boolean {
     if ((a && !b) || (!a && b)) {
         return false;
@@ -57,11 +58,11 @@ export function getFirst<T>(array: T[], sortFunction?: (a: T) => number): T {
 function getFirstOrLast<T>(
     getFirst: boolean,
     array: T[],
-    sortFunction?: (a: T) => number
+    sortFunction?: (a: T) => number,
 ): T {
     if (array.length == 0) {
         throw new Error(
-            `can't get ${getFirst ? "first" : "last"} from empty array!`
+            `can't get ${getFirst ? "first" : "last"} from empty array!`,
         );
     }
 
@@ -154,6 +155,28 @@ export function getEnvVariableOrElse<T>(key: string, orElse: T): string | T {
     return getEnvVariableOr(key, () => orElse);
 }
 
+/**
+ * Gets variable from environment or from an AWS Secrets Manager secret if not found in the environment.
+ * @param Environment key
+ * @param Secret id in Secrets Manager
+ */
+
+export async function getFromEnvOrSecret(
+    key: string,
+    secretId: string,
+): Promise<string> {
+    const envValue = getEnvVariableSafe(key);
+    if (envValue.result === "ok") {
+        return envValue.value;
+    }
+    const secret = await getSecret<GenericSecret>(secretId);
+    const secretValue = secret[key];
+    if (secretValue !== undefined) {
+        return secretValue;
+    }
+    throw new Error(`Cannot get value with key ${key} from env or secret`);
+}
+
 export function setSecretOverideAwsRegionEnv(region: string) {
     setEnvVariable(EnvKeys.SECRET_OVERRIDE_AWS_REGION, region);
 }
@@ -167,7 +190,7 @@ export function setSecretOverideAwsRegionEnv(region: string) {
  */
 export function hasOwnPropertySafe(
     object: object,
-    propertyName: string
+    propertyName: string,
 ): boolean {
     return Object.prototype.hasOwnProperty.call(object, propertyName);
 }
