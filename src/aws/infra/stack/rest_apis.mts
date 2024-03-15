@@ -1,5 +1,5 @@
 import {
-    CfnDocumentationPart,
+    CfnDocumentationPart, Cors,
     EndpointType,
     GatewayResponse,
     type IResource,
@@ -64,6 +64,18 @@ export class DigitrafficRestApi extends RestApi {
             stack.configuration.stackFeatures?.enableDocumentation ?? true;
 
         add404Support(this, stack);
+    }
+
+    static withPublicCors(stack: DigitrafficStack,
+                          apiId: string,
+                          apiName: string,
+                          allowFromIpAddresses?: string[] | undefined,
+                          config?: Partial<RestApiProps>) {
+        const mergedConfig:Partial<RestApiProps> = {
+            ...PUBLIC_REST_API_CORS_CONFIG,
+            ...config
+        };
+        return new DigitrafficRestApi(stack, apiId, apiName, allowFromIpAddresses, mergedConfig)
     }
 
     hostname(): string {
@@ -319,4 +331,12 @@ export function createIpRestrictionPolicyDocument(
             }),
         ],
     });
+}
+
+export const PUBLIC_REST_API_CORS_CONFIG: Partial<RestApiProps> = {
+    defaultCorsPreflightOptions: {
+        allowOrigins: Cors.ALL_ORIGINS,
+        allowHeaders: ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "Digitraffic-User"],
+        allowMethods: ["OPTIONS", "GET", "HEAD"]
+    }
 }
