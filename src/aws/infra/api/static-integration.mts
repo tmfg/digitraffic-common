@@ -1,19 +1,9 @@
-import {
-    type MethodResponse,
-    MockIntegration,
-    PassthroughBehavior,
-    Resource,
-} from "aws-cdk-lib/aws-apigateway";
+import { MockIntegration, PassthroughBehavior, Resource } from "aws-cdk-lib/aws-apigateway";
 import { MediaType } from "../../types/mediatypes.mjs";
-import { RESPONSE_CORS_INTEGRATION } from "./responses.mjs";
 
 const INTEGRATION_RESPONSE_200 = `{
     "statusCode": 200
 }`;
-
-const METHOD_RESPONSE_200 = {
-    statusCode: "200",
-};
 
 /**
  * Static integration, that returns the given response with given mediaType from given resource.
@@ -31,11 +21,14 @@ export class DigitrafficStaticIntegration extends MockIntegration {
         apiKeyRequired = true,
         headers: Record<string, string> = {}
     ) {
+        if (enableCors) {
+            headers = { ...headers, "Access-Control-Allow-Origin": "*" };
+        }
+
         const integrationResponse =
             DigitrafficStaticIntegration.createIntegrationResponse(
                 response,
                 mediaType,
-                enableCors,
                 headers
             );
 
@@ -51,7 +44,7 @@ export class DigitrafficStaticIntegration extends MockIntegration {
             resource.addMethod(httpMethod, this, {
                 apiKeyRequired,
                 methodResponses: [
-                    DigitrafficStaticIntegration.createMethodResponse(enableCors, headers),
+                    DigitrafficStaticIntegration.createMethodResponse(headers),
                 ],
             });
         });
@@ -61,54 +54,49 @@ export class DigitrafficStaticIntegration extends MockIntegration {
         resource: Resource,
         response: K,
         enableCors = true,
-        apiKeyRequired = true
+        apiKeyRequired = true,
+        headers: Record<string, string> = {}
     ) {
         return new DigitrafficStaticIntegration(
             resource,
             MediaType.APPLICATION_JSON,
             JSON.stringify(response),
             enableCors,
-            apiKeyRequired
+            apiKeyRequired,
+            headers
         );
     }
 
     static createIntegrationResponse(
         response: string,
         mediaType: MediaType,
-        enableCors: boolean,
         headers: Record<string, string> = {}
     ) {
-        const integrationResponse = {
+        const params = mapRecord(headers, (entry) => ["method.response.header." + entry[0], `'${entry[1]}'`]);
+
+        return {
             statusCode: "200",
             responseTemplates: {
                 [mediaType]: response,
             },
-            headers: headers
+            responseParameters: params
         };
-
-        return enableCors
-            ? { ...integrationResponse, ...RESPONSE_CORS_INTEGRATION }
-            : integrationResponse;
     }
 
-    static createMethodResponse(enableCors: boolean, headers: Record<string, string>) {
-        const allowedHeaders = [
-            ...Object.keys(headers),
-            ...(enableCors ? ["Access-Control-Allow-Origin"] : [])
-        ];
-
+    static createMethodResponse(headers: Record<string, string>) {
+        const allowedHeaders = Object.keys(headers);
         const entries = Object.fromEntries(allowedHeaders.map((key) => [key, true]));
-        const allowedHeaderParams = prefixKeys("method.response.header.", entries);
 
         return {
-            ...METHOD_RESPONSE_200,
-            ...{
-                responseParameters: {
-                    ...allowedHeaderParams
-                },
-            }
+            statusCode: "200",
+            responseParameters: prefixKeys("method.response.header.", entries)
         }
     }
+}
+
+function mapRecord<T>(obj: Record<string, T>, func: (entry: [string, T]) => [string, T]): Record<string, T> {
+    const mappedEntries = Object.entries(obj).map((entry: [string, T]) => func(entry));
+    return Object.fromEntries(mappedEntries);
 }
 
 /**
@@ -118,8 +106,5 @@ export class DigitrafficStaticIntegration extends MockIntegration {
  * @param obj
  */
 function prefixKeys<T>(prefix: string, obj: Record<string, T>): Record<string, T> {
-    return Object.entries(obj).reduce((acc: Record<string, T>, entry: [string, T]) => {
-        acc[prefix + entry[0]] = entry[1];
-        return acc;
-    }, {})
+    return mapRecord(obj, (entry) => [prefix + entry[0], entry[1]]);
 }
