@@ -28,10 +28,26 @@ jobs:
         run: |
           pnpm test >> $GITHUB_STEP_SUMMARY
 
+      - name: Install madge
+        run: npm -g install madge 
+        continue-on-error: true
+
       - name: Run madge
+        id: run-madge
         run: |
-          npm -g install madge
-          madge --circular --extensions mjs dist
+          # create image
+          madge --image dependencies.svg dist
+          # run for output
+          madge --circular dist
+
+      - name: Publish madge image
+        id: publish-reports
+        uses: tmfg/digitraffic-actions@gh-pages-publish/v1
+        with:
+          GH_PAGES_BRANCH: gh-pages
+          FILE_PATH: ${{ github.ref_name }}/dependencies.svg
+          COMMIT_MESSAGE: Madge dependency graph in branch $CURRENT_BRANCH
+          LINK_TEXT: Dependency graph
 
       - name: Test Report
         uses: dorny/test-reporter@v1
