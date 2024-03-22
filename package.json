@@ -150,7 +150,7 @@
     "@rushstack/heft-typescript-plugin": "^0.3.20",
     "@types/aws-lambda": "8.10.136",
     "@types/etag": "1.8.3",
-    "@types/geojson": "7946.0.14",
+    "@types/geojson": "^7946.0.14",
     "@types/geojson-validation": "^1.0.3",
     "@types/jest": "29.5.12",
     "@types/lodash": "4.14.202",
