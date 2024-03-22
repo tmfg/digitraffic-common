@@ -30,10 +30,13 @@ jobs:
 
       - name: Install madge
         run: npm -g install madge 
-        continue-on-error: true
+
+      - name: Setup Graphviz
+        uses: ts-graphviz/setup-graphviz@v2
 
       - name: Run madge
         id: run-madge
+        continue-on-error: true
         run: |
           # create image
           madge --image dependencies.svg dist
