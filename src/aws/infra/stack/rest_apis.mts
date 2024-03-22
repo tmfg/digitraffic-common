@@ -1,13 +1,12 @@
 import {
-    CfnDocumentationPart,
+    CfnDocumentationPart, Cors,
     EndpointType,
     GatewayResponse,
     type IResource,
     type JsonSchema,
     MethodLoggingLevel,
-    MockIntegration,
     Model,
-    Resource,
+    Resource, type ResourceOptions,
     ResponseType,
     RestApi,
     type RestApiProps,
@@ -155,48 +154,23 @@ export class DigitrafficRestApi extends RestApi {
         }
     }
 
+    addResourceWithCorsOptionsSubTree(resource: Resource,
+                                      pathPart: string,
+                                      config?: ResourceOptions) {
+        const mergedConfig: ResourceOptions = {
+            ...PUBLIC_REST_API_CORS_CONFIG,
+            ...config
+        };
+        return resource.addResource(pathPart, mergedConfig);
+    }
+
     /**
      * Add support for HTTP OPTIONS to an API GW resource,
      * this is required for preflight CORS requests made by browsers.
      * @param apiResource
      */
     addCorsOptions(apiResource: IResource): void {
-        apiResource.addMethod(
-            "OPTIONS",
-            new MockIntegration({
-                integrationResponses: [
-                    {
-                        statusCode: "200",
-                        responseParameters: {
-                            "method.response.header.Access-Control-Allow-Headers":
-                                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Digitraffic-User'",
-                            "method.response.header.Access-Control-Allow-Origin":
-                                "'*'",
-                            "method.response.header.Access-Control-Allow-Methods":
-                                "'OPTIONS,GET,HEAD'",
-                        },
-                    },
-                ],
-                requestTemplates: {
-                    "application/json": '{"statusCode": 200}',
-                },
-            }),
-            {
-                methodResponses: [
-                    {
-                        statusCode: "200",
-                        responseParameters: {
-                            "method.response.header.Access-Control-Allow-Headers":
-                                true,
-                            "method.response.header.Access-Control-Allow-Methods":
-                                true,
-                            "method.response.header.Access-Control-Allow-Origin":
-                                true,
-                        },
-                    },
-                ],
-            }
-        );
+        apiResource.addCorsPreflight(PUBLIC_REST_API_CORS_CONFIG.defaultCorsPreflightOptions!)
     }
 }
 
@@ -319,4 +293,12 @@ export function createIpRestrictionPolicyDocument(
             }),
         ],
     });
+}
+
+export const PUBLIC_REST_API_CORS_CONFIG: Partial<ResourceOptions> = {
+    defaultCorsPreflightOptions: {
+        allowOrigins: Cors.ALL_ORIGINS,
+        allowHeaders: ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "Digitraffic-User"],
+        allowMethods: ["OPTIONS", "GET", "HEAD"]
+    }
 }

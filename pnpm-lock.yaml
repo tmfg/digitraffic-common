@@ -45,7 +45,7 @@ devDependencies:
     specifier: 1.8.3
     version: 1.8.3
   '@types/geojson':
-    specifier: 7946.0.14
+    specifier: ^7946.0.14
     version: 7946.0.14
   '@types/geojson-validation':
     specifier: ^1.0.3
@@ -69,8 +69,8 @@ devDependencies:
     specifier: ^6.20.0
     version: 6.20.0(eslint@8.57.0)(typescript@5.3.3)
   aws-cdk-lib:
-    specifier: ~2.132.1
-    version: 2.132.1(constructs@10.3.0)
+    specifier: ^2.133.0
+    version: 2.133.0(constructs@10.3.0)
   aws-sdk:
     specifier: 2.1577.0
     version: 2.1577.0
@@ -3124,8 +3124,8 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /aws-cdk-lib@2.132.1(constructs@10.3.0):
-    resolution: {integrity: sha512-VheC7WcvmxiteNaZPucS9J9haGQZwbUtwNiNqsbTaEiru6ETUhf/yIOIamLto1kOKEPxCw2bfLkgYrWoCzwOpw==}
+  /aws-cdk-lib@2.133.0(constructs@10.3.0):
+    resolution: {integrity: sha512-5/ezv8Ir2xyz3myeXQcODwrjVRN/cDD2OpBwU/ySFBe+uNac25OoHfTXwUPwE7oLj9qetSt6/i1QvY2iIs6yiQ==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
       constructs: ^10.0.0
