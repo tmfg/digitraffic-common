@@ -48,7 +48,7 @@ jobs:
         uses: tmfg/digitraffic-actions@gh-pages-publish/v1
         with:
           GH_PAGES_BRANCH: gh-pages
-          FILE_PATH: ${{ github.ref_name }}/dependencies.svg
+          FILE_PATH: dependencies.svg
           COMMIT_MESSAGE: Madge dependency graph in branch $CURRENT_BRANCH
           LINK_TEXT: Dependency graph
 

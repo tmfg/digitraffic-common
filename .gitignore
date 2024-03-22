@@ -11,6 +11,7 @@
 !/.npmrc
 !/.prettierignore
 !/.prettierrc.json
+!/.madgerc
 !/jest.config.mjs
 !/LICENSE
 !/package.json
