@@ -11,11 +11,11 @@ import {SnsTopic} from "aws-cdk-lib/aws-events-targets";
  */
 export class DigitrafficSecurityRule extends Rule {
     constructor(scope: Construct, topic: ITopic) {
-        const ruleName = 'SecurityHubRule';
+        const ruleName = "SecurityHubRule";
         super(scope, ruleName, {
             ruleName,
             eventPattern: {
-                source: ['aws.securityhub'],
+                source: ["aws.securityhub"],
                 detailType: ["Security Hub Findings - Imported"],
                 detail: {
                     findings: {

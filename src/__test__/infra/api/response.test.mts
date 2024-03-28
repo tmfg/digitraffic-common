@@ -1,4 +1,4 @@
-import { RESPONSE_DEFAULT_LAMBDA } from "../../aws/infra/api/response.mjs";
+import { RESPONSE_DEFAULT_LAMBDA } from "../../../aws/infra/api/response.mjs";
 import etag from "etag";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires

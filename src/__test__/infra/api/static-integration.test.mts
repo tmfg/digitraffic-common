@@ -1,5 +1,5 @@
-import { DigitrafficStaticIntegration } from "../../aws/infra/api/static-integration.mjs";
-import { MediaType } from "../../aws/types/mediatypes.mjs";
+import { DigitrafficStaticIntegration } from "../../../aws/infra/api/static-integration.mjs";
+import { MediaType } from "../../../aws/types/mediatypes.mjs";
 
 describe("response tests", () => {
     it("createIntegrationResponse works", () => {
