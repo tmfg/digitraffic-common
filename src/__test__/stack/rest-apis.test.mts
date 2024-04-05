@@ -15,7 +15,7 @@ describe("Rest api test", () => {
       trafficType: TrafficType.ROAD,
       warningTopicArn: ""
     });
-    const publicApi = new DigitrafficRestApi(stack, "CountingSite-public", "Counting Site Public API");
+    const publicApi = new DigitrafficRestApi(stack, "test", "testName");
     const apiResource = publicApi.root.addResource("api");
     const versionResource = apiResource.addResource("v1");
     const testsResource = publicApi.addResourceWithCorsOptionsSubTree(versionResource, "tests");
