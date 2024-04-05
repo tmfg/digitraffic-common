@@ -5,7 +5,7 @@ import {TrafficType} from "../../types/traffictype.mjs";
 import {Match, Template} from "aws-cdk-lib/assertions";
 
 describe("Rest api test", () => {
-  test("OPTIONS-header is added to API-gateway", () => {
+  test("OPTIONS method is added to API-gateway", () => {
     const app = new App();
     const stack = new DigitrafficStack(app, "test-stack", {
       alarmTopicArn: "",
