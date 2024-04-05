@@ -35,13 +35,6 @@ export class StackCheckingAspect implements IAspect {
         this.whitelistedResources = whitelistedResources;
     }
 
-    static create(stack: DigitrafficStack) {
-        return new StackCheckingAspect(
-            stack.configuration.shortName,
-            stack.configuration.whitelistedResources
-        );
-    }
-
     public visit(node: IConstruct): void {
         //console.info("visiting class " + node.constructor.name);
 
