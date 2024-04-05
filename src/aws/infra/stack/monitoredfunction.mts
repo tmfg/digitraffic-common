@@ -5,7 +5,6 @@ import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
 import {DigitrafficStack} from "./stack.mjs";
 import type {ITopic} from "aws-cdk-lib/aws-sns";
 import {databaseFunctionProps, type LambdaEnvironment, type MonitoredFunctionParameters,} from "./lambda-configs.mjs";
-import {DigitrafficLogSubscriptions} from "./subscription.mjs";
 import {TrafficType} from "../../../types/traffictype.mjs";
 
 import _ from "lodash";
@@ -297,7 +296,7 @@ export class MonitoredFunction extends Function {
 export class MonitoredDBFunction {
     /**
      * Create new MonitoredDBFunction.  Use topics from given DigitrafficStack.  Generate names from given name and configuration shortName.
-     * Grant secret and create log subscription.
+     * Grant secret.
      *
      * For example, shortName FOO and given name update-things will create function FOO-UpdateThings and use code from lambda/update-things/update-things.ts method handler.
      *
@@ -339,10 +338,6 @@ export class MonitoredDBFunction {
         );
 
         stack.grantSecret(mf);
-
-        if (stack.configuration.logsDestinationArn) {
-            new DigitrafficLogSubscriptions(stack, mf);
-        }
 
         return mf;
     }

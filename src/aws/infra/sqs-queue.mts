@@ -7,11 +7,12 @@ import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { ComparisonOperator, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
-import { S3, S3Client } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
 import type { SQSEvent, SQSHandler, SQSRecord } from "aws-lambda";
 import { DigitrafficStack } from "./stack/stack.mjs";
 import { MonitoredFunction } from "./stack/monitoredfunction.mjs";
+import { ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import type { NodeJsRuntimeStreamingBlobPayloadInputTypes } from "@smithy/types";
+import { logger } from "../runtime/dt-logger-default.mjs";
 
 /**
  * Construct for creating SQS-queues.
@@ -96,37 +97,33 @@ function addDLQAlarm(stack: DigitrafficStack, dlqName: string, dlq: Queue) {
 function getDlqCode(Bucket: string): InlineCode {
     const functionBody = DLQ_LAMBDA_CODE.replace("__bucketName__", Bucket)
         .replace("__upload__", uploadToS3.toString())
-        .replace("__doUpload__", doUpload.toString())
         .replace("__handler__", createHandler().toString().substring(23)); // remove function handler() from signature
 
     return new InlineCode(functionBody);
 }
 
-async function uploadToS3(s3: S3 | S3Client, Bucket: string, Body: string, Key: string): Promise<void> {
+async function uploadToS3(
+    s3: S3Client,
+    bucketName: string,
+    body: NodeJsRuntimeStreamingBlobPayloadInputTypes,
+    objectName: string,
+    cannedAcl?: ObjectCannedACL,
+    contentType?: string,
+) {
+    const command = new PutObjectCommand({
+        Bucket: bucketName,
+        Key: objectName,
+        Body: body,
+        ACL: cannedAcl,
+        ContentType: contentType,
+    });
     try {
-        console.info("writing %s to %s", Key, Bucket);
-        await doUpload(s3, Bucket, Body, Key);
+        await s3.send(command);
     } catch (error) {
-        console.warn(error);
-        console.warn("method=uploadToS3 retrying upload to bucket %s", Bucket);
-        try {
-            await doUpload(s3, Bucket, Body, Key);
-        } catch (e2) {
-            console.error("method=uploadToS3 failed retrying upload to bucket %s", Bucket);
-        }
-    }
-}
-
-async function doUpload(s3: S3 | S3Client, Bucket: string, Body: string, Key: string) {
-    try {
-        const upload = new Upload({
-            client: s3,
-            params: { Bucket, Key, Body },
+        logger.error({
+            method: "s3.uploadToS3",
+            message: `upload failed to bucket ${bucketName}`,
         });
-
-        await upload.done();
-    } catch (error) {
-        console.error(error);
     }
 }
 
@@ -135,28 +132,26 @@ const bucketName = "";
 
 function createHandler(): SQSHandler {
     return async function handler(event: SQSEvent): Promise<void> {
-
         const millis = new Date().getTime();
+        const s3 = new S3Client({});
         await Promise.all(
-            event.Records.map((e: SQSRecord, idx: number) =>
-                uploadToS3(
-                    new S3(),
-                    bucketName,
-                    e.body,
-                    `dlq-${millis}-${idx}.json`
-                )
-            )
+            event.Records.map((e: SQSRecord, idx: number) => {
+                uploadToS3(s3, bucketName, e.body, `dlq-${millis}-${idx}.json`);
+            }),
         );
     };
 }
 
 const DLQ_LAMBDA_CODE = `
-import { S3, S3Client } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
+import type { ObjectCannedACL } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { type NodeJsRuntimeStreamingBlobPayloadInputTypes } from "@smithy/types";
+import { logger } from "./dt-logger-default.mjs";
+
+
 const bucketName = "__bucketName__";
 
 __upload__
-__doUpload__
 
 exports.handler = async (event) => __handler__
 `;

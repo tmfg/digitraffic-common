@@ -110,7 +110,7 @@ export class DigitrafficStack extends Stack {
     }
 
     addAspects() {
-        Aspects.of(this).add(StackCheckingAspect.create(this));
+        Aspects.of(this).add(new StackCheckingAspect(this.configuration.shortName, this.configuration.whitelistedResources));
     }
 
     createLambdaEnvironment(): DBLambdaEnvironment {
