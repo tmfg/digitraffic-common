@@ -1,10 +1,6 @@
 import type { AwsEnv } from "../types/aws-env.mjs";
 import type { Either } from "../types/either.mjs";
 import { EnvKeys } from "../aws/runtime/environment.mjs";
-import {
-    type GenericSecret,
-    getSecret,
-} from "../aws/runtime/secrets/secret.mjs";
 
 /**
  * Check if arrays have only elements that also exists also in other array.
@@ -156,28 +152,6 @@ export function getEnvVariableOr<T>(key: string, fn: () => T): string | T {
  */
 export function getEnvVariableOrElse<T>(key: string, orElse: T): string | T {
     return getEnvVariableOr(key, () => orElse);
-}
-
-/**
- * Gets variable from environment or from an AWS Secrets Manager secret if not found in the environment.
- * @param Environment key
- * @param Secret id in Secrets Manager
- */
-
-export async function getFromEnvOrSecret(
-    key: string,
-    secretId: string,
-): Promise<string> {
-    const envValue = getEnvVariableSafe(key);
-    if (envValue.result === "ok") {
-        return envValue.value;
-    }
-    const secret = await getSecret<GenericSecret>(secretId);
-    const secretValue = secret[key];
-    if (secretValue !== undefined) {
-        return secretValue;
-    }
-    throw new Error(`Cannot get value with key ${key} from env or secret`);
 }
 
 export function setSecretOverideAwsRegionEnv(region: string) {
