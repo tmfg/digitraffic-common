@@ -1,5 +1,6 @@
-import { CfnIPSet, CfnWebACL } from "aws-cdk-lib/aws-wafv2";
+import {CfnIPSet, CfnWebACL} from "aws-cdk-lib/aws-wafv2";
 import type { Construct } from "constructs";
+import { logger } from "../runtime/dt-logger-default.mjs";
 
 interface RuleProperty {
     action?: CfnWebACL.RuleActionProperty;
@@ -21,6 +22,7 @@ export class AclBuilder {
 
     _scope: string = "CLOUDFRONT";
     _name: string = "WebACL";
+    _customResponseBodies: Record<string, CfnWebACL.CustomResponseBodyProperty> = {}
 
     constructor(construct: Construct) {
         this._construct = construct;
@@ -76,6 +78,92 @@ export class AclBuilder {
         return this;
     }
 
+    withThrottleRule(name: string, priority: number, limit: number, customResponseBodyKey: string, isHeaderRequired: boolean, isBasedOnIpAndUriPath: boolean): AclBuilder {
+        this._rules.push({
+            name,
+            priority,
+            visibilityConfig: {
+                sampledRequestsEnabled: true,
+                cloudWatchMetricsEnabled: true,
+                metricName: name
+            },
+            action: {
+                block: {
+                    customResponse: {
+                        responseCode: 429,
+                        customResponseBodyKey
+                    }
+                }
+            },
+            statement: createThrottleStatement(limit, isHeaderRequired, isBasedOnIpAndUriPath)
+        })
+
+        return this;
+    }
+
+    withCustomResponseBody(key: string, customResponseBody: CfnWebACL.CustomResponseBodyProperty) {
+        if (key in this._customResponseBodies) {
+            logger.warn({
+                method: "acl-builder.withCustomResponseBody",
+                message:`Overriding custom response body with key ${key}`
+            })
+        }
+        this._customResponseBodies[key] = customResponseBody;
+        return this;
+    }
+
+    withThrottleDigitrafficUserIp(limit: number) {
+        const customResponseBodyKey = `IP_THROTTLE_DIGITRAFFIC_USER_${limit}`;
+        if (! this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
+            this.withCustomResponseBody(customResponseBodyKey,
+              {
+                  content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
+                  contentType: "TEXT_PLAIN"
+              })
+        }
+        return this.withThrottleRule("ThrottleRuleWithDigitrafficUser", 1, limit, customResponseBodyKey, true, false)
+    }
+
+    withThrottleDigitrafficUserIpAndUriPath(limit: number) {
+        const customResponseBodyKey = `IP_PATH_THROTTLE_DIGITRAFFIC_USER_${limit}`;
+        if (! this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
+            this.withCustomResponseBody(customResponseBodyKey,
+              {
+                  content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
+                  contentType: "TEXT_PLAIN"
+              })
+        }
+        return this.withThrottleRule("ThrottleRuleIPQueryWithDigitrafficUser", 2, limit, customResponseBodyKey, true, true)
+    }
+
+    withThrottleAnonymousUserIp(limit: number) {
+        const customResponseBodyKey = `IP_THROTTLE_ANONYMOUS_USER_${limit}`;
+        if (! this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
+            this.withCustomResponseBody(customResponseBodyKey,
+              {
+                  content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
+                  contentType: "TEXT_PLAIN"
+              })
+        }
+        return this.withThrottleRule("ThrottleRuleWithAnonymousUser", 1, limit, customResponseBodyKey, false, false)
+    }
+
+    withThrottleAnonymousUserIpAndUriPath(limit: number) {
+        const customResponseBodyKey = `IP_PATH_THROTTLE_ANONYMOUS_USER_${limit}`;
+        if (! this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
+            this.withCustomResponseBody(customResponseBodyKey,
+              {
+                  content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
+                  contentType: "TEXT_PLAIN"
+              })
+        }
+        return this.withThrottleRule("ThrottleRuleIPQueryWithAnonymousUser", 2, limit, customResponseBodyKey, false, true)
+    }
+
+    _isCustomResponseBodyKeySet(key:string) {
+        return key in this._customResponseBodies
+    }
+
     public build(): CfnWebACL {
         if(this._rules.length === 0) {
             throw new Error("No rules defined for WebACL")
@@ -90,11 +178,86 @@ export class AclBuilder {
                 sampledRequestsEnabled: false
             },
             rules: this._rules,
-//            customResponseBodies
+            customResponseBodies: this._customResponseBodies,
         });
 
         return acl;
     }
+}
+
+type ResponseKey = "IP_WITH_HEADER" | "IPQUERY_WITH_HEADER" | "IP_WITHOUT_HEADER" | "IPQUERY_WITHOUT_HEADER";
+
+const CUSTOM_KEYS_IP_AND_URI_PATH: CfnWebACL.RateBasedStatementCustomKeyProperty[] = [
+    {
+        uriPath: {
+            textTransformations: [
+                {
+                    priority: 1,
+                    type: "LOWERCASE"
+                },
+                {
+                    priority: 2,
+                    type: "NORMALIZE_PATH"
+                },
+                {
+                    priority: 3,
+                    type: "MD5"
+                }
+            ]
+        }
+    },
+    {
+        ip: {}
+    }
+];
+
+function notStatement(statement: CfnWebACL.StatementProperty): CfnWebACL.StatementProperty {
+    return {
+        notStatement: {
+            statement
+        }
+    };
+}
+function createThrottleStatement(
+  limit: number,
+  isHeaderRequired: boolean,
+  isBasedOnIpAndUriPath: boolean
+): CfnWebACL.StatementProperty {
+    // this statement matches empty digitraffic-user -header
+    const matchStatement: CfnWebACL.StatementProperty = {
+        sizeConstraintStatement: {
+            comparisonOperator: isHeaderRequired ? "GT" : "GE",
+            fieldToMatch: {
+                singleHeader: {
+                    Name: "digitraffic-user"
+                }
+            },
+            textTransformations: [{ priority: 0, type: "NONE" }],
+            size: 0
+        } as CfnWebACL.SizeConstraintStatementProperty
+    };
+
+    // header present       -> size > 0
+    // header not present   -> NOT(size >= 0)
+
+    if (isBasedOnIpAndUriPath) {
+        return {
+            rateBasedStatement: {
+                aggregateKeyType: "CUSTOM_KEYS",
+                customKeys: CUSTOM_KEYS_IP_AND_URI_PATH,
+                limit: limit,
+                scopeDownStatement: isHeaderRequired ? matchStatement : notStatement(matchStatement)
+            }
+        };
+    }
+
+    return {
+        rateBasedStatement: {
+            aggregateKeyType: "IP",
+            limit: limit,
+            scopeDownStatement: isHeaderRequired ? matchStatement : notStatement(matchStatement)
+        }
+    };
 }
 
 function createAWSCommonRuleSet(): CfnWebACL.RuleProperty {
