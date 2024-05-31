@@ -194,8 +194,6 @@ export class AclBuilder {
     }
 }
 
-type ResponseKey = "IP_WITH_HEADER" | "IPQUERY_WITH_HEADER" | "IP_WITHOUT_HEADER" | "IPQUERY_WITHOUT_HEADER";
-
 const CUSTOM_KEYS_IP_AND_URI_PATH: CfnWebACL.RateBasedStatementCustomKeyProperty[] = [
     {
         uriPath: {
