@@ -113,55 +113,64 @@ export class AclBuilder {
     }
 
     withThrottleDigitrafficUserIp(limit: number) {
-        const customResponseBodyKey = `IP_THROTTLE_DIGITRAFFIC_USER_${limit}`;
-        if (! this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
-            this.withCustomResponseBody(customResponseBodyKey,
-              {
-                  content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
-                  contentType: "TEXT_PLAIN"
-              })
+        if (limit == null) {
+            this._logMissingLimit("withThrottleDigitrafficUserIp")
+            return this;
         }
+        const customResponseBodyKey = `IP_THROTTLE_DIGITRAFFIC_USER_${limit}`;
+        this._addThrottleResponseBody(customResponseBodyKey, limit);
         return this.withThrottleRule("ThrottleRuleWithDigitrafficUser", 1, limit, customResponseBodyKey, true, false)
     }
 
     withThrottleDigitrafficUserIpAndUriPath(limit: number) {
-        const customResponseBodyKey = `IP_PATH_THROTTLE_DIGITRAFFIC_USER_${limit}`;
-        if (! this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
-            this.withCustomResponseBody(customResponseBodyKey,
-              {
-                  content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
-                  contentType: "TEXT_PLAIN"
-              })
+        if (limit == null) {
+            this._logMissingLimit("withThrottleDigitrafficUserIpAndUriPath")
+            return this;
         }
+        const customResponseBodyKey = `IP_PATH_THROTTLE_DIGITRAFFIC_USER_${limit}`;
+        this._addThrottleResponseBody(customResponseBodyKey, limit);
         return this.withThrottleRule("ThrottleRuleIPQueryWithDigitrafficUser", 2, limit, customResponseBodyKey, true, true)
     }
 
     withThrottleAnonymousUserIp(limit: number) {
-        const customResponseBodyKey = `IP_THROTTLE_ANONYMOUS_USER_${limit}`;
-        if (! this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
-            this.withCustomResponseBody(customResponseBodyKey,
-              {
-                  content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
-                  contentType: "TEXT_PLAIN"
-              })
+        if (limit == null) {
+            this._logMissingLimit("withThrottleAnonymousUserIp")
+            return this;
         }
-        return this.withThrottleRule("ThrottleRuleWithAnonymousUser", 1, limit, customResponseBodyKey, false, false)
+        const customResponseBodyKey = `IP_THROTTLE_ANONYMOUS_USER_${limit}`;
+        this._addThrottleResponseBody(customResponseBodyKey, limit);
+        return this.withThrottleRule("ThrottleRuleWithAnonymousUser", 3, limit, customResponseBodyKey, false, false)
     }
 
     withThrottleAnonymousUserIpAndUriPath(limit: number) {
-        const customResponseBodyKey = `IP_PATH_THROTTLE_ANONYMOUS_USER_${limit}`;
-        if (! this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
-            this.withCustomResponseBody(customResponseBodyKey,
-              {
-                  content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
-                  contentType: "TEXT_PLAIN"
-              })
+        if (limit == null) {
+            this._logMissingLimit("withThrottleAnonymousUserIpAndUriPath")
+            return this;
         }
-        return this.withThrottleRule("ThrottleRuleIPQueryWithAnonymousUser", 2, limit, customResponseBodyKey, false, true)
+        const customResponseBodyKey = `IP_PATH_THROTTLE_ANONYMOUS_USER_${limit}`;
+        this._addThrottleResponseBody(customResponseBodyKey, limit);
+        return this.withThrottleRule("ThrottleRuleIPQueryWithAnonymousUser", 4, limit, customResponseBodyKey, false, true)
     }
 
     _isCustomResponseBodyKeySet(key:string) {
         return key in this._customResponseBodies
+    }
+
+    _addThrottleResponseBody(customResponseBodyKey: string, limit: number) {
+        if (!this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
+            this.withCustomResponseBody(customResponseBodyKey,
+              {
+                  content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
+                  contentType: "TEXT_PLAIN"
+              })
+        }
+    }
+
+    _logMissingLimit(method: string) {
+        logger.warn({
+            method: `acl-builder.${method}`,
+            message: `'limit' was not defined. Not setting a throttle rule`
+        })
     }
 
     public build(): CfnWebACL {
