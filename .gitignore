@@ -20,6 +20,7 @@
 !/tsconfig.json
 !/tsconfig.test.json
 !/tsconfig.eslint.json
+!/dependabot.yml
 
 !src/
 !src/**/
