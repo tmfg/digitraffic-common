@@ -178,6 +178,12 @@ export class AclBuilder {
             throw new Error("No rules defined for WebACL")
         }
 
+        const uniqueRuleNames = new Set(this._rules.map(rule => rule.name));
+
+        if (uniqueRuleNames.size != this._rules.length) {
+            throw new Error("Tried to create an Access Control List with multiple rules having the same name")
+        }
+
         const acl = new CfnWebACL(this._construct, this._name, {
             defaultAction: { allow: {} },
             scope: this._scope,
