@@ -35,3 +35,4 @@
 !.github/**/
 !.github/workflows/**/**.yml
 !.github/CODEOWNERS
+!.github/dependabot.yml
