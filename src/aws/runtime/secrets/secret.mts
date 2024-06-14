@@ -1,5 +1,5 @@
 import { SecretsManager } from "@aws-sdk/client-secrets-manager";
-import { getEnvVariable, getEnvVariableOrElse } from "../../../utils/utils.mjs";
+import { getEnvVariable, getEnvVariableOrElse, getEnvVariableSafe } from "../../../utils/utils.mjs";
 import { EnvKeys } from "../environment.mjs";
 
 // SECRET_OVERRIDE_AWS_REGION might not have been set before import of
@@ -54,4 +54,26 @@ function parseSecret<Secret>(secret: GenericSecret, prefix: string): Secret {
     }
 
     return parsed as unknown as Secret;
+}
+
+/**
+ * Gets variable from environment or from an AWS Secrets Manager secret if not found in the environment.
+ * @param Environment key
+ * @param Secret id in Secrets Manager
+ */
+
+export async function getFromEnvOrSecret(
+    key: string,
+    secretId: string,
+): Promise<string> {
+    const envValue = getEnvVariableSafe(key);
+    if (envValue.result === "ok") {
+        return envValue.value;
+    }
+    const secret = await getSecret<GenericSecret>(secretId);
+    const secretValue = secret[key];
+    if (secretValue !== undefined) {
+        return secretValue;
+    }
+    throw new Error(`Cannot get value with key ${key} from env or secret`);
 }

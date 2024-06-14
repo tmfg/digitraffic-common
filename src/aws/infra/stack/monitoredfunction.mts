@@ -1,4 +1,4 @@
-import {Function, type FunctionProps, LoggingFormat} from "aws-cdk-lib/aws-lambda";
+import {ApplicationLogLevel, Function, type FunctionProps, LoggingFormat, SystemLogLevel} from "aws-cdk-lib/aws-lambda";
 import {Stack} from "aws-cdk-lib";
 import {SnsAction} from "aws-cdk-lib/aws-cloudwatch-actions";
 import {ComparisonOperator, Metric} from "aws-cdk-lib/aws-cloudwatch";
@@ -6,7 +6,6 @@ import {DigitrafficStack} from "./stack.mjs";
 import type {ITopic} from "aws-cdk-lib/aws-sns";
 import {databaseFunctionProps, type LambdaEnvironment, type MonitoredFunctionParameters,} from "./lambda-configs.mjs";
 import {TrafficType} from "../../../types/traffictype.mjs";
-
 import _ from "lodash";
 
 /**
@@ -155,7 +154,13 @@ export class MonitoredFunction extends Function {
         props?: MonitoredFunctionProps
     ) {
         // Set default loggingFormat to JSON if not explicitly set to TEXT
-        super(scope, id, {...{loggingFormat: LoggingFormat.JSON}, ...functionProps});
+        super(scope, id, {
+            ...{
+                loggingFormat: LoggingFormat.JSON,
+                applicationLogLevel: ApplicationLogLevel.DEBUG,
+                systemLogLevel: SystemLogLevel.INFO
+            }, ...functionProps
+        });
 
         if (functionProps.functionName === undefined) {
             throw new Error("Function name not provided");
@@ -172,7 +177,7 @@ export class MonitoredFunction extends Function {
 
             this.createAlarm(
                 scope,
-                this.metricDuration().with({ statistic: "max" }),
+                this.metricDuration().with({statistic: "max"}),
                 "Duration",
                 "Duration alarm",
                 `Duration has exceeded ${functionProps.timeout.toSeconds()} seconds`,
@@ -196,7 +201,7 @@ export class MonitoredFunction extends Function {
 
             this.createAlarm(
                 scope,
-                this.metricDuration().with({ statistic: "max" }),
+                this.metricDuration().with({statistic: "max"}),
                 "Duration-Warning",
                 "Duration warning",
                 `Duration is 85 % of max ${functionProps.timeout.toSeconds()} seconds`,

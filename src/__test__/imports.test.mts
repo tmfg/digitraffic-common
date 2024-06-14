@@ -90,11 +90,6 @@ test("dbTestutils import ok?", () => {
     return expect(dbTestutils).resolves.toBeDefined();
 });
 
-test("httpserver import ok?", () => {
-    const httpserver = import("../test/httpserver.mjs");
-    return expect(httpserver).resolves.toBeDefined();
-});
-
 test("asserter import ok?", () => {
     const asserter = import("../test/asserter.mjs");
     return expect(asserter).resolves.toBeDefined();

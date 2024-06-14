@@ -35,7 +35,14 @@ export function dbTestBase(
             process.env[DatabaseEnvironmentKeys.DB_PASS] = dbPass;
             process.env[DatabaseEnvironmentKeys.DB_URI] = theDbUri;
             process.env[DatabaseEnvironmentKeys.DB_RO_URI] = theDbUri;
-            await truncateFn(db);
+
+            // if there's no connection to the database, it will be caught here
+            try {
+                await truncateFn(db);
+            } catch(e) {
+                console.info("cought in commonDbTest:" + JSON.stringify(e));
+                throw e;
+            }
         });
 
         afterAll(async () => {

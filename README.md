@@ -4,10 +4,11 @@ This is a place for common utilities and classes that can be used in other cdk-p
 
 ## How to build
 
-Use `npm` to build the code i.e.
+Use `pnpm` to build the code i.e.
 
-    npm run build
-    npm run test
+    pnpm install
+    pnpm build
+    pnpm test
 
 ## How to use
 
