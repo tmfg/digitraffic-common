@@ -112,7 +112,7 @@ export class AclBuilder {
         return this;
     }
 
-    withThrottleDigitrafficUserIp(limit: number) {
+    withThrottleDigitrafficUserIp(limit: number|null|undefined) {
         if (limit == null) {
             this._logMissingLimit("withThrottleDigitrafficUserIp")
             return this;
@@ -122,7 +122,7 @@ export class AclBuilder {
         return this.withThrottleRule("ThrottleRuleWithDigitrafficUser", 1, limit, customResponseBodyKey, true, false)
     }
 
-    withThrottleDigitrafficUserIpAndUriPath(limit: number) {
+    withThrottleDigitrafficUserIpAndUriPath(limit: number|null|undefined) {
         if (limit == null) {
             this._logMissingLimit("withThrottleDigitrafficUserIpAndUriPath")
             return this;
@@ -132,7 +132,7 @@ export class AclBuilder {
         return this.withThrottleRule("ThrottleRuleIPQueryWithDigitrafficUser", 2, limit, customResponseBodyKey, true, true)
     }
 
-    withThrottleAnonymousUserIp(limit: number) {
+    withThrottleAnonymousUserIp(limit: number|null|undefined) {
         if (limit == null) {
             this._logMissingLimit("withThrottleAnonymousUserIp")
             return this;
@@ -142,7 +142,7 @@ export class AclBuilder {
         return this.withThrottleRule("ThrottleRuleWithAnonymousUser", 3, limit, customResponseBodyKey, false, false)
     }
 
-    withThrottleAnonymousUserIpAndUriPath(limit: number) {
+    withThrottleAnonymousUserIpAndUriPath(limit: number|null|undefined) {
         if (limit == null) {
             this._logMissingLimit("withThrottleAnonymousUserIpAndUriPath")
             return this;

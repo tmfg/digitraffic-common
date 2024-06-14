@@ -58,4 +58,15 @@ describe("acl-builder tests", () => {
           .build()).toThrow()
     })
 
+    test("throtle rule without limit does nothing", () => {
+        for (const aclBuilder of [
+            createBuilder().withThrottleDigitrafficUserIp(undefined),
+            createBuilder().withThrottleDigitrafficUserIpAndUriPath(undefined),
+            createBuilder().withThrottleAnonymousUserIp(null),
+            createBuilder().withThrottleAnonymousUserIpAndUriPath(null)
+        ]) {
+            expect(()=>aclBuilder.build()).toThrowError('No rules');
+        }
+    })
+
 });
