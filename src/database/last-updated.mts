@@ -3,7 +3,6 @@ import type { DTDatabase, DTTransaction } from "./database.mjs";
 export enum DataType {
     VS_DATEX2 = "VS_DATEX2",
     COUNTING_SITES_DATA = "COUNTING_SITES_DATA",
-    COUNTING_SITES_METADATA = "COUNTING_SITES_METADATA",
     COUNTING_SITES_METADATA_CHECK = "COUNTING_SITES_METADATA_CHECK",
     MAINTENANCE_TRACKING_DATA_CHECKED = "MAINTENANCE_TRACKING_DATA_CHECKED",
     PERMIT_DATA = "PERMIT_DATA",
@@ -16,10 +15,7 @@ type UpdatedTimestamp = {
     updated: Date;
 } | null;
 
-export function getLastUpdated(
-    db: DTDatabase,
-    datatype: DataType
-): Promise<Date | null> {
+export function getLastUpdated(db: DTDatabase, datatype: DataType): Promise<Date | null> {
     return db.oneOrNone(
         "select updated from data_updated where data_type=$(datatype) and subtype=$(subtype)",
         {
@@ -74,10 +70,7 @@ export function updateLastUpdatedWithSubtype(
     );
 }
 
-export function getUpdatedTimestamp(
-    db: DTDatabase,
-    datatype: string
-): Promise<Date | null> {
+export function getUpdatedTimestamp(db: DTDatabase, datatype: string): Promise<Date | null> {
     return db.oneOrNone(
         "select updated_time as updated from updated_timestamp where updated_name=$(datatype)",
         {

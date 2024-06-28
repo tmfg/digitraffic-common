@@ -11,6 +11,7 @@
 !/.npmrc
 !/.prettierignore
 !/.prettierrc.json
+!/.madgerc
 !/jest.config.mjs
 !/LICENSE
 !/package.json
@@ -19,6 +20,7 @@
 !/tsconfig.json
 !/tsconfig.test.json
 !/tsconfig.eslint.json
+!/dependabot.yml
 
 !src/
 !src/**/
@@ -33,3 +35,4 @@
 !.github/**/
 !.github/workflows/**/**.yml
 !.github/CODEOWNERS
+!.github/dependabot.yml

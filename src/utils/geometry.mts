@@ -61,10 +61,7 @@ function coordinatePair(coordinate: Position): string {
  * @param features List of Features
  * @param lastUpdated Last updated date
  */
-export function createFeatureCollection(
-    features: Feature[],
-    lastUpdated: Date | null
-): FeatureCollection {
+export function createFeatureCollection(features: Feature[], lastUpdated: Date | null): FeatureCollection {
     return {
         type: "FeatureCollection",
         lastUpdated: lastUpdated,
@@ -86,10 +83,14 @@ const DEGREES_TO_RADIANS = 0.017453292519943295; // = Math.PI / 180
 const EARTH_RADIUS_KM = 6371;
 
 /**
- * Returns the distance between this and given GeoJSON point in kilometers. Doesn't take in account altitude.
+ * Returns the distance between two WGS84 points in kilometers. Doesn't take in account altitude.
  * Based on the following Stack Overflow question:
  * http://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula,
  * which is based on https://en.wikipedia.org/wiki/Haversine_formula (error rate: ~0.55%).
+ * @param fromXLon first point longitude
+ * @param fromYLat first point latitude
+ * @param toXLon second point longitude
+ * @param toYLat second point latitude
  */
 function distanceBetweenWGS84PointsInKm(
     fromXLon: number,
@@ -111,13 +112,18 @@ function distanceBetweenWGS84PointsInKm(
 }
 
 /**
- * Calculates distance between two GeoJSON points (WGS84)
- * @param pos1
- * @param pos2
+ * Returns the distance between two WGS84 GeoJSON positions in kilometers. Doesn't take in account altitude.
+ * Based on the following Stack Overflow question:
+ * http://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula,
+ * which is based on https://en.wikipedia.org/wiki/Haversine_formula (error rate: ~0.55%).
+ * @param pos1 first position
+ * @param pos2 second position
  */
 export function distanceBetweenPositionsInKm(pos1: Position, pos2: Position) {
-    if (pos1.length !== 2 && pos2.length !== 2) {
-        throw Error(`Positions ${pos1.toString()} and ${pos2.toString()} both must be arrays of length two`)
+    if (pos1.length < 2 || pos1.length > 3 || pos2.length < 2 || pos2.length > 3) {
+        throw Error(
+            `Illegal Positions ${pos1.toString()} and ${pos2.toString()}. Both must have length between 2 or 3.`
+        );
     }
     return distanceBetweenWGS84PointsInKm(pos1[0]!, pos1[1]!, pos2[0]!, pos2[1]!);
 }

@@ -1,4 +1,4 @@
-import { Schedule } from "aws-cdk-lib/aws-synthetics";
+import { Runtime, Schedule } from "aws-cdk-lib/aws-synthetics";
 
 /** Optional env parameters for canary */
 type CanaryEnv = Record<string, string>;
@@ -16,4 +16,5 @@ export interface CanaryParameters {
         readonly topicArn?: string;
     };
     readonly canaryEnv?: CanaryEnv;
+    readonly runtime?: Runtime;
 }
