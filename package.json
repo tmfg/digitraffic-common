@@ -153,7 +153,6 @@
     "node-ttl": "^0.2.0",
     "pg-native": "^3.1.0",
     "pg-promise": "^11.8.0",
-
     "@jest/globals": "^29.7.0",
     "@rushstack/eslint-config": "^3.7.0",
     "@rushstack/heft": "^0.66.18",
