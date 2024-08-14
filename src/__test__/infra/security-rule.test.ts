@@ -1,6 +1,6 @@
 import { App, Stack } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
-import { DigitrafficSecurityRule } from "../../aws/infra/security-rule.mjs";
+import { DigitrafficSecurityRule } from "../../aws/infra/security-rule.js";
 import { Topic } from "aws-cdk-lib/aws-sns";
 
 describe("security-rule tests", () => {

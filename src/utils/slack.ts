@@ -1,6 +1,6 @@
 import ky from "ky";
-import { logger } from "../aws/runtime/dt-logger-default.mjs";
-import { logException } from "./logging.mjs";
+import { logger } from "../aws/runtime/dt-logger-default.js";
+import { logException } from "./logging.js";
 
 export class SlackApi {
     private readonly url: string;

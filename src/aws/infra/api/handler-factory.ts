@@ -1,6 +1,6 @@
-import { getEnvVariableOrElse } from "../../../utils/utils.mjs";
-import { DtLogger } from "../../runtime/dt-logger.mjs";
-import { LambdaResponse } from "../../types/lambda-response.mjs";
+import { getEnvVariableOrElse } from "../../../utils/utils.js";
+import { DtLogger } from "../../runtime/dt-logger.js";
+import { LambdaResponse } from "../../types/lambda-response.js";
 
 export type LoggingHandler = (
     method: () => Promise<LambdaResponse>,

@@ -1,16 +1,10 @@
-import {
-    Architecture,
-    AssetCode,
-    Code,
-    type FunctionProps,
-    Runtime,
-} from "aws-cdk-lib/aws-lambda";
+import { Architecture, AssetCode, Code, type FunctionProps, Runtime } from "aws-cdk-lib/aws-lambda";
 import { Duration } from "aws-cdk-lib";
 import type { IVpc, SubnetSelection } from "aws-cdk-lib/aws-ec2";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { Role } from "aws-cdk-lib/aws-iam";
-import { DigitrafficStack } from "./stack.mjs";
-import type { MonitoredFunctionAlarmProps } from "./monitoredfunction.mjs";
+import { DigitrafficStack } from "./stack.js";
+import type { MonitoredFunctionAlarmProps } from "./monitoredfunction.js";
 
 export type LambdaEnvironment = Record<string, string>;
 

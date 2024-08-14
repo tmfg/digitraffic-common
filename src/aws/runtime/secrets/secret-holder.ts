@@ -1,7 +1,7 @@
-import { type GenericSecret, getSecret } from "./secret.mjs";
-import { checkExpectedSecretKeys } from "./dbsecret.mjs";
-import { getEnvVariable } from "../../../utils/utils.mjs";
-import { logger } from "../dt-logger-default.mjs";
+import { type GenericSecret, getSecret } from "./secret.js";
+import { checkExpectedSecretKeys } from "./dbsecret.js";
+import { getEnvVariable } from "../../../utils/utils.js";
+import { logger } from "../dt-logger-default.js";
 
 import NodeTtl from "node-ttl";
 

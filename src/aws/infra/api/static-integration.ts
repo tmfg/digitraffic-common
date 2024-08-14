@@ -1,5 +1,5 @@
 import { MockIntegration, PassthroughBehavior, Resource } from "aws-cdk-lib/aws-apigateway";
-import { MediaType } from "../../types/mediatypes.mjs";
+import { MediaType } from "../../types/mediatypes.js";
 
 const INTEGRATION_RESPONSE_200 = `{
     "statusCode": 200
@@ -19,7 +19,7 @@ export class DigitrafficStaticIntegration extends MockIntegration {
         response: string,
         enableCors = true,
         apiKeyRequired = true,
-        headers: Record<string, string> = {}
+        headers: Record<string, string> = {},
     ) {
         if (enableCors) {
             headers = { ...headers, "Access-Control-Allow-Origin": "*" };
@@ -28,7 +28,7 @@ export class DigitrafficStaticIntegration extends MockIntegration {
         const integrationResponse = DigitrafficStaticIntegration.createIntegrationResponse(
             response,
             mediaType,
-            headers
+            headers,
         );
 
         super({
@@ -52,7 +52,7 @@ export class DigitrafficStaticIntegration extends MockIntegration {
         response: K,
         enableCors = true,
         apiKeyRequired = true,
-        headers: Record<string, string> = {}
+        headers: Record<string, string> = {},
     ) {
         return new DigitrafficStaticIntegration(
             resource,
@@ -60,14 +60,14 @@ export class DigitrafficStaticIntegration extends MockIntegration {
             JSON.stringify(response),
             enableCors,
             apiKeyRequired,
-            headers
+            headers,
         );
     }
 
     static createIntegrationResponse(
         response: string,
         mediaType: MediaType,
-        headers: Record<string, string> = {}
+        headers: Record<string, string> = {},
     ) {
         const params = mapRecord(headers, (entry) => ["method.response.header." + entry[0], `'${entry[1]}'`]);
 

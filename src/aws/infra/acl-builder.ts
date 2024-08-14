@@ -1,6 +1,6 @@
 import { CfnIPSet, CfnWebACL } from "aws-cdk-lib/aws-wafv2";
 import type { Construct } from "constructs";
-import { logger } from "../runtime/dt-logger-default.mjs";
+import { logger } from "../runtime/dt-logger-default.js";
 
 interface RuleProperty {
     action?: CfnWebACL.RuleActionProperty;

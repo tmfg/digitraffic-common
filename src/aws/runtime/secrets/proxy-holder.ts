@@ -1,7 +1,7 @@
-import { SecretHolder } from "./secret-holder.mjs";
-import { RdsProxySecretKey, type RdsProxySecret } from "./dbsecret.mjs";
-import { getEnvVariable } from "../../../utils/utils.mjs";
-import { DatabaseEnvironmentKeys } from "../../../database/database.mjs";
+import { SecretHolder } from "./secret-holder.js";
+import { type RdsProxySecret, RdsProxySecretKey } from "./dbsecret.js";
+import { getEnvVariable } from "../../../utils/utils.js";
+import { DatabaseEnvironmentKeys } from "../../../database/database.js";
 
 const RDS_PROXY_SECRET_KEYS = Object.values(RdsProxySecretKey);
 

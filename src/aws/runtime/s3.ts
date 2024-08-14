@@ -1,7 +1,7 @@
 import type { ObjectCannedACL } from "@aws-sdk/client-s3";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { type NodeJsRuntimeStreamingBlobPayloadInputTypes } from "@smithy/types";
-import { logger } from "./dt-logger-default.mjs";
+import { logger } from "./dt-logger-default.js";
 
 export async function uploadToS3(
     s3: S3Client,

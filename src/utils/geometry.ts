@@ -3,7 +3,7 @@
  */
 import type { Feature, FeatureCollection, Geometry, Position } from "geojson";
 import * as geoJsonValidator from "geojson-validation";
-import { logger } from "../aws/runtime/dt-logger-default.mjs";
+import { logger } from "../aws/runtime/dt-logger-default.js";
 
 export const SRID_WGS84 = 4326;
 

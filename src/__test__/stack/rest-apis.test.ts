@@ -1,7 +1,7 @@
 import { App } from "aws-cdk-lib";
-import { DigitrafficRestApi } from "../../aws/infra/stack/rest_apis.mjs";
-import { DigitrafficStack } from "../../aws/infra/stack/stack.mjs";
-import { TrafficType } from "../../types/traffictype.mjs";
+import { DigitrafficRestApi } from "../../aws/infra/stack/rest_apis.js";
+import { DigitrafficStack } from "../../aws/infra/stack/stack.js";
+import { TrafficType } from "../../types/traffictype.js";
 import { Match, Template } from "aws-cdk-lib/assertions";
 
 describe("Rest api test", () => {

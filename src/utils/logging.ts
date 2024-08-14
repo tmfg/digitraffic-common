@@ -1,5 +1,5 @@
-import { DtLogger } from "../aws/runtime/dt-logger.mjs";
-import { getEnvVariableOrElse } from "./utils.mjs";
+import { DtLogger } from "../aws/runtime/dt-logger.js";
+import { getEnvVariableOrElse } from "./utils.js";
 
 const functionName = getEnvVariableOrElse("AWS_LAMBDA_FUNCTION_NAME", "test");
 

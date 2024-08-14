@@ -1,6 +1,6 @@
-import type { AwsEnv } from "../types/aws-env.mjs";
-import type { Either } from "../types/either.mjs";
-import { EnvKeys } from "../aws/runtime/environment.mjs";
+import type { AwsEnv } from "../types/aws-env.js";
+import type { Either } from "../types/either.js";
+import { EnvKeys } from "../aws/runtime/environment.js";
 
 /**
  * Check if arrays have only elements that also exists also in other array.
@@ -175,7 +175,6 @@ export function getErrorMessage(maybeError: unknown) {
 }
 
 /**
- *
  * @param value
  */
 export function isDefined<T>(value: T | undefined | null): value is T {

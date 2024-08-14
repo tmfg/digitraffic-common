@@ -1,6 +1,6 @@
 import { IpAddresses, type IVpc, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
-import type { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
-import { exportValue } from "../import-util.mjs";
+import type { InfraStackConfiguration } from "./intra-stack-configuration.js";
+import { exportValue } from "../import-util.js";
 import { Stack } from "aws-cdk-lib/core";
 import { Construct } from "constructs/lib/construct.js";
 

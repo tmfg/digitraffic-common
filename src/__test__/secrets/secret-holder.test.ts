@@ -1,7 +1,7 @@
 import {
-    SecretsManager,
-    type GetSecretValueCommandOutput,
     type GetSecretValueCommandInput,
+    type GetSecretValueCommandOutput,
+    SecretsManager,
 } from "@aws-sdk/client-secrets-manager";
 import { jest } from "@jest/globals";
 

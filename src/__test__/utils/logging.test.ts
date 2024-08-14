@@ -1,6 +1,6 @@
 import { Writable } from "stream";
-import { DtLogger } from "../../aws/runtime/dt-logger.mjs";
-import { logException } from "../../utils/logging.mjs";
+import { DtLogger } from "../../aws/runtime/dt-logger.js";
+import { logException } from "../../utils/logging.js";
 
 interface ErrorLogLine {
     type: string;

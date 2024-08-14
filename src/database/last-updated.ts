@@ -1,4 +1,4 @@
-import type { DTDatabase, DTTransaction } from "./database.mjs";
+import type { DTDatabase, DTTransaction } from "./database.js";
 
 export enum DataType {
     VS_DATEX2 = "VS_DATEX2",

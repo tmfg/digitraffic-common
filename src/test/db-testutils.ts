@@ -1,5 +1,5 @@
-import { DatabaseEnvironmentKeys, type DTDatabase, initDbConnection } from "../database/database.mjs";
-import type { Countable } from "../database/models.mjs";
+import { DatabaseEnvironmentKeys, type DTDatabase, initDbConnection } from "../database/database.js";
+import type { Countable } from "../database/models.js";
 
 export async function assertCount(db: DTDatabase, sql: string, count: number) {
     await db.one(sql).then((x: Countable) => expect(x.count).toEqual(count));

@@ -1,9 +1,6 @@
 import type { IntegrationResponse } from "aws-cdk-lib/aws-apigateway";
-import { MediaType } from "../types/mediatypes.mjs";
-import {
-    getDeprecatedDefaultLambdaResponse,
-    RESPONSE_DEFAULT_LAMBDA,
-} from "../infra/api/response.mjs";
+import { MediaType } from "../types/mediatypes.js";
+import { getDeprecatedDefaultLambdaResponse, RESPONSE_DEFAULT_LAMBDA } from "../infra/api/response.js";
 
 export abstract class DigitrafficIntegrationResponse {
     static ok(mediaType: MediaType, sunset?: string): IntegrationResponse {

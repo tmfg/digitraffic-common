@@ -8,14 +8,14 @@ import {
 import { Stack } from "aws-cdk-lib";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import { ComparisonOperator, Metric } from "aws-cdk-lib/aws-cloudwatch";
-import { DigitrafficStack } from "./stack.mjs";
+import { DigitrafficStack } from "./stack.js";
 import type { ITopic } from "aws-cdk-lib/aws-sns";
 import {
     databaseFunctionProps,
     type LambdaEnvironment,
     type MonitoredFunctionParameters,
-} from "./lambda-configs.mjs";
-import { TrafficType } from "../../../types/traffictype.mjs";
+} from "./lambda-configs.js";
+import { TrafficType } from "../../../types/traffictype.js";
 import _ from "lodash";
 
 /**

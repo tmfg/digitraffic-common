@@ -15,12 +15,12 @@ import {
 } from "aws-cdk-lib/aws-apigateway";
 import { AnyPrincipal, Effect, PolicyDocument, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
-import { getModelReference } from "../../../utils/api-model.mjs";
-import { MediaType } from "../../types/mediatypes.mjs";
-import type { ModelWithReference } from "../../types/model-with-reference.mjs";
-import { DocumentationPart, type DocumentationProperties } from "../documentation.mjs";
-import { createDefaultUsagePlan, createUsagePlan } from "../usage-plans.mjs";
-import { DigitrafficStack } from "./stack.mjs";
+import { getModelReference } from "../../../utils/api-model.js";
+import { MediaType } from "../../types/mediatypes.js";
+import type { ModelWithReference } from "../../types/model-with-reference.js";
+import { DocumentationPart, type DocumentationProperties } from "../documentation.js";
+import { createDefaultUsagePlan, createUsagePlan } from "../usage-plans.js";
+import { DigitrafficStack } from "./stack.js";
 
 import _ from "lodash";
 

@@ -1,10 +1,4 @@
-import {
-    InstanceType,
-    type IVpc,
-    SecurityGroup,
-    SubnetType,
-  type ISecurityGroup,
-} from "aws-cdk-lib/aws-ec2";
+import { InstanceType, type ISecurityGroup, type IVpc, SecurityGroup, SubnetType } from "aws-cdk-lib/aws-ec2";
 import {
     AuroraPostgresEngineVersion,
     CfnDBInstance,
@@ -19,10 +13,10 @@ import {
 } from "aws-cdk-lib/aws-rds";
 import { Construct } from "constructs/lib/construct.js";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
-import type { InfraStackConfiguration } from "./intra-stack-configuration.mjs";
-import { exportValue, importVpc } from "../import-util.mjs";
+import type { InfraStackConfiguration } from "./intra-stack-configuration.js";
+import { exportValue, importVpc } from "../import-util.js";
 import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib/core";
-import { createParameter } from "../stack/parameters.mjs";
+import { createParameter } from "../stack/parameters.js";
 
 export interface DbConfiguration {
     readonly cluster?: ClusterConfiguration;

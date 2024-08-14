@@ -1,4 +1,4 @@
-import { AclBuilder } from "../../aws/infra/acl-builder.mjs";
+import { AclBuilder } from "../../aws/infra/acl-builder.js";
 import { App, Stack } from "aws-cdk-lib";
 import { expect } from "@jest/globals";
 import type { CfnWebACL } from "aws-cdk-lib/aws-wafv2";

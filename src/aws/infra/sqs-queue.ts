@@ -8,11 +8,11 @@ import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { ComparisonOperator, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import type { SQSEvent, SQSHandler, SQSRecord } from "aws-lambda";
-import { DigitrafficStack } from "./stack/stack.mjs";
-import { MonitoredFunction } from "./stack/monitoredfunction.mjs";
+import { DigitrafficStack } from "./stack/stack.js";
+import { MonitoredFunction } from "./stack/monitoredfunction.js";
 import { ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import type { NodeJsRuntimeStreamingBlobPayloadInputTypes } from "@smithy/types";
-import { logger } from "../runtime/dt-logger-default.mjs";
+import { logger } from "../runtime/dt-logger-default.js";
 
 /**
  * Construct for creating SQS-queues.

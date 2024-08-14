@@ -1,4 +1,4 @@
-import { DocumentationPart } from "../../aws/infra/documentation.mjs";
+import { DocumentationPart } from "../../aws/infra/documentation.js";
 
 const METHOD_NAME = "test" as const;
 const SUMMARY = "summary" as const;

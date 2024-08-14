@@ -5,10 +5,10 @@ import { StringParameter } from "aws-cdk-lib/aws-ssm";
 import { type ISecret, Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Function as AWSFunction } from "aws-cdk-lib/aws-lambda";
 
-import { StackCheckingAspect } from "./stack-checking-aspect.mjs";
+import { StackCheckingAspect } from "./stack-checking-aspect.js";
 import { Construct } from "constructs";
-import { TrafficType } from "../../../types/traffictype.mjs";
-import type { DBLambdaEnvironment } from "./lambda-configs.mjs";
+import { TrafficType } from "../../../types/traffictype.js";
+import type { DBLambdaEnvironment } from "./lambda-configs.js";
 
 const SSM_ROOT = "/digitraffic";
 export const SOLUTION_KEY = "Solution";

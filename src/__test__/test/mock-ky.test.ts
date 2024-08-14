@@ -1,5 +1,5 @@
-import { mockKyResponse } from "../../test/mock-ky.mjs";
-import { describe, test, jest } from "@jest/globals";
+import { mockKyResponse } from "../../test/mock-ky.js";
+import { describe, jest, test } from "@jest/globals";
 
 const ky = (await import("ky")).default;
 

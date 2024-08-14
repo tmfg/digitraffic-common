@@ -1,7 +1,7 @@
 import {
-    SecretsManager,
     type GetSecretValueCommandInput,
     type GetSecretValueCommandOutput,
+    SecretsManager,
 } from "@aws-sdk/client-secrets-manager";
 import { jest } from "@jest/globals";
 
@@ -32,7 +32,7 @@ function mockSecret<T>(secret: null | T) {
 
 process.env["AWS_REGION"] = "eu-west-1";
 
-const secret = await import("../../aws/runtime/secrets/secret.mjs");
+const secret = await import("../../aws/runtime/secrets/secret.js");
 const { getSecret } = secret;
 
 describe("secret - test", () => {

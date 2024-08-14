@@ -1,23 +1,19 @@
 import {
-    InternalServerErrorResponseTemplate,
-    XmlResponseTemplate,
-    NotFoundResponseTemplate,
     BadRequestResponseTemplate,
-} from "./response.mjs";
+    InternalServerErrorResponseTemplate,
+    NotFoundResponseTemplate,
+    XmlResponseTemplate,
+} from "./response.js";
 import {
+    type IModel,
+    type IntegrationResponse,
     LambdaIntegration,
     type MethodResponse,
-    type IntegrationResponse,
     PassthroughBehavior,
-  type IModel
 } from "aws-cdk-lib/aws-apigateway";
 import { Function as AWSFunction } from "aws-cdk-lib/aws-lambda";
-import {
-    BAD_REQUEST_MESSAGE,
-    ERROR_MESSAGE,
-    NOT_FOUND_MESSAGE,
-} from "../../types/errors.mjs";
-import { MediaType } from "../../types/mediatypes.mjs";
+import { BAD_REQUEST_MESSAGE, ERROR_MESSAGE, NOT_FOUND_MESSAGE } from "../../types/errors.js";
+import { MediaType } from "../../types/mediatypes.js";
 
 /// @deprecated
 export const RESPONSE_200_OK: IntegrationResponse = {
