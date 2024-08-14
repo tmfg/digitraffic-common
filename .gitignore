@@ -4,7 +4,7 @@
 !.husky/pre-commit
 !/.editorconfig
 !/.eslintignore
-!/.eslintrc.json
+!/.eslintrc.cjs
 !/.gitattributes
 !/.gitignore
 !/.npmignore
