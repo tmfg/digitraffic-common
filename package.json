@@ -11,16 +11,15 @@
     "node": ">=20 <21"
   },
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch",
+    "build": "heft build --clean",
+    "build:watch": "heft build-watch",
     "lint": "eslint --cache .",
-    "eslint-report": "eslint . --format html",
     "ci:eslint-report": "eslint . --format html -o report.html || true",
-    "clean": "rimraf dist output",
     "test": "NODE_OPTIONS='--experimental-vm-modules' heft test --clean --max-workers=1",
     "test:jest": "node --trace-warnings --experimental-vm-modules --max-old-space-size=1536 --expose-gc ./node_modules/jest/bin/jest.js --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --logHeapUsage --runInBand --verbose",
     "test:inspect": "node --inspect-brk --expose-gc ./node_modules/jest/bin/jest.js --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --logHeapUsage --runInBand",
-    "test:watch": "jest --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --watch",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' heft test-watch --max-workers=1",
+    "test:watch:no-coverage": "NODE_OPTIONS='--experimental-vm-modules' heft test-watch --disable-code-coverage --max-workers=1",
     "prepublishOnly": "pnpm clean && pnpm build && pnpm test"
   },
   "license": "EUPL-1.2",
