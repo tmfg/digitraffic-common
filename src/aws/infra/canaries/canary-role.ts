@@ -5,7 +5,7 @@ import {
     Role,
     ServicePrincipal,
 } from "aws-cdk-lib/aws-iam";
-import { Construct } from "constructs";
+import type { Construct } from "constructs";
 
 const BASE_POLICY_STATEMENT_PROPS: PolicyStatementProps = {
     actions: [
@@ -34,7 +34,7 @@ export class DigitrafficCanaryRole extends Role {
             assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
             managedPolicies: [
                 ManagedPolicy.fromAwsManagedPolicyName(
-                    "CloudWatchSyntheticsFullAccess"
+                    "CloudWatchSyntheticsFullAccess",
                 ),
             ],
         });
@@ -52,8 +52,8 @@ export class DigitrafficCanaryRole extends Role {
         // Works
         this.addManagedPolicy(
             ManagedPolicy.fromAwsManagedPolicyName(
-                "service-role/AWSLambdaVPCAccessExecutionRole"
-            )
+                "service-role/AWSLambdaVPCAccessExecutionRole",
+            ),
         );
         return this;
     }
@@ -65,8 +65,8 @@ export class DigitrafficCanaryRole extends Role {
     withVpcAccess(): this {
         this.addManagedPolicy(
             ManagedPolicy.fromAwsManagedPolicyName(
-                "service-role/AWSLambdaVPCAccessExecutionRole"
-            )
+                "service-role/AWSLambdaVPCAccessExecutionRole",
+            ),
         );
         return this;
     }

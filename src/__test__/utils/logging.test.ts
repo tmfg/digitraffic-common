@@ -14,21 +14,21 @@ interface ErrorLogLine {
 const TEST_METHODNAME = "test.logException";
 
 interface LikeAxiosError extends Error {
-  code?: string;
+    code?: string;
 }
 
 describe("dt-logger", () => {
     function assertLogError(
         error: Error | string,
         expected: ErrorLogLine,
-        includeStack = false
-    ) {
+        includeStack: boolean = false,
+    ): void {
         assertWrite((logger: DtLogger) => {
             logException(logger, error, includeStack);
         }, expected);
     }
 
-    function assertAxiosError(error: LikeAxiosError, expected: ErrorLogLine) {
+    function assertAxiosError(error: LikeAxiosError, expected: ErrorLogLine): void {
         assertWrite((logger: DtLogger) => {
             logException(logger, error);
         }, expected);
@@ -36,8 +36,8 @@ describe("dt-logger", () => {
 
     function assertWrite(
         writeFunction: (logger: DtLogger) => void,
-        expected: ErrorLogLine
-    ) {
+        expected: ErrorLogLine,
+    ): void {
         const logged: string[] = [];
         const writeStream = new Writable({
             write: (chunk: Buffer) => {
@@ -101,7 +101,7 @@ describe("dt-logger", () => {
                 level: "ERROR",
                 stack: true,
             },
-            true
+            true,
         );
     });
 

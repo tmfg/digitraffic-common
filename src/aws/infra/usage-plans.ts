@@ -1,4 +1,4 @@
-import { type IApiKey, RestApi } from "aws-cdk-lib/aws-apigateway";
+import type { IApiKey, RestApi } from "aws-cdk-lib/aws-apigateway";
 
 /**
  * Creates an usage plan for a REST API with a single API key
@@ -10,7 +10,7 @@ import { type IApiKey, RestApi } from "aws-cdk-lib/aws-apigateway";
 export function createUsagePlan(
     api: RestApi,
     apiKeyId: string,
-    apiKeyName: string
+    apiKeyName: string,
 ): IApiKey {
     const apiKey = api.addApiKey(apiKeyId);
     const plan = api.addUsagePlan(apiKeyName, {
@@ -33,7 +33,7 @@ export function createUsagePlan(
 export function createDefaultUsagePlan(
     api: RestApi,
     apiName: string,
-    value?: string
+    value?: string,
 ): IApiKey {
     const apiKeyName = apiName + " API Key";
     const usagePlanName = apiName + " API Usage Plan";

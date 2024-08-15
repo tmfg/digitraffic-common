@@ -11,36 +11,36 @@ describe("dt-logger", () => {
     function assertLog<T>(
         config: LoggerConfiguration,
         message: LoggableType,
-        expected: NonNullable<T>
-    ) {
+        expected: NonNullable<T>,
+    ): void {
         assertWrite(
             config,
             (logger: DtLogger) => {
                 logger.info(message);
             },
-            expected
+            expected,
         );
     }
 
     function assertDebug<T>(
         config: LoggerConfiguration,
         message: unknown,
-        expected: NonNullable<T>
-    ) {
+        expected: NonNullable<T>,
+    ): void {
         assertWrite(
             config,
             (logger: DtLogger) => {
                 logger.debug(message);
             },
-            expected
+            expected,
         );
     }
 
     function assertWrite<T>(
         config: LoggerConfiguration,
         writeFunction: (logger: DtLogger) => void,
-        expected: NonNullable<T>
-    ) {
+        expected: NonNullable<T>,
+    ): void {
         const logged: string[] = [];
         const writeStream = new Writable({
             write: (chunk: Buffer) => {
@@ -68,8 +68,10 @@ describe("dt-logger", () => {
             "stack" in expected &&
             expected.stack
         ) {
-            const stack = loggedLine['stack'];
-            delete loggedLine['stack'];
+            // eslint-disable-next-line dot-notation
+            const stack = loggedLine["stack"];
+            // eslint-disable-next-line dot-notation
+            delete loggedLine["stack"];
             delete expected.stack;
 
             expect(stack).toBeDefined();
@@ -89,7 +91,7 @@ describe("dt-logger", () => {
             {
                 ...LOG_LINE,
                 date: date.toISOString(),
-            }
+            },
         );
     });
 
@@ -103,7 +105,7 @@ describe("dt-logger", () => {
             {
                 ...LOG_LINE,
                 fooCount: 123,
-            }
+            },
         );
     });
 

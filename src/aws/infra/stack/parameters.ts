@@ -53,8 +53,8 @@ export type WriteParameterType = Exclude<
 
 export function getParameterValue(
     scope: Construct,
-    parameterType: ReadParameterType
-) {
+    parameterType: ReadParameterType,
+): string {
     const parameterName = PARAMETERS[parameterType].parameterName;
     return StringParameter.valueForStringParameter(scope, parameterName);
 }
@@ -62,7 +62,7 @@ export function getParameterValue(
 export function createParameter(
     scope: Construct,
     parameterType: WriteParameterType,
-    stringValue: string
+    stringValue: string,
 ): StringParameter {
     const { id, parameterName, description } = PARAMETERS[parameterType];
 

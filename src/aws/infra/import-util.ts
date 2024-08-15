@@ -1,10 +1,10 @@
 import { type IVpc, Vpc } from "aws-cdk-lib/aws-ec2";
-import { CfnOutput, Fn, Stack } from "aws-cdk-lib";
-import { Construct } from "constructs";
+import { CfnOutput, Fn, type Stack } from "aws-cdk-lib";
+import type { Construct } from "constructs";
 
 export class OldStackImports {
-    public static AURORAINSTANCE_SG_IMPORT_NAME = "AuroraSG";
-    public static RDSPROXY_SG_IMPORT_NAME = "RDSProxySG";
+    public static AURORAINSTANCE_SG_IMPORT_NAME: string = "AuroraSG";
+    public static RDSPROXY_SG_IMPORT_NAME: string = "RDSProxySG";
 }
 
 /**
@@ -42,10 +42,11 @@ export function exportValue(
     stack: Stack,
     environmentName: string,
     name: string,
-    value: string
-) {
+    value: string,
+): void {
     const exportName = outputName(environmentName, name);
 
+    // eslint-disable-next-line no-new
     new CfnOutput(stack, exportName, {
         exportName,
         value,

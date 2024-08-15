@@ -12,7 +12,7 @@ import { DbStack } from "./db-stack.js";
 import { exportValue, importVpc } from "../import-util.js";
 import { createParameter } from "../stack/parameters.js";
 import { Duration, Stack } from "aws-cdk-lib/core";
-import { Construct } from "constructs/lib/construct.js";
+import type { Construct } from "constructs/lib/construct.js";
 
 export interface ProxyConfiguration {
     readonly secretArn: string;
@@ -27,14 +27,14 @@ export interface ProxyConfiguration {
 export class DbProxyStack extends Stack {
     readonly isc: InfraStackConfiguration;
 
-    public static PROXY_READER_EXPORT_NAME = "db-reader-endpoint";
-    public static PROXY_WRITER_EXPORT_NAME = "db-writer-endpoint";
+    public static PROXY_READER_EXPORT_NAME: string = "db-reader-endpoint";
+    public static PROXY_WRITER_EXPORT_NAME: string = "db-writer-endpoint";
 
     constructor(
         scope: Construct,
         id: string,
         isc: InfraStackConfiguration,
-        configuration: ProxyConfiguration
+        configuration: ProxyConfiguration,
     ) {
         super(scope, id, {
             env: isc.env,
@@ -55,7 +55,7 @@ export class DbProxyStack extends Stack {
         const readerEndpoint = this.createProxyEndpoints(
             vpc,
             proxy,
-            configuration.securityGroupId
+            configuration.securityGroupId,
         );
 
         createParameter(this, "proxy.reader", readerEndpoint.attrEndpoint);
@@ -64,28 +64,28 @@ export class DbProxyStack extends Stack {
         this.setOutputs(proxy);
     }
 
-    setOutputs(proxy: DatabaseProxy) {
+    setOutputs(proxy: DatabaseProxy): void {
         // if only one instance, then there is no reader-endpoint
         exportValue(
             this,
             this.isc.environmentName,
             DbProxyStack.PROXY_READER_EXPORT_NAME,
-            proxy.endpoint
+            proxy.endpoint,
         );
         exportValue(
             this,
             this.isc.environmentName,
             DbProxyStack.PROXY_WRITER_EXPORT_NAME,
-            proxy.endpoint
+            proxy.endpoint,
         );
     }
 
-    createProxy(vpc: IVpc, secret: ISecret, configuration: ProxyConfiguration) {
+    createProxy(vpc: IVpc, secret: ISecret, configuration: ProxyConfiguration): DatabaseProxy {
         const proxyId = `${this.isc.environmentName}-proxy`;
         const securityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             "securitygroup",
-            configuration.securityGroupId
+            configuration.securityGroupId,
         );
 
         const cluster = DatabaseCluster.fromDatabaseClusterAttributes(
@@ -95,7 +95,7 @@ export class DbProxyStack extends Stack {
                 clusterIdentifier: configuration.clusterIdentifier,
                 engine: DatabaseClusterEngine.AURORA_POSTGRESQL,
                 port: DbStack.CLUSTER_PORT,
-            }
+            },
         );
 
         // CDK tries to allow connections between proxy and cluster
@@ -121,8 +121,8 @@ export class DbProxyStack extends Stack {
     createProxyEndpoints(
         vpc: IVpc,
         proxy: DatabaseProxy,
-        securityGroupId: string
-    ) {
+        securityGroupId: string,
+    ): CfnDBProxyEndpoint {
         return new CfnDBProxyEndpoint(this, "ReaderEndpoint", {
             dbProxyEndpointName: "ReaderEndpoint",
             dbProxyName: proxy.dbProxyName,

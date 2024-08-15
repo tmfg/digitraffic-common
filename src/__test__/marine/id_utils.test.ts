@@ -1,5 +1,5 @@
 import * as IdUtils from "../../marine/id_utils.js";
-import { getRandomNumber } from "../../test/testutils.js";
+import { getRandomNumber } from "../../__test__/testutils.js";
 
 describe("IdUtils tests", () => {
     test("isValidLOCODE - success", () => {
@@ -40,7 +40,7 @@ describe("IdUtils tests", () => {
 
     test("isValidIMO - fail with number larger than 9999999", () => {
         expect(IdUtils.isValidIMO(getRandomNumber(9999999 + 1, 99999999))).toBe(
-            false
+            false,
         );
     });
 
@@ -50,13 +50,13 @@ describe("IdUtils tests", () => {
 
     test("isValidMMSI - fail with number smaller than 100000000", () => {
         expect(IdUtils.isValidMMSI(getRandomNumber(0, 100000000 - 1))).toBe(
-            false
+            false,
         );
     });
 
     test("isValidMMSI - fail with number larger than 999999999", () => {
         expect(
-            IdUtils.isValidMMSI(getRandomNumber(999999999 + 1, 9999999999))
+            IdUtils.isValidMMSI(getRandomNumber(999999999 + 1, 9999999999)),
         ).toBe(false);
     });
 });

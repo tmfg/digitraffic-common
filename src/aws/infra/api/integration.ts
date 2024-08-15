@@ -23,8 +23,8 @@ export class DigitrafficIntegration<T extends string> {
 
     constructor(
         lambda: IFunction,
-        mediaType = MediaType.TEXT_PLAIN,
-        sunset?: string
+        mediaType: MediaType = MediaType.TEXT_PLAIN,
+        sunset?: string,
     ) {
         this.lambda = lambda;
         this.mediaType = mediaType;
@@ -38,16 +38,12 @@ export class DigitrafficIntegration<T extends string> {
     }
 
     addQueryParameter(...names: T[]): this {
-        names.forEach((name) =>
-            this.parameters.push({ type: "querystring", name })
-        );
+        names.forEach((name) => this.parameters.push({ type: "querystring", name }));
         return this;
     }
 
     addMultiValueQueryParameter(...names: T[]): this {
-        names.forEach((name) =>
-            this.parameters.push({ type: "multivaluequerystring", name })
-        );
+        names.forEach((name) => this.parameters.push({ type: "multivaluequerystring", name }));
         return this;
     }
 
@@ -58,9 +54,7 @@ export class DigitrafficIntegration<T extends string> {
      * @returns
      */
     addContextParameter(...names: T[]): this {
-        names.forEach((name) =>
-            this.parameters.push({ type: "context", name })
-        );
+        names.forEach((name) => this.parameters.push({ type: "context", name }));
 
         return this;
     }
@@ -82,14 +76,8 @@ export class DigitrafficIntegration<T extends string> {
         return new LambdaIntegration(this.lambda, {
             proxy: false,
             integrationResponses,
-            requestParameters:
-                this.parameters.length == 0
-                    ? undefined
-                    : this.createRequestParameters(),
-            requestTemplates:
-                this.parameters.length == 0
-                    ? undefined
-                    : this.createRequestTemplates(),
+            requestParameters: this.parameters.length === 0 ? undefined : this.createRequestParameters(),
+            requestTemplates: this.parameters.length === 0 ? undefined : this.createRequestTemplates(),
             passthroughBehavior: PassthroughBehavior.WHEN_NO_MATCH,
         });
     }
@@ -104,8 +92,9 @@ export class DigitrafficIntegration<T extends string> {
                 requestParameters[
                     `integration.request.${parameter.type.replace(
                         "multivaluequerystring",
-                        "querystring"
-                    )}.${parameter.name}`
+                        "querystring",
+                    )
+                    }.${parameter.name}`
                 ] = `method.request.${parameter.type}.${parameter.name}`;
             });
 
@@ -124,7 +113,8 @@ export class DigitrafficIntegration<T extends string> {
                 // make multivaluequerystring values to array
                 requestJson[
                     parameter.name
-                ] = `[#foreach($val in $method.request.multivaluequerystring.get('${parameter.name}'))"$util.escapeJavaScript($val)"#if($foreach.hasNext),#end#end]`;
+                ] =
+                    `[#foreach($val in $method.request.multivaluequerystring.get('${parameter.name}'))"$util.escapeJavaScript($val)"#if($foreach.hasNext),#end#end]`;
             } else {
                 requestJson[
                     parameter.name

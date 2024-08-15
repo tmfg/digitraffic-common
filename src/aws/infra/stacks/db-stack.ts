@@ -1,6 +1,12 @@
-import { InstanceType, type ISecurityGroup, type IVpc, SecurityGroup, SubnetType } from "aws-cdk-lib/aws-ec2";
 import {
-    AuroraPostgresEngineVersion,
+    type InstanceType,
+    type ISecurityGroup,
+    type IVpc,
+    SecurityGroup,
+    SubnetType,
+} from "aws-cdk-lib/aws-ec2";
+import {
+    type AuroraPostgresEngineVersion,
     CfnDBInstance,
     Credentials,
     DatabaseCluster,
@@ -11,7 +17,7 @@ import {
     type IParameterGroup,
     ParameterGroup,
 } from "aws-cdk-lib/aws-rds";
-import { Construct } from "constructs/lib/construct.js";
+import type { Construct } from "constructs/lib/construct.js";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import type { InfraStackConfiguration } from "./intra-stack-configuration.js";
 import { exportValue, importVpc } from "../import-util.js";
@@ -59,21 +65,19 @@ export interface ClusterImportConfiguration {
  */
 
 export class DbStack extends Stack {
-    public static CLUSTER_PORT = 5432;
+    public static CLUSTER_PORT: number = 5432;
 
-    public static CLUSTER_IDENTIFIER_EXPORT_NAME = "db-cluster";
-    public static CLUSTER_READ_ENDPOINT_EXPORT_NAME =
-        "db-cluster-reader-endpoint";
-    public static CLUSTER_WRITE_ENDPOINT_EXPORT_NAME =
-        "db-cluster-writer-endpoint";
+    public static CLUSTER_IDENTIFIER_EXPORT_NAME: string = "db-cluster";
+    public static CLUSTER_READ_ENDPOINT_EXPORT_NAME: string = "db-cluster-reader-endpoint";
+    public static CLUSTER_WRITE_ENDPOINT_EXPORT_NAME: string = "db-cluster-writer-endpoint";
 
-    public clusterIdentifier = "";
+    public clusterIdentifier: string = "";
 
     constructor(
         scope: Construct,
         id: string,
         isc: InfraStackConfiguration,
-        configuration: DbConfiguration
+        configuration: DbConfiguration,
     ) {
         super(scope, id, {
             env: isc.env,
@@ -81,7 +85,7 @@ export class DbStack extends Stack {
 
         const parameterGroups = this.createParameterGroups(
             configuration.customParameterGroups,
-            configuration.workmem ?? 524288
+            configuration.workmem ?? 524288,
         );
 
         if (
@@ -97,44 +101,44 @@ export class DbStack extends Stack {
                 isc,
                 configuration,
                 configuration.cluster,
-                parameterGroups
+                parameterGroups,
             );
 
             exportValue(
                 this,
                 isc.environmentName,
                 DbStack.CLUSTER_IDENTIFIER_EXPORT_NAME,
-                cluster.clusterIdentifier
+                cluster.clusterIdentifier,
             );
 
             exportValue(
                 this,
                 isc.environmentName,
                 DbStack.CLUSTER_WRITE_ENDPOINT_EXPORT_NAME,
-                cluster.clusterEndpoint.hostname
+                cluster.clusterEndpoint.hostname,
             );
 
             exportValue(
                 this,
                 isc.environmentName,
                 DbStack.CLUSTER_READ_ENDPOINT_EXPORT_NAME,
-                cluster.clusterReadEndpoint.hostname
+                cluster.clusterReadEndpoint.hostname,
             );
 
             createParameter(
                 this,
                 "cluster.reader",
-                cluster.clusterReadEndpoint.hostname
+                cluster.clusterReadEndpoint.hostname,
             );
             createParameter(
                 this,
                 "cluster.writer",
-                cluster.clusterEndpoint.hostname
+                cluster.clusterEndpoint.hostname,
             );
             createParameter(
                 this,
                 "cluster.identifier",
-                cluster.clusterIdentifier
+                cluster.clusterIdentifier,
             );
 
             this.clusterIdentifier = cluster.clusterIdentifier;
@@ -144,19 +148,19 @@ export class DbStack extends Stack {
             createParameter(
                 this,
                 "cluster.reader",
-                configuration.clusterImport.clusterReadEndpoint
+                configuration.clusterImport.clusterReadEndpoint,
             );
             createParameter(
                 this,
                 "cluster.writer",
-                configuration.clusterImport.clusterWriteEndpoint
+                configuration.clusterImport.clusterWriteEndpoint,
             );
         }
     }
 
     createParameterGroups(
         customVersions: AuroraPostgresEngineVersion[],
-        workmem: number
+        workmem: number,
     ): IParameterGroup[] {
         return customVersions.map((version: AuroraPostgresEngineVersion) => {
             const pg = new ParameterGroup(
@@ -171,7 +175,7 @@ export class DbStack extends Stack {
                         random_page_cost: "1",
                         work_mem: workmem.toString(),
                     },
-                }
+                },
             );
 
             // create both cluster parameter group and instance parameter group
@@ -188,12 +192,12 @@ export class DbStack extends Stack {
         instanceName: string,
         vpc: IVpc,
         securityGroup: ISecurityGroup,
-        parameterGroup: IParameterGroup
+        parameterGroup: IParameterGroup,
     ): DatabaseClusterProps {
         const secret = Secret.fromSecretCompleteArn(
             this,
             "DBSecret",
-            secretArn
+            secretArn,
         );
 
         return {
@@ -226,7 +230,7 @@ export class DbStack extends Stack {
             },
             credentials: Credentials.fromPassword(
                 secret.secretValueFromJson("db.superuser").unsafeUnwrap(),
-                secret.secretValueFromJson("db.superuser.password")
+                secret.secretValueFromJson("db.superuser.password"),
             ),
             parameterGroup,
             //            storageEncrypted: clusterConfiguration.storageEncrypted ?? true,
@@ -238,20 +242,18 @@ export class DbStack extends Stack {
         isc: InfraStackConfiguration,
         configuration: DbConfiguration,
         clusterConfiguration: ClusterConfiguration,
-        parameterGroups: IParameterGroup[]
+        parameterGroups: IParameterGroup[],
     ): DatabaseCluster {
         const instanceName = isc.environmentName + "-db";
         const securityGroup = SecurityGroup.fromSecurityGroupId(
             this,
             "securitygroup",
-            clusterConfiguration.securityGroupId
+            clusterConfiguration.securityGroupId,
         );
-        const vpc = configuration.vpc
-            ? configuration.vpc
-            : importVpc(this, isc.environmentName);
+        const vpc = configuration.vpc ? configuration.vpc : importVpc(this, isc.environmentName);
 
         if (parameterGroups[0] === undefined) {
-            throw Error('ParameterGroups should not be empty')
+            throw Error("ParameterGroups should not be empty");
         }
 
         const parameters = this.createClusterParameters(
@@ -260,27 +262,26 @@ export class DbStack extends Stack {
             instanceName,
             vpc,
             securityGroup,
-            parameterGroups[0]
+            parameterGroups[0],
         );
 
         // create cluster from the snapshot or from the scratch
         const cluster = clusterConfiguration.snapshotIdentifier
             ? new DatabaseClusterFromSnapshot(this, instanceName, {
-                  ...parameters,
-                  ...{
-                      snapshotIdentifier:
-                          clusterConfiguration.snapshotIdentifier,
-                  },
-              })
+                ...parameters,
+                ...{
+                    snapshotIdentifier: clusterConfiguration.snapshotIdentifier,
+                },
+            })
             : new DatabaseCluster(this, instanceName, parameters);
 
         // this workaround should prevent stack failing on version upgrade
         const cfnInstances = cluster.node.children.filter(
-            (child): child is CfnDBInstance => child instanceof CfnDBInstance
+            (child): child is CfnDBInstance => child instanceof CfnDBInstance,
         );
         if (cfnInstances.length === 0) {
             throw new Error(
-                "Couldn't pull CfnDBInstances from the L1 constructs!"
+                "Couldn't pull CfnDBInstances from the L1 constructs!",
             );
         }
         cfnInstances.forEach((cfnInstance) => delete cfnInstance.engineVersion);

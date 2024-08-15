@@ -1,5 +1,6 @@
 import type { Writable } from "stream";
-import { mapKeys, lowerFirst } from "lodash-es";
+import { lowerFirst, mapKeys } from "lodash-es";
+import { getEnvVariable } from "../../utils/utils.js";
 
 /** Logging level */
 export type LOG_LEVEL = "DEBUG" | "INFO" | "WARN" | "ERROR";
@@ -35,7 +36,15 @@ export interface CustomParams {
     customApiKey?: never;
     [key: `custom${Capitalize<string>}Count`]: number;
 
-    [key: `custom${Capitalize<string>}`]: string | number | bigint | boolean | Date | null | undefined;
+    [key: `custom${Capitalize<string>}`]:
+    | string
+    | number
+    | bigint
+    | boolean
+    | Date
+    // eslint-disable-next-line @rushstack/no-new-null
+    | null
+    | undefined;
 }
 
 /**
@@ -83,8 +92,8 @@ export class DtLogger {
      * @param {LoggerConfiguration?} [config] - Accepts configuration options @see {@link LoggerConfiguration}
      */
     constructor(config?: LoggerConfiguration) {
-        this.lambdaName = config?.lambdaName ?? process.env["AWS_LAMBDA_FUNCTION_NAME"];
-        this.runtime = config?.runTime ?? process.env["AWS_EXECUTION_ENV"];
+        this.lambdaName = config?.lambdaName ?? getEnvVariable("AWS_LAMBDA_FUNCTION_NAME");
+        this.runtime = config?.runTime ?? getEnvVariable("AWS_EXECUTION_ENV");
         this.writeStream = config?.writeStream ?? process.stdout;
     }
 
@@ -153,9 +162,7 @@ export class DtLogger {
      */
     private log(message: LoggableTypeInternal): void {
         const error = message.error
-            ? typeof message.error === "string"
-                ? message.error
-                : JSON.stringify(message.error)
+            ? typeof message.error === "string" ? message.error : JSON.stringify(message.error)
             : undefined;
 
         const logMessage = {
@@ -169,8 +176,12 @@ export class DtLogger {
     }
 }
 
-function removePrefix(prefix: string, loggable: LoggableType) {
-    return mapKeys(loggable, (_index, key: string) =>
-        key.startsWith(prefix) ? lowerFirst(key.replace(prefix, "")) : key,
-    );
+/**
+ * Removes given prefixes from the keys of the object.
+ */
+function removePrefix(prefix: string, loggable: LoggableType): LoggableType {
+    return mapKeys(
+        loggable,
+        (_index, key: string) => key.startsWith(prefix) ? lowerFirst(key.replace(prefix, "")) : key,
+    ) as unknown as LoggableType;
 }

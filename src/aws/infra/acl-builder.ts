@@ -32,12 +32,12 @@ export class AclBuilder {
     _scope: string = "CLOUDFRONT";
     _customResponseBodies: Record<string, CfnWebACL.CustomResponseBodyProperty> = {};
 
-    constructor(construct: Construct, name="WebACL") {
+    constructor(construct: Construct, name: string = "WebACL") {
         this._construct = construct;
         this._name = name;
     }
 
-    isRuleDefined(rules: AWSManagedWafRule[] | "all", rule: AWSManagedWafRule) {
+    isRuleDefined(rules: AWSManagedWafRule[] | "all", rule: AWSManagedWafRule): boolean {
         return rules === "all" || rules.includes(rule);
     }
 
@@ -117,7 +117,7 @@ export class AclBuilder {
         return this;
     }
 
-    withCustomResponseBody(key: string, customResponseBody: CfnWebACL.CustomResponseBodyProperty) {
+    withCustomResponseBody(key: string, customResponseBody: CfnWebACL.CustomResponseBodyProperty): AclBuilder {
         if (key in this._customResponseBodies) {
             logger.warn({
                 method: "acl-builder.withCustomResponseBody",
@@ -128,8 +128,9 @@ export class AclBuilder {
         return this;
     }
 
-    withThrottleDigitrafficUserIp(limit: number | null | undefined) {
-        if (limit == null) {
+    // eslint-disable-next-line @rushstack/no-new-null
+    withThrottleDigitrafficUserIp(limit: number | null | undefined): AclBuilder {
+        if (limit === null || limit === undefined) {
             this._logMissingLimit("withThrottleDigitrafficUserIp");
             return this;
         }
@@ -145,8 +146,9 @@ export class AclBuilder {
         );
     }
 
-    withThrottleDigitrafficUserIpAndUriPath(limit: number | null | undefined) {
-        if (limit == null) {
+    // eslint-disable-next-line @rushstack/no-new-null
+    withThrottleDigitrafficUserIpAndUriPath(limit: number | null | undefined): AclBuilder {
+        if (limit === null || limit === undefined) {
             this._logMissingLimit("withThrottleDigitrafficUserIpAndUriPath");
             return this;
         }
@@ -162,8 +164,9 @@ export class AclBuilder {
         );
     }
 
-    withThrottleAnonymousUserIp(limit: number | null | undefined) {
-        if (limit == null) {
+    // eslint-disable-next-line @rushstack/no-new-null
+    withThrottleAnonymousUserIp(limit: number | null | undefined): AclBuilder {
+        if (limit === null || limit === undefined) {
             this._logMissingLimit("withThrottleAnonymousUserIp");
             return this;
         }
@@ -179,8 +182,9 @@ export class AclBuilder {
         );
     }
 
-    withThrottleAnonymousUserIpAndUriPath(limit: number | null | undefined) {
-        if (limit == null) {
+    // eslint-disable-next-line @rushstack/no-new-null
+    withThrottleAnonymousUserIpAndUriPath(limit: number | null | undefined): AclBuilder {
+        if (limit === null || limit === undefined) {
             this._logMissingLimit("withThrottleAnonymousUserIpAndUriPath");
             return this;
         }
@@ -196,11 +200,11 @@ export class AclBuilder {
         );
     }
 
-    _isCustomResponseBodyKeySet(key: string) {
+    _isCustomResponseBodyKeySet(key: string): boolean {
         return key in this._customResponseBodies;
     }
 
-    _addThrottleResponseBody(customResponseBodyKey: string, limit: number) {
+    _addThrottleResponseBody(customResponseBodyKey: string, limit: number): void {
         if (!this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
             this.withCustomResponseBody(customResponseBodyKey, {
                 content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
@@ -209,7 +213,7 @@ export class AclBuilder {
         }
     }
 
-    _logMissingLimit(method: string) {
+    _logMissingLimit(method: string): void {
         logger.warn({
             method: `acl-builder.${method}`,
             message: `'limit' was not defined. Not setting a throttle rule for ${this._name}`,
@@ -223,7 +227,7 @@ export class AclBuilder {
 
         const uniqueRuleNames = new Set(this._rules.map((rule) => rule.name));
 
-        if (uniqueRuleNames.size != this._rules.length) {
+        if (uniqueRuleNames.size !== this._rules.length) {
             throw new Error(
                 "Tried to create an Access Control List with multiple rules having the same name",
             );
