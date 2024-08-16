@@ -16,7 +16,7 @@ import {
     type MonitoredFunctionParameters,
 } from "./lambda-configs.js";
 import { TrafficType } from "../../../types/traffictype.js";
-import { chain } from "lodash";
+import { chain } from "lodash-es";
 
 /**
  * Allows customization of CloudWatch Alarm properties
