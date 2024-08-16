@@ -14,7 +14,7 @@ export type AWSManagedWafRule =
     | "SQLiRuleSet";
 
 export type ExcludedAWSRules = {
-    [key: AWSManagedWafRule]: string[]
+    [key in AWSManagedWafRule]?: string[]
 }
 
 /**
