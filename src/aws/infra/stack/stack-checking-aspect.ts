@@ -49,6 +49,7 @@ export class StackCheckingAspect implements IAspect {
 
     private isWhitelisted(key: string): boolean | undefined {
         return this.whitelistedResources?.some((wl) => {
+            // eslint-disable-next-line @rushstack/security/no-unsafe-regexp
             return key.matchAll(new RegExp(wl, "g"));
         });
     }

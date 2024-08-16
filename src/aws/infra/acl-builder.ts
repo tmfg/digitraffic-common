@@ -27,7 +27,7 @@ export type ExcludedAWSRules = {
 export class AclBuilder {
     readonly _construct: Construct;
     readonly _rules: CfnWebACL.RuleProperty[] = [];
-    readonly _name: string;
+    readonly _name: string = "WebACL";
 
     _scope: string = "CLOUDFRONT";
     _customResponseBodies: Record<string, CfnWebACL.CustomResponseBodyProperty> = {};

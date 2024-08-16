@@ -150,9 +150,9 @@ function createHandler(): SQSHandler {
         const millis = new Date().getTime();
         const s3 = new S3Client({});
         await Promise.all(
-            event.Records.map((e: SQSRecord, idx: number) =>
-                uploadToS3(s3, bucketName, e.body, `dlq-${millis}-${idx}.json`)
-            ),
+            event.Records.map((e: SQSRecord, idx: number) => {
+                return uploadToS3(s3, bucketName, e.body, `dlq-${millis}-${idx}.json`);
+            })
         );
     };
 }
