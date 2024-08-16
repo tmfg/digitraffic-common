@@ -14,14 +14,15 @@ const SECRET_WITH_PREFIX = {
 
 const emptySecret: GetSecretValueCommandOutput = { $metadata: {} };
 
-const getSecretValueMock =
-    jest.fn<(arg: GetSecretValueCommandInput) => Promise<GetSecretValueCommandOutput>>();
+const getSecretValueMock = jest.fn<
+    (arg: GetSecretValueCommandInput) => Promise<GetSecretValueCommandOutput>
+>();
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 jest.spyOn(SecretsManager.prototype, "getSecretValue").mockImplementation(getSecretValueMock);
 
-const { SecretHolder } = await import("../../aws/runtime/secrets/secret-holder.mjs");
-const { DatabaseEnvironmentKeys } = await import("../../database/database.mjs");
+const { SecretHolder } = await import("../../aws/runtime/secrets/secret-holder.js");
+const { DatabaseEnvironmentKeys } = await import("../../database/database.js");
 
 function mockSecret<T>(secret: null | T) {
     if (!secret) {
