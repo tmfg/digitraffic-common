@@ -13,6 +13,10 @@ export type AWSManagedWafRule =
     | "KnownBadInputsRuleSet"
     | "SQLiRuleSet";
 
+export type ExcludedAWSRules = {
+    [key: AWSManagedWafRule]: string[]
+}
+
 /**
  * Builder class for building CfnWebACL.
  *
@@ -37,21 +41,21 @@ export class AclBuilder {
         return rules === "all" || rules.includes(rule);
     }
 
-    withAWSManagedRules(rules: AWSManagedWafRule[] | "all" = "all"): AclBuilder {
+    withAWSManagedRules(rules: AWSManagedWafRule[] | "all" = "all", excludedRules: ExcludedAWSRules = {}): AclBuilder {
         if (this.isRuleDefined(rules, "CommonRuleSet")) {
-            this._rules.push(createAWSCommonRuleSet());
+            this._rules.push(createAWSCommonRuleSet(excludedRules?.CommonRuleSet));
         }
 
         if (this.isRuleDefined(rules, "AmazonIpReputationList")) {
-            this._rules.push(createAWSReputationList());
+            this._rules.push(createAWSReputationList(excludedRules?.AmazonIpReputationList));
         }
 
         if (this.isRuleDefined(rules, "KnownBadInputsRuleSet")) {
-            this._rules.push(createAWSKnownBadInput());
+            this._rules.push(createAWSKnownBadInput(excludedRules?.KnownBadInputsRuleSet));
         }
 
         if (this.isRuleDefined(rules, "SQLiRuleSet")) {
-            this._rules.push(createAWSAntiSQLInjection());
+            this._rules.push(createAWSAntiSQLInjection(excludedRules?.SQLiRuleSet));
         }
 
         return this;
@@ -314,7 +318,7 @@ function createThrottleStatement(
     };
 }
 
-function createAWSCommonRuleSet(): CfnWebACL.RuleProperty {
+function createAWSCommonRuleSet(excludedRules: string[] = []): CfnWebACL.RuleProperty {
     return createRuleProperty("AWS-AWSManagedRulesCommonRuleSet", 70, {
         statement: {
             managedRuleGroupStatement: {
@@ -324,40 +328,43 @@ function createAWSCommonRuleSet(): CfnWebACL.RuleProperty {
                     { name: "NoUserAgent_HEADER" },
                     { name: "SizeRestrictions_BODY" },
                     { name: "GenericRFI_BODY" },
-                ],
+                ].concat((excludedRules ?? []).map(rule => ({name: rule}))),
             },
         },
     });
 }
 
-function createAWSReputationList(): CfnWebACL.RuleProperty {
+function createAWSReputationList(excludedRules: string[] = []): CfnWebACL.RuleProperty {
     return createRuleProperty("AWS-AWSManagedRulesAmazonIpReputationList", 80, {
         statement: {
             managedRuleGroupStatement: {
                 vendorName: "AWS",
                 name: "AWSManagedRulesAmazonIpReputationList",
+                excludedRules: (excludedRules ?? []).map(rule => ({name: rule}))
             },
         },
     });
 }
 
-function createAWSKnownBadInput(): CfnWebACL.RuleProperty {
+function createAWSKnownBadInput(excludedRules: string[] = []): CfnWebACL.RuleProperty {
     return createRuleProperty("AWS-AWSManagedRulesKnownBadInputsRuleSet", 90, {
         statement: {
             managedRuleGroupStatement: {
                 vendorName: "AWS",
                 name: "AWSManagedRulesKnownBadInputsRuleSet",
+                excludedRules: (excludedRules ?? []).map(rule => ({name: rule}))
             },
         },
     });
 }
 
-function createAWSAntiSQLInjection(): CfnWebACL.RuleProperty {
+function createAWSAntiSQLInjection(excludedRules: string[] = []): CfnWebACL.RuleProperty {
     return createRuleProperty("AWS-AWSManagedRulesSQLiRuleSet", 100, {
         statement: {
             managedRuleGroupStatement: {
                 vendorName: "AWS",
                 name: "AWSManagedRulesSQLiRuleSet",
+                excludedRules: (excludedRules ?? []).map(rule => ({name: rule}))
             },
         },
     });
