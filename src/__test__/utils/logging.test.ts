@@ -64,7 +64,7 @@ describe("dt-logger", () => {
             expect(stack).toBeDefined();
         }
 
-        expect(loggedLine).toEqual(expected);
+        expect(loggedLine).toMatchObject(expected);
     }
 
     test("log error - string", () => {

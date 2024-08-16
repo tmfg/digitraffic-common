@@ -1,6 +1,6 @@
 import type { Writable } from "stream";
 import { lowerFirst, mapKeys } from "lodash-es";
-import { getEnvVariable } from "../../utils/utils.js";
+import { getEnvVariableOrElse } from "../../utils/utils.js";
 
 /** Logging level */
 export type LOG_LEVEL = "DEBUG" | "INFO" | "WARN" | "ERROR";
@@ -92,8 +92,9 @@ export class DtLogger {
      * @param {LoggerConfiguration?} [config] - Accepts configuration options @see {@link LoggerConfiguration}
      */
     constructor(config?: LoggerConfiguration) {
-        this.lambdaName = config?.lambdaName ?? getEnvVariable("AWS_LAMBDA_FUNCTION_NAME");
-        this.runtime = config?.runTime ?? getEnvVariable("AWS_EXECUTION_ENV");
+        this.lambdaName = config?.lambdaName ??
+            getEnvVariableOrElse("AWS_LAMBDA_FUNCTION_NAME", "unknown lambda name");
+        this.runtime = config?.runTime ?? getEnvVariableOrElse("AWS_EXECUTION_ENV", "unknown runtime");
         this.writeStream = config?.writeStream ?? process.stdout;
     }
 
