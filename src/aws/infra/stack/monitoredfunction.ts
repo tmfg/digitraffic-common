@@ -15,7 +15,7 @@ import {
     type LambdaEnvironment,
     type MonitoredFunctionParameters,
 } from "./lambda-configs.js";
-import { TrafficType } from "../../../types/traffictype.js";
+import type { TrafficType } from "../../../types/traffictype.js";
 import { chain } from "lodash-es";
 
 /**
