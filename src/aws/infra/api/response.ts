@@ -131,39 +131,21 @@ export class DigitrafficMethodResponse {
         };
     }
 
-    static response200(
-        model: IModel,
-        mediaType: MediaType = MediaType.APPLICATION_JSON,
-    ): DigitrafficMethodResponse {
-        return DigitrafficMethodResponse.response(
-            "200",
-            model,
-            mediaType,
-            false,
-        );
+    static response200(model: IModel, mediaType: MediaType = MediaType.APPLICATION_JSON): MethodResponse {
+        return DigitrafficMethodResponse.response("200", model, mediaType, false);
     }
 
     static response500(
         model: IModel = Model.EMPTY_MODEL,
-        mediaType: MediaType = MediaType.APPLICATION_JSON,
-    ): DigitrafficMethodResponse {
-        return DigitrafficMethodResponse.response(
-            "500",
-            model,
-            mediaType,
-            false,
-        );
+        mediaType: MediaType = MediaType.APPLICATION_JSON
+    ): MethodResponse {
+        return DigitrafficMethodResponse.response("500", model, mediaType, false);
     }
 
     static response400(
         model: IModel = Model.EMPTY_MODEL,
-        mediaType: MediaType = MediaType.APPLICATION_JSON,
-    ): DigitrafficMethodResponse {
-        return DigitrafficMethodResponse.response(
-            "400",
-            model,
-            mediaType,
-            false,
-        );
+        mediaType: MediaType = MediaType.APPLICATION_JSON
+    ): MethodResponse {
+        return DigitrafficMethodResponse.response("400", model, mediaType, false);
     }
 }
