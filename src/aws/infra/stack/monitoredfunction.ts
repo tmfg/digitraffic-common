@@ -85,8 +85,7 @@ export class MonitoredFunction extends Function {
         if (props === MonitoredFunction.DISABLE_ALARMS && stack.configuration.production) {
             throw new Error(
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                `Function ${functionProps
-                    .functionName!} has DISABLE_ALARMS.  Remove before installing to production or define your own properties!`,
+                `Function ${functionProps.functionName!} has DISABLE_ALARMS.  Remove before installing to production or define your own properties!`,
             );
         }
 
@@ -118,13 +117,13 @@ export class MonitoredFunction extends Function {
         environment: LambdaEnvironment,
         functionParameters?: Partial<MonitoredFunctionParameters>,
     ): MonitoredFunction {
-        const functionName = functionParameters?.functionName ??
+        const functionName =
+            functionParameters?.functionName ??
             `${stack.configuration.shortName}-${chain(name)
                 .camelCase()
                 .startCase()
                 .replace(/\s/g, "")
-                .value()
-            }`;
+                .value()}`;
         const functionProps = databaseFunctionProps(
             stack,
             environment,
@@ -306,13 +305,13 @@ export class MonitoredDBFunction {
         environment?: LambdaEnvironment,
         functionParameters?: Partial<MonitoredFunctionParameters>,
     ): MonitoredFunction {
-        const functionName = functionParameters?.functionName ??
+        const functionName =
+            functionParameters?.functionName ??
             `${stack.configuration.shortName}-${chain(name)
                 .camelCase()
                 .startCase()
                 .replace(/\s/g, "")
-                .value()
-            }`;
+                .value()}`;
         const env = environment ? environment : stack.createLambdaEnvironment();
         const functionProps = databaseFunctionProps(stack, env, functionName, name, functionParameters);
 

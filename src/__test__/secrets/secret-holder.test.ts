@@ -14,9 +14,8 @@ const SECRET_WITH_PREFIX = {
 
 const emptySecret: GetSecretValueCommandOutput = { $metadata: {} };
 
-const getSecretValueMock = jest.fn<
-    (arg: GetSecretValueCommandInput) => Promise<GetSecretValueCommandOutput>
->();
+const getSecretValueMock =
+    jest.fn<(arg: GetSecretValueCommandInput) => Promise<GetSecretValueCommandOutput>>();
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 jest.spyOn(SecretsManager.prototype, "getSecretValue").mockImplementation(getSecretValueMock);
@@ -29,7 +28,7 @@ function mockSecret<T>(secret: null | T) {
         getSecretValueMock.mockImplementation(() => Promise.resolve(emptySecret));
     } else {
         getSecretValueMock.mockImplementation(() =>
-            Promise.resolve({ ...emptySecret, ...{ SecretString: JSON.stringify(secret) } })
+            Promise.resolve({ ...emptySecret, ...{ SecretString: JSON.stringify(secret) } }),
         );
     }
 }

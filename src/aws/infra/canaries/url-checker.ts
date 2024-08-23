@@ -74,7 +74,7 @@ export class UrlChecker {
         return synthetics.executeHttpStep(
             `Verify ${statusCode} for ${url.replace(/auth=.*/, "")}`,
             requestOptions,
-            callback
+            callback,
         );
     }
 
@@ -98,7 +98,7 @@ export class UrlChecker {
         return synthetics.executeHttpStep(
             `Verify 404 for ${url}`,
             requestOptions,
-            validateStatusCodeAndContentType(404, MediaType.TEXT_PLAIN)
+            validateStatusCodeAndContentType(404, MediaType.TEXT_PLAIN),
         );
     }
 
@@ -114,7 +114,7 @@ export class UrlChecker {
         return synthetics.executeHttpStep(
             `Verify 400 for ${url}`,
             requestOptions,
-            validateStatusCodeAndContentType(400, MediaType.TEXT_PLAIN)
+            validateStatusCodeAndContentType(400, MediaType.TEXT_PLAIN),
         );
     }
 
@@ -142,7 +142,7 @@ export class UrlChecker {
         return synthetics.executeHttpStep(
             `Verify 403 for ${url}`,
             requestOptions,
-            validateStatusCodeAndContentType(403, mediaType ?? MediaType.APPLICATION_JSON)
+            validateStatusCodeAndContentType(403, mediaType ?? MediaType.APPLICATION_JSON),
         );
     }
 
@@ -186,7 +186,7 @@ function getBodyFromResponse(response: IncomingMessage): Promise<string> {
  */
 function validateStatusCodeAndContentType(
     statusCode: number,
-    contentType: MediaType
+    contentType: MediaType,
 ): (Res: IncomingMessage) => Promise<void> {
     return (res: IncomingMessage) => {
         return new Promise((resolve) => {
@@ -198,7 +198,7 @@ function validateStatusCodeAndContentType(
             if (res.headers["content-type"] !== contentType) {
                 throw new Error(
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    `Wrong content-type ${res.headers["content-type"]!}`
+                    `Wrong content-type ${res.headers["content-type"]!}`,
                 );
             }
 
@@ -262,7 +262,7 @@ export class ResponseChecker {
             if (res.headers["content-type"] !== this.contentType) {
                 throw new Error(
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    `Wrong content-type ${res.headers["content-type"]!}`
+                    `Wrong content-type ${res.headers["content-type"]!}`,
                 );
             }
 
@@ -310,7 +310,7 @@ export class ContentTypeChecker {
             if (res.headers["content-type"] !== contentType) {
                 throw new Error(
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    `Wrong content-type ${res.headers["content-type"]!}`
+                    `Wrong content-type ${res.headers["content-type"]!}`,
                 );
             }
 

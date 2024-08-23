@@ -10,7 +10,7 @@ function getSmClient(): SecretsManager {
         smClient = new SecretsManager({
             region: getEnvVariableOrElse<string>(
                 EnvKeys.SECRET_OVERRIDE_AWS_REGION, // this is override secret region
-                getEnvVariable(EnvKeys.AWS_REGION)
+                getEnvVariable(EnvKeys.AWS_REGION),
             ),
         });
     }

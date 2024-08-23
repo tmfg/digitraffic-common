@@ -10,7 +10,7 @@ export function dbTestBase(
     truncateFn: (db: DTDatabase) => Promise<void>,
     dbUser: string,
     dbPass: string,
-    dbUri: string
+    dbUri: string,
 ): () => void {
     const theDbUri = process.env["DB_URI"] ?? dbUri;
     console.log(`Test database URI: ${theDbUri}`);

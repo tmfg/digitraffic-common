@@ -27,13 +27,7 @@ export function databaseFunctionProps(
         : undefined;
 
     return {
-        ...lambdaFunctionProps(
-            stack,
-            environment,
-            lambdaName,
-            simpleLambdaName,
-            config,
-        ),
+        ...lambdaFunctionProps(stack, environment, lambdaName, simpleLambdaName, config),
         ...{
             vpc: stack.vpc ?? undefined,
             vpcSubnets,
@@ -64,20 +58,13 @@ export function lambdaFunctionProps(
     };
 }
 
-function getAssetCode(
-    simpleLambdaName: string,
-    isSingleLambda: boolean,
-): AssetCode {
-    const lambdaPath = isSingleLambda
-        ? `dist/lambda/`
-        : `dist/lambda/${simpleLambdaName}`;
+function getAssetCode(simpleLambdaName: string, isSingleLambda: boolean): AssetCode {
+    const lambdaPath = isSingleLambda ? `dist/lambda/` : `dist/lambda/${simpleLambdaName}`;
 
     return new AssetCode(lambdaPath);
 }
 
-export function defaultLambdaConfiguration(
-    config: FunctionParameters,
-): FunctionProps {
+export function defaultLambdaConfiguration(config: FunctionParameters): FunctionProps {
     const props: FunctionProps = {
         runtime: Runtime.NODEJS_20_X,
         memorySize: config.memorySize ?? 128,

@@ -25,12 +25,12 @@ describe("response tests", () => {
     function generateResponse(
         status: number,
         fileName?: string,
-        timestamp?: Date
+        timestamp?: Date,
     ): [string, VelocityContext] {
         // eslint-disable-next-line
         const compile = new velocity.Compile(
             // eslint-disable-next-line
-            velocity.parse(RESPONSE_DEFAULT_LAMBDA)
+            velocity.parse(RESPONSE_DEFAULT_LAMBDA),
         );
         // eslint-disable-next-line
         const output = compile.render({
@@ -71,7 +71,7 @@ describe("response tests", () => {
         status?: number,
         contentType?: string,
         fileName?: string,
-        timestamp?: Date
+        timestamp?: Date,
     ) {
         expect(output).toEqual(TEST_BODY);
         expect(context).toMatchObject({

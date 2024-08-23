@@ -53,7 +53,7 @@ describe("acl-builder tests", () => {
 
     test("Cannot define two rules with the same name", () => {
         expect(() =>
-            createBuilder().withThrottleAnonymousUserIp(10).withThrottleAnonymousUserIp(200).build()
+            createBuilder().withThrottleAnonymousUserIp(10).withThrottleAnonymousUserIp(200).build(),
         ).toThrow();
     });
 

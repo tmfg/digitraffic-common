@@ -25,7 +25,7 @@ import { EnvKeys } from "../aws/runtime/environment.js";
  */
 export function bothArraysHasSameValues(
     a: null | undefined | unknown[],
-    b: null | undefined | unknown[]
+    b: null | undefined | unknown[],
 ): boolean {
     if ((a && !b) || (!a && b)) {
         return false;

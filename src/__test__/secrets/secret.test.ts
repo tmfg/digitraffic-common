@@ -25,7 +25,7 @@ function mockSecret<T>(secret: null | T) {
         getSecretValueMock.mockImplementation(() => Promise.resolve(emptySecret));
     } else {
         getSecretValueMock.mockImplementation(() =>
-            Promise.resolve({ ...emptySecret, ...{ SecretString: JSON.stringify(secret) } })
+            Promise.resolve({ ...emptySecret, ...{ SecretString: JSON.stringify(secret) } }),
         );
     }
 }

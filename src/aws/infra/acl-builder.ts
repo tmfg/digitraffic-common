@@ -14,8 +14,8 @@ export type AWSManagedWafRule =
     | "SQLiRuleSet";
 
 export type ExcludedAWSRules = {
-    [key in AWSManagedWafRule]?: string[]
-}
+    [key in AWSManagedWafRule]?: string[];
+};
 
 /**
  * Builder class for building CfnWebACL.
@@ -32,7 +32,7 @@ export class AclBuilder {
     _scope: string = "CLOUDFRONT";
     _customResponseBodies: Record<string, CfnWebACL.CustomResponseBodyProperty> = {};
 
-    constructor(construct: Construct, name="WebACL") {
+    constructor(construct: Construct, name = "WebACL") {
         this._construct = construct;
         this._name = name;
     }
@@ -41,7 +41,10 @@ export class AclBuilder {
         return rules === "all" || rules.includes(rule);
     }
 
-    withAWSManagedRules(rules: AWSManagedWafRule[] | "all" = "all", excludedRules: ExcludedAWSRules = {}): AclBuilder {
+    withAWSManagedRules(
+        rules: AWSManagedWafRule[] | "all" = "all",
+        excludedRules: ExcludedAWSRules = {},
+    ): AclBuilder {
         if (this.isRuleDefined(rules, "CommonRuleSet")) {
             this._rules.push(createAWSCommonRuleSet(excludedRules?.CommonRuleSet));
         }
@@ -328,7 +331,7 @@ function createAWSCommonRuleSet(excludedRules: string[] = []): CfnWebACL.RulePro
                     { name: "NoUserAgent_HEADER" },
                     { name: "SizeRestrictions_BODY" },
                     { name: "GenericRFI_BODY" },
-                ].concat((excludedRules ?? []).map(rule => ({name: rule}))),
+                ].concat((excludedRules ?? []).map((rule) => ({ name: rule }))),
             },
         },
     });
@@ -340,7 +343,7 @@ function createAWSReputationList(excludedRules: string[] = []): CfnWebACL.RulePr
             managedRuleGroupStatement: {
                 vendorName: "AWS",
                 name: "AWSManagedRulesAmazonIpReputationList",
-                excludedRules: (excludedRules ?? []).map(rule => ({name: rule}))
+                excludedRules: (excludedRules ?? []).map((rule) => ({ name: rule })),
             },
         },
     });
@@ -352,7 +355,7 @@ function createAWSKnownBadInput(excludedRules: string[] = []): CfnWebACL.RulePro
             managedRuleGroupStatement: {
                 vendorName: "AWS",
                 name: "AWSManagedRulesKnownBadInputsRuleSet",
-                excludedRules: (excludedRules ?? []).map(rule => ({name: rule}))
+                excludedRules: (excludedRules ?? []).map((rule) => ({ name: rule })),
             },
         },
     });
@@ -364,7 +367,7 @@ function createAWSAntiSQLInjection(excludedRules: string[] = []): CfnWebACL.Rule
             managedRuleGroupStatement: {
                 vendorName: "AWS",
                 name: "AWSManagedRulesSQLiRuleSet",
-                excludedRules: (excludedRules ?? []).map(rule => ({name: rule}))
+                excludedRules: (excludedRules ?? []).map((rule) => ({ name: rule })),
             },
         },
     });

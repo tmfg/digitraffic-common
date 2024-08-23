@@ -3,23 +3,27 @@ import type { IFunction } from "aws-cdk-lib/aws-lambda";
 import { MediaType } from "../../types/mediatypes.js";
 import { DigitrafficIntegrationResponse } from "../../runtime/digitraffic-integration-response.js";
 
-type ParameterType =
-    | "path"
-    | "querystring"
-    | "multivaluequerystring"
-    | "context"
-    | "header";
+type ParameterType = "path" | "querystring" | "multivaluequerystring" | "context" | "header";
 
 interface ApiParameter {
     type: ParameterType;
     name: string;
 }
 
+const VELOCITY_ALL_PARAMS = 
+`#set($params = $input.params().get("querystring"))
+#foreach($paramName in $params.keySet())
+  "$paramName":"$util.escapeJavaScript($params.get($paramName))" #if($foreach.hasNext),#end
+#end
+`;
+
 export class DigitrafficIntegration<T extends string> {
     readonly lambda: IFunction;
     readonly mediaType: MediaType;
     readonly parameters: ApiParameter[] = [];
     readonly sunset?: string;
+
+    _passAllQueryParameters: boolean;
 
     constructor(
         lambda: IFunction,
@@ -29,6 +33,15 @@ export class DigitrafficIntegration<T extends string> {
         this.lambda = lambda;
         this.mediaType = mediaType;
         this.sunset = sunset;
+        this._passAllQueryParameters = false;
+    }
+
+    passAllQueryParameters(): this {
+        if(this.parameters.some(p => p.type === "querystring")) throw new Error("Can't add query parameters with pass all");
+
+        this._passAllQueryParameters= true;
+
+        return this;
     }
 
     addPathParameter(...names: T[]): this {
@@ -38,6 +51,8 @@ export class DigitrafficIntegration<T extends string> {
     }
 
     addQueryParameter(...names: T[]): this {
+        if(this._passAllQueryParameters) throw new Error("Can't add query parameters with pass all");
+
         names.forEach((name) =>
             this.parameters.push({ type: "querystring", name })
         );
@@ -45,9 +60,7 @@ export class DigitrafficIntegration<T extends string> {
     }
 
     addMultiValueQueryParameter(...names: T[]): this {
-        names.forEach((name) =>
-            this.parameters.push({ type: "multivaluequerystring", name })
-        );
+        names.forEach((name) => this.parameters.push({ type: "multivaluequerystring", name }));
         return this;
     }
 
@@ -58,9 +71,7 @@ export class DigitrafficIntegration<T extends string> {
      * @returns
      */
     addContextParameter(...names: T[]): this {
-        names.forEach((name) =>
-            this.parameters.push({ type: "context", name })
-        );
+        names.forEach((name) => this.parameters.push({ type: "context", name }));
 
         return this;
     }
@@ -83,11 +94,12 @@ export class DigitrafficIntegration<T extends string> {
             proxy: false,
             integrationResponses,
             requestParameters:
-                this.parameters.length == 0
-                    ? undefined
-                    : this.createRequestParameters(),
+                undefined,
+//                this.parameters.length == 0
+  //                  ? undefined
+    //                : this.createRequestParameters(),
             requestTemplates:
-                this.parameters.length == 0
+                this.parameters.length == 0 && !this._passAllQueryParameters
                     ? undefined
                     : this.createRequestTemplates(),
             passthroughBehavior: PassthroughBehavior.WHEN_NO_MATCH,
@@ -104,7 +116,7 @@ export class DigitrafficIntegration<T extends string> {
                 requestParameters[
                     `integration.request.${parameter.type.replace(
                         "multivaluequerystring",
-                        "querystring"
+                        "querystring",
                     )}.${parameter.name}`
                 ] = `method.request.${parameter.type}.${parameter.name}`;
             });
@@ -113,27 +125,26 @@ export class DigitrafficIntegration<T extends string> {
     }
 
     createRequestTemplates(): Record<string, string> {
-        const requestJson: Record<string, string> = {};
+        const parameterAssignments: string[] = [];
+
+        if(this._passAllQueryParameters) {
+            parameterAssignments.push(VELOCITY_ALL_PARAMS);
+        }
 
         this.parameters.forEach((parameter: ApiParameter) => {
             if (parameter.type === "context") {
-                requestJson[
-                    parameter.name
-                ] = `$util.parseJson($context.${parameter.name})`;
+                parameterAssignments.push(`"${parameter.name}":"$util.parseJson($context.${parameter.name}"`);
             } else if (parameter.type === "multivaluequerystring") {
                 // make multivaluequerystring values to array
-                requestJson[
-                    parameter.name
-                ] = `[#foreach($val in $method.request.multivaluequerystring.get('${parameter.name}'))"$util.escapeJavaScript($val)"#if($foreach.hasNext),#end#end]`;
+                parameterAssignments.push(`"${parameter.name}":[#foreach($val in $method.request.multivaluequerystring.get('${parameter.name}'))"$util.escapeJavaScript($val)"#if($foreach.hasNext),#end#end]`);
             } else {
-                requestJson[
-                    parameter.name
-                ] = `$util.escapeJavaScript($input.params('${parameter.name}'))`;
+                parameterAssignments.push(`"${parameter.name}":"$util.escapeJavaScript($input.params('${parameter.name}'))"`);
             }
         });
 
         return {
-            [MediaType.APPLICATION_JSON]: JSON.stringify(requestJson),
+            [MediaType.APPLICATION_JSON]: `{
+    ${parameterAssignments.length > 0 ? parameterAssignments.join(',\n    ') + '\n' : ''}}`,
         };
     }
 
