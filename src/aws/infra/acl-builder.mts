@@ -91,10 +91,22 @@ export class AclBuilder {
         name: string,
         priority: number,
         limit: number,
-        customResponseBodyKey: string,
         isHeaderRequired: boolean,
         isBasedOnIpAndUriPath: boolean,
+        blockSettings?: {
+            customResponseBodyKey: string
+        },
     ): AclBuilder {
+        const action = blockSettings ? {
+            block: {
+                customResponse: {
+                    responseCode: 429,
+                    blockSettings: blockSettings.customResponseBodyKey,
+                },
+            },
+        } : {
+            count: {}
+        }
         this._rules.push({
             name,
             priority,
@@ -103,14 +115,7 @@ export class AclBuilder {
                 cloudWatchMetricsEnabled: true,
                 metricName: name,
             },
-            action: {
-                block: {
-                    customResponse: {
-                        responseCode: 429,
-                        customResponseBodyKey,
-                    },
-                },
-            },
+            action: action,
             statement: createThrottleStatement(limit, isHeaderRequired, isBasedOnIpAndUriPath),
         });
 
@@ -139,9 +144,9 @@ export class AclBuilder {
             "ThrottleRuleWithDigitrafficUser",
             1,
             limit,
-            customResponseBodyKey,
             true,
             false,
+            {customResponseBodyKey}
         );
     }
 
@@ -156,9 +161,9 @@ export class AclBuilder {
             "ThrottleRuleIPQueryWithDigitrafficUser",
             2,
             limit,
-            customResponseBodyKey,
             true,
             true,
+            {customResponseBodyKey}
         );
     }
 
@@ -173,9 +178,9 @@ export class AclBuilder {
             "ThrottleRuleWithAnonymousUser",
             3,
             limit,
-            customResponseBodyKey,
             false,
             false,
+            {customResponseBodyKey}
         );
     }
 
@@ -190,9 +195,65 @@ export class AclBuilder {
             "ThrottleRuleIPQueryWithAnonymousUser",
             4,
             limit,
-            customResponseBodyKey,
             false,
             true,
+            {customResponseBodyKey}
+        );
+    }
+
+    withCountDigitrafficUserIp(limit: number | null | undefined) {
+        if (limit == null) {
+            this._logMissingLimit("withCountDigitrafficUserIp");
+            return this;
+        }
+        return this.withThrottleRule(
+          `CountRuleWithDigitrafficUser${limit}`,
+          0,
+          limit,
+          true,
+          false,
+        );
+    }
+
+    withCountDigitrafficUserIpAndUriPath(limit: number | null | undefined) {
+        if (limit == null) {
+            this._logMissingLimit("withCountDigitrafficUserIpAndUriPath");
+            return this;
+        }
+        return this.withThrottleRule(
+          `CountRuleIPQueryWithDigitrafficUser${limit}`,
+          0,
+          limit,
+          true,
+          true,
+        );
+    }
+
+    withCountAnonymousUserIp(limit: number | null | undefined) {
+        if (limit == null) {
+            this._logMissingLimit("withCountAnonymousUserIp");
+            return this;
+        }
+        return this.withThrottleRule(
+          `CountRuleWithAnonymousUser${limit}`,
+          0,
+          limit,
+          false,
+          false,
+        );
+    }
+
+    withCountAnonymousUserIpAndUriPath(limit: number | null | undefined) {
+        if (limit == null) {
+            this._logMissingLimit("withCountAnonymousUserIpAndUriPath");
+            return this;
+        }
+        return this.withThrottleRule(
+          `CountRuleIPQueryWithAnonymousUser${limit}`,
+          0,
+          limit,
+          false,
+          true,
         );
     }
 
@@ -228,6 +289,25 @@ export class AclBuilder {
                 "Tried to create an Access Control List with multiple rules having the same name",
             );
         }
+
+        /*
+        There is no way of knowing how many count rules there will be. We want to run count rules before blocking rules.
+         */
+        const modifyRulePriorities = (rules: {-readonly [P in keyof typeof this._rules]: (typeof this._rules)[P]}) => {
+            const isCountRule = (rule: CfnWebACL.RuleProperty) => !!rule?.action?.count
+            const nCountRules = rules.filter(isCountRule).length
+            let countRulePriority = 0
+            for (const rule of rules) {
+                if (isCountRule(rule)) {
+                    rule.priority = countRulePriority
+                    countRulePriority++
+                } else {
+                    rule.priority = rule.priority + nCountRules
+                }
+            }
+        }
+
+        modifyRulePriorities(this._rules)
 
         const acl = new CfnWebACL(this._construct, this._name, {
             defaultAction: { allow: {} },
