@@ -144,7 +144,6 @@ export class AclBuilder {
 
     withThrottleDigitrafficUserIp(limit: number | undefined): AclBuilder {
         if (limit === undefined) {
-            this._logMissingLimit("withThrottleDigitrafficUserIp");
             return this;
         }
         const customResponseBodyKey = `IP_THROTTLE_DIGITRAFFIC_USER_${limit}`;
@@ -160,7 +159,6 @@ export class AclBuilder {
 
     withThrottleDigitrafficUserIpAndUriPath(limit: number | undefined): AclBuilder {
         if (limit === undefined) {
-            this._logMissingLimit("withThrottleDigitrafficUserIpAndUriPath");
             return this;
         }
         const customResponseBodyKey = `IP_PATH_THROTTLE_DIGITRAFFIC_USER_${limit}`;
@@ -176,7 +174,6 @@ export class AclBuilder {
 
     withThrottleAnonymousUserIp(limit: number | undefined): AclBuilder {
         if (limit === undefined) {
-            this._logMissingLimit("withThrottleAnonymousUserIp");
             return this;
         }
         const customResponseBodyKey = `IP_THROTTLE_ANONYMOUS_USER_${limit}`;
@@ -192,7 +189,6 @@ export class AclBuilder {
 
     withThrottleAnonymousUserIpAndUriPath(limit: number | undefined): AclBuilder {
         if (limit === undefined) {
-            this._logMissingLimit("withThrottleAnonymousUserIpAndUriPath");
             return this;
         }
         const customResponseBodyKey = `IP_PATH_THROTTLE_ANONYMOUS_USER_${limit}`;
@@ -208,7 +204,6 @@ export class AclBuilder {
 
     withCountDigitrafficUserIp(limit: number | undefined) {
         if (limit === undefined) {
-            this._logMissingLimit("withCountDigitrafficUserIp");
             return this;
         }
         return this.withThrottleRule(
@@ -221,7 +216,6 @@ export class AclBuilder {
 
     withCountDigitrafficUserIpAndUriPath(limit: number | undefined) {
         if (limit === undefined) {
-            this._logMissingLimit("withCountDigitrafficUserIpAndUriPath");
             return this;
         }
         return this.withThrottleRule(
@@ -234,7 +228,6 @@ export class AclBuilder {
 
     withCountAnonymousUserIp(limit: number | undefined) {
         if (limit === undefined) {
-            this._logMissingLimit("withCountAnonymousUserIp");
             return this;
         }
         return this.withThrottleRule(
@@ -247,7 +240,6 @@ export class AclBuilder {
 
     withCountAnonymousUserIpAndUriPath(limit: number | undefined) {
         if (limit === undefined) {
-            this._logMissingLimit("withCountAnonymousUserIpAndUriPath");
             return this;
         }
         return this.withThrottleRule(
@@ -269,13 +261,6 @@ export class AclBuilder {
                 contentType: "TEXT_PLAIN",
             });
         }
-    }
-
-    _logMissingLimit(method: string): void {
-        logger.warn({
-            method: `acl-builder.${method}`,
-            message: `'limit' was not defined. Not setting a throttle rule for ${this._name}`,
-        });
     }
 
     public build(): CfnWebACL {
