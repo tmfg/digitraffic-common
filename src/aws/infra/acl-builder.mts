@@ -115,7 +115,7 @@ export class AclBuilder {
                 cloudWatchMetricsEnabled: true,
                 metricName: name,
             },
-            action: action,
+            action,
             statement: createThrottleStatement(limit, isHeaderRequired, isBasedOnIpAndUriPath),
         });
 
