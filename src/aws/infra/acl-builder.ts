@@ -108,7 +108,7 @@ export class AclBuilder {
             block: {
                 customResponse: {
                     responseCode: 429,
-                    blockSettings: customResponseBodyKey,
+                    customResponseBodyKey,
                 },
             },
         } : {
