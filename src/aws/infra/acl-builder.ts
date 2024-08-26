@@ -2,8 +2,6 @@ import { CfnIPSet, CfnWebACL } from "aws-cdk-lib/aws-wafv2";
 import type { Construct } from "constructs";
 import { logger } from "../runtime/dt-logger-default.js";
 import { zipWith, range, concat } from "lodash-es";
-import {constants} from "os";
-import priority = module
 
 interface RuleProperty {
     action?: CfnWebACL.RuleActionProperty;
@@ -209,7 +207,7 @@ export class AclBuilder {
     }
 
     withCountDigitrafficUserIp(limit: number | undefined) {
-        if (limit == null) {
+        if (limit === undefined) {
             this._logMissingLimit("withCountDigitrafficUserIp");
             return this;
         }
@@ -222,7 +220,7 @@ export class AclBuilder {
     }
 
     withCountDigitrafficUserIpAndUriPath(limit: number | undefined) {
-        if (limit == null) {
+        if (limit === undefined) {
             this._logMissingLimit("withCountDigitrafficUserIpAndUriPath");
             return this;
         }
@@ -235,7 +233,7 @@ export class AclBuilder {
     }
 
     withCountAnonymousUserIp(limit: number | undefined) {
-        if (limit == null) {
+        if (limit === undefined) {
             this._logMissingLimit("withCountAnonymousUserIp");
             return this;
         }
@@ -248,7 +246,7 @@ export class AclBuilder {
     }
 
     withCountAnonymousUserIpAndUriPath(limit: number | undefined) {
-        if (limit == null) {
+        if (limit === undefined) {
             this._logMissingLimit("withCountAnonymousUserIpAndUriPath");
             return this;
         }
@@ -286,8 +284,8 @@ export class AclBuilder {
             priority
         })
         const rules: CfnWebACL.RuleProperty[] = concat(
-          zipWith(this._countRules, range(this._countRules), addPriority),
-          zipWith(this._blockRules, range(this._blockRules).map(n => n + this._countRules.length), addPriority))
+          zipWith(this._countRules, range(this._countRules.length), addPriority),
+          zipWith(this._blockRules, range(this._blockRules.length).map(n => n + this._countRules.length), addPriority))
 
         if (rules.length === 0) {
             throw new Error("No rules defined for WebACL");
