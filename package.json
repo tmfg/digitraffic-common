@@ -21,7 +21,7 @@
     "test:inspect": "node --inspect-brk --expose-gc ./node_modules/jest/bin/jest.js --detectOpenHandles --forceExit --coverage --coverageDirectory=output/coverage/jest --logHeapUsage --runInBand",
     "test:watch": "NODE_OPTIONS='--experimental-vm-modules' heft test-watch --max-workers=1",
     "test:watch:no-coverage": "NODE_OPTIONS='--experimental-vm-modules' heft test-watch --disable-code-coverage --max-workers=1",
-    "prepublishOnly": "pnpm clean && pnpm build && pnpm test"
+    "prepublishOnly": "pnpm build && pnpm test"
   },
   "license": "EUPL-1.2",
   "private": false,
