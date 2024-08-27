@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2024.8.16-1",
+  "version": "2024.8.27-1",
   "description": "",
   "type": "module",
   "repository": {
@@ -144,9 +144,9 @@
     "@digitraffic/eslint-config": "^2.1.0",
     "@jest/globals": "^29.7.0",
     "@rushstack/eslint-config": "^3.7.1",
-    "@rushstack/heft": "^0.66.26",
+    "@rushstack/heft": "^0.67.0",
     "@rushstack/heft-jest-plugin": "^0.12.9",
-    "@rushstack/heft-lint-plugin": "^0.3.48",
+    "@rushstack/heft-lint-plugin": "^0.4.1",
     "@rushstack/heft-typescript-plugin": "^0.5.25",
     "@smithy/types": "^3.3.0",
     "@types/aws-lambda": "8.10.143",
@@ -160,7 +160,7 @@
     "@typescript-eslint/eslint-plugin": "~7.14.1",
     "@typescript-eslint/parser": "^7.18.0",
     "aws-cdk-lib": "^2.154.1",
-    "aws-sdk": "^2.1681.0",
+    "aws-sdk": "^2.1682.0",
     "change-case": "^5.4.4",
     "constructs": "~10.3.0",
     "date-fns": "~3.6.0",
@@ -181,7 +181,7 @@
     "pg-promise": "^11.9.1",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
-    "ts-jest": "^29.2.4",
+    "ts-jest": "^29.2.5",
     "typescript": "~5.5.4",
     "velocityjs": "^2.0.6"
   }
