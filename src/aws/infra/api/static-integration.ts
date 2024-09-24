@@ -1,4 +1,4 @@
-import { type IntegrationResponse, MockIntegration, PassthroughBehavior, type Resource } from "aws-cdk-lib/aws-apigateway";
+import { type IntegrationResponse, type MethodResponse, MockIntegration, PassthroughBehavior, type Resource } from "aws-cdk-lib/aws-apigateway";
 import { MediaType } from "../../types/mediatypes.js";
 
 const INTEGRATION_RESPONSE_200 = `{
@@ -80,7 +80,7 @@ export class DigitrafficStaticIntegration extends MockIntegration {
         };
     }
 
-    static createMethodResponse(headers: Record<string, string>) {
+    static createMethodResponse(headers: Record<string, string>): MethodResponse {
         const allowedHeaders = Object.keys(headers);
         const entries = Object.fromEntries(allowedHeaders.map((key) => [key, true]));
 

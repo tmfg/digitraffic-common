@@ -1,11 +1,39 @@
-import { DigitrafficIntegration } from "../../../aws/infra/api/integration.mjs";
+import { DigitrafficIntegration } from "../../../aws/infra/api/integration.js";
 import { Code, Function, Runtime } from "aws-cdk-lib/aws-lambda";
 import { App, Stack } from "aws-cdk-lib";
-import { MediaType } from "../../../aws/types/mediatypes.mjs";
+import { MediaType } from "../../../aws/types/mediatypes.js";
+import velocity from "velocityjs";
 
 describe("integration tests", () => {
     function createTemplate(i: DigitrafficIntegration<string>): string {
-        return i.createRequestTemplates()[MediaType.APPLICATION_JSON]!.trim();
+        const template = i.createRequestTemplates()[MediaType.APPLICATION_JSON]!.trim();
+
+        // assert template parses
+        const response = createResponseFromTemplate(template);
+
+        // assert response parses
+        JSON.parse(response);
+
+        return template;
+    }
+
+    function createResponseFromTemplate(template: string) {
+        const compile = new velocity.Compile(velocity.parse(template));
+        return compile.render({
+            input: {
+                path: () => ({
+                    body: "",
+                }),
+            },
+            util: {
+                base64Decode: (data: string) => Buffer.from(data, "base64").toString(),
+            },
+            context: {
+                responseOverride: {
+                    c1: "value"
+                }
+            }
+        });
     }
 
     function createIntegration(): DigitrafficIntegration<string> {
@@ -19,7 +47,7 @@ describe("integration tests", () => {
         });
 
         return new DigitrafficIntegration(f);
-    }
+    }    
 
     function expectAssignmentInTemplate(t: string, name: string): void {
         expect(t).toContain(`"${name}":`);
@@ -89,4 +117,13 @@ describe("integration tests", () => {
                 .addQueryParameter("q1");
         }).toThrow();
     });
+
+    test("path parameters & pass all ", () => {
+        const i = createIntegration()
+                .addPathParameter("p")
+                .passAllQueryParameters();
+
+        createTemplate(i);        
+    });
+
 });

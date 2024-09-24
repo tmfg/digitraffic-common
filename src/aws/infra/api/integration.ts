@@ -11,9 +11,9 @@ interface ApiParameter {
 }
 
 const VELOCITY_ALL_PARAMS = `#set($params = $input.params().get("querystring"))
-#foreach($paramName in $params.keySet())
-  "$paramName":"$util.escapeJavaScript($params.get($paramName))" #if($foreach.hasNext),#end
-#end
+    #foreach($paramName in $params.keySet())
+    "$paramName":"$util.escapeJavaScript($params.get($paramName))" #if($foreach.hasNext),#end
+    #end
 `;
 
 export class DigitrafficIntegration<T extends string> {
@@ -122,13 +122,9 @@ export class DigitrafficIntegration<T extends string> {
     createRequestTemplates(): Record<string, string> {
         const parameterAssignments: string[] = [];
 
-        if (this._passAllQueryParameters) {
-            parameterAssignments.push(VELOCITY_ALL_PARAMS);
-        }
-
         this.parameters.forEach((parameter: ApiParameter) => {
             if (parameter.type === "context") {
-                parameterAssignments.push(`"${parameter.name}":"$util.parseJson($context.${parameter.name}"`);
+                parameterAssignments.push(`"${parameter.name}":"$util.parseJson($context.${parameter.name})"`);
             } else if (parameter.type === "multivaluequerystring") {
                 // make multivaluequerystring values to array
                 parameterAssignments.push(
@@ -141,9 +137,12 @@ export class DigitrafficIntegration<T extends string> {
             }
         });
 
+        const templateString = (this._passAllQueryParameters ? VELOCITY_ALL_PARAMS : "")
+        + (parameterAssignments.length > 0 ? parameterAssignments.join(",\n    ") + "\n" : "");
+
         return {
             [MediaType.APPLICATION_JSON]: `{
-    ${parameterAssignments.length > 0 ? parameterAssignments.join(",\n    ") + "\n" : ""}}`,
+    ${templateString}}`,
         };
     }
 
