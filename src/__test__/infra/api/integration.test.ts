@@ -29,17 +29,18 @@ describe("integration tests", () => {
                 }
             },
             input: {
-                path: () => ({                    
-                }),
                 params: () => ({
-                    p1: "path1",
-                    q1: "query1",
-                    q2: "query2",
-                    h1: "header1",
+                    header: {
+                        h1: "header1",
+                    },
                     querystring: {
-                        qs1: "querystring1",
-                        qs2: "querystring2"
-                    }
+                        q1: "querystring1",
+                        q2: "querystring2"
+                    },
+                    path: {
+                        p1: "path1"        
+                    },
+    
                 })
             },
             util: {
@@ -79,7 +80,19 @@ describe("integration tests", () => {
 
         const t = createTemplate(i);
         expect(t).toEqual({
-            q1: "query1"
+            q1: "querystring1"
+        });
+    });
+
+    test("two query parameters", () => {
+        const i = createIntegration()
+            .addQueryParameter("q1")
+            .addQueryParameter("q2")
+
+        const t = createTemplate(i);
+        expect(t).toEqual({
+            q1: "querystring1",
+            q2: "querystring2"
         });
     });
 
@@ -99,8 +112,8 @@ describe("integration tests", () => {
 
         const t = createTemplate(i);
         expect(t).toEqual({
-            qs1: "querystring1",
-            qs2: "querystring2"
+            q1: "querystring1",
+            q2: "querystring2"
         });
     });
 
@@ -131,9 +144,9 @@ describe("integration tests", () => {
 
         const t = createTemplate(i);
         expect(t).toEqual({
-            "h1": "header1",
-            qs1: "querystring1",
-            qs2: "querystring2"
+            h1: "header1",
+            q1: "querystring1",
+            q2: "querystring2"
         });
     });
 
@@ -153,8 +166,8 @@ describe("integration tests", () => {
         const t = createTemplate(i);
         expect(t).toEqual({
             p1: "path1",
-            qs1: "querystring1",
-            qs2: "querystring2"
+            q1: "querystring1",
+            q2: "querystring2"
         })
     });
 

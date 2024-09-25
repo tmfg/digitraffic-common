@@ -126,8 +126,12 @@ export class DigitrafficIntegration<T extends string> {
             } else if (parameter.type === "multivaluequerystring") {
                 // make multivaluequerystring values to array
                 parameterAssignments.push(`#set($tmp = $paramMap.put('_${parameter.name}', $util.parseJson($method.request.multivaluequerystring['${parameter.name}'])))`);
+            } else if (parameter.type === "path") {
+                parameterAssignments.push(`#set($tmp = $paramMap.put('${parameter.name}', $util.escapeJavaScript($input.params().path['${parameter.name}'])))`);
+            } else if (parameter.type === "header") {
+                parameterAssignments.push(`#set($tmp = $paramMap.put('${parameter.name}', $util.escapeJavaScript($input.params().header['${parameter.name}'])))`);
             } else {
-                parameterAssignments.push(`#set($tmp = $paramMap.put('${parameter.name}', $util.escapeJavaScript($input.params()['${parameter.name}'])))`);
+                parameterAssignments.push(`#set($tmp = $paramMap.put('${parameter.name}', $util.escapeJavaScript($params['${parameter.name}'])))`);
             }
         });
 
