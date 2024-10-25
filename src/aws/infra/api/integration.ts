@@ -22,11 +22,7 @@ export class DigitrafficIntegration<T extends string> {
 
     _passAllQueryParameters: boolean;
 
-    constructor(
-        lambda: IFunction,
-        mediaType: MediaType = MediaType.TEXT_PLAIN,
-        sunset?: string,
-    ) {
+    constructor(lambda: IFunction, mediaType: MediaType = MediaType.TEXT_PLAIN, sunset?: string) {
         this.lambda = lambda;
         this.mediaType = mediaType;
         this.sunset = sunset;
@@ -34,9 +30,8 @@ export class DigitrafficIntegration<T extends string> {
     }
 
     passAllQueryParameters(): this {
-        if (this.parameters.some((p) => p.type === "querystring")) {
+        if (this.parameters.some((p) => p.type === "querystring"))
             throw new Error("Can't add query parameters with pass all");
-        }
 
         this._passAllQueryParameters = true;
 
@@ -91,9 +86,10 @@ export class DigitrafficIntegration<T extends string> {
             proxy: false,
             integrationResponses,
             requestParameters: undefined,
-            requestTemplates: this.parameters.length === 0 && !this._passAllQueryParameters
-                ? undefined
-                : this.createRequestTemplates(),
+            requestTemplates:
+                this.parameters.length === 0 && !this._passAllQueryParameters
+                    ? undefined
+                    : this.createRequestTemplates(),
             passthroughBehavior: PassthroughBehavior.WHEN_NO_MATCH,
         });
     }
@@ -109,8 +105,7 @@ export class DigitrafficIntegration<T extends string> {
                     `integration.request.${parameter.type.replace(
                         "multivaluequerystring",
                         "querystring",
-                    )
-                    }.${parameter.name}`
+                    )}.${parameter.name}`
                 ] = `method.request.${parameter.type}.${parameter.name}`;
             });
 
