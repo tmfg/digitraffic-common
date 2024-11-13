@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2024.10.25-1",
+  "version": "2024.11.13-1",
   "description": "",
   "type": "module",
   "repository": {
@@ -147,9 +147,9 @@
     "@jest/globals": "^29.7.0",
     "@rushstack/eslint-config": "^3.7.1",
     "@rushstack/heft": "^0.68.2",
-    "@rushstack/heft-jest-plugin": "^0.12.14",
+    "@rushstack/heft-jest-plugin": "^0.12.18",
     "@rushstack/heft-lint-plugin": "^0.5.0",
-    "@rushstack/heft-typescript-plugin": "^0.5.30",
+    "@rushstack/heft-typescript-plugin": "^0.5.35",
     "@smithy/fetch-http-handler": "3.2.9",
     "@smithy/types": "^3.5.0",
     "@types/aws-lambda": "8.10.145",
