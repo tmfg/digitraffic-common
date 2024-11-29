@@ -117,7 +117,7 @@ export class DigitrafficIntegration<T extends string> {
 
         this.parameters.forEach((parameter: ApiParameter) => {
             if (parameter.type === "context") {
-                parameterAssignments.push(`#set($tmp = $paramMap.put('${parameter.name}', $util.escapeJavaScript($context['${parameter.name}'])))`);
+                parameterAssignments.push(`#set($tmp = $paramMap.put('${parameter.name}', $util.escapeJavaScript($context.${parameter.name})))`);
             } else if (parameter.type === "multivaluequerystring") {
                 // make multivaluequerystring values to array
                 parameterAssignments.push(`#set($tmp = $paramMap.put('_${parameter.name}', $util.parseJson($method.request.multivaluequerystring['${parameter.name}'])))`);
