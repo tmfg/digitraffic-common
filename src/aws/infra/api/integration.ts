@@ -14,6 +14,8 @@ const VELOCITY_ALL_PARAMS = `#foreach($paramName in $params.keySet())
     #set($tmp = $paramMap.put($paramName, $params[$paramName]))
 #end`;
 
+const VELOCITY_PASS_BODY = `#set($tmp = $paramMap.put('body', $util.escapeJavaScript($input.json('$'))))`;
+
 export class DigitrafficIntegration<T extends string> {
     readonly lambda: IFunction;
     readonly mediaType: MediaType;
@@ -21,12 +23,14 @@ export class DigitrafficIntegration<T extends string> {
     readonly sunset?: string;
 
     _passAllQueryParameters: boolean;
+    _passBody: boolean;
 
     constructor(lambda: IFunction, mediaType: MediaType = MediaType.TEXT_PLAIN, sunset?: string) {
         this.lambda = lambda;
         this.mediaType = mediaType;
         this.sunset = sunset;
         this._passAllQueryParameters = false;
+        this._passBody = false;
     }
 
     passAllQueryParameters(): this {
@@ -34,6 +38,16 @@ export class DigitrafficIntegration<T extends string> {
             throw new Error("Can't add query parameters with pass all");
 
         this._passAllQueryParameters = true;
+
+        return this;
+    }
+
+    /**
+     * Body is passed as an escaped string, so broken input won't break anything.  You should
+     * parse and validate the input in the lambda.
+     */
+    passBody(): this {
+        this._passBody = true;
 
         return this;
     }
@@ -139,6 +153,7 @@ export class DigitrafficIntegration<T extends string> {
 #set($params = $input.params().get("querystring"))
 ${parameterAssignments.join("\n")}
 ${this._passAllQueryParameters ? VELOCITY_ALL_PARAMS : ""}
+${this._passBody ? VELOCITY_PASS_BODY : ""}
 {
 #foreach($paramName in $paramMap.keySet())
 #if( $paramName[0] != '_')
