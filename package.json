@@ -8,7 +8,7 @@
     "url": "https://github.com/tmfg/digitraffic-common.git"
   },
   "engines": {
-    "node": ">=22 <23"
+    "node": ">=20 <21"
   },
   "scripts": {
     "build": "heft build --clean",
@@ -160,7 +160,7 @@
     "@types/jest": "29.5.14",
     "@types/lodash-es": "4.17.12",
     "@types/madge": "5.0.3",
-    "@types/node": "22.10.5",
+    "@types/node": "20.17.6",
     "@typescript-eslint/eslint-plugin": "~8.19.0",
     "@typescript-eslint/parser": "^8.19.0",
     "aws-cdk-lib": "^2.173.4",
