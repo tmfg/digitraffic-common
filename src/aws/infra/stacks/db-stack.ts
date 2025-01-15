@@ -1,13 +1,8 @@
-import {
-    type InstanceType,
-    type ISecurityGroup,
-    type IVpc,
-    SecurityGroup,
-    SubnetType,
-} from "aws-cdk-lib/aws-ec2";
+import {type InstanceType, type ISecurityGroup, type IVpc, SecurityGroup, SubnetType,} from "aws-cdk-lib/aws-ec2";
 import {
     type AuroraPostgresEngineVersion,
     CfnDBInstance,
+    ClusterInstance,
     Credentials,
     DatabaseCluster,
     DatabaseClusterEngine,
@@ -17,12 +12,12 @@ import {
     type IParameterGroup,
     ParameterGroup,
 } from "aws-cdk-lib/aws-rds";
-import type { Construct } from "constructs/lib/construct.js";
-import { Secret } from "aws-cdk-lib/aws-secretsmanager";
-import type { InfraStackConfiguration } from "./intra-stack-configuration.js";
-import { exportValue, importVpc } from "../import-util.js";
-import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib/core";
-import { createParameter } from "../stack/parameters.js";
+import {Secret} from "aws-cdk-lib/aws-secretsmanager";
+import {Duration, RemovalPolicy, Stack} from "aws-cdk-lib/core";
+import type {Construct} from "constructs/lib/construct.js";
+import {exportValue, importVpc} from "../import-util.js";
+import {createParameter} from "../stack/parameters.js";
+import type {InfraStackConfiguration} from "./intra-stack-configuration.js";
 
 export interface DbConfiguration {
     readonly cluster?: ClusterConfiguration;
@@ -40,13 +35,18 @@ export interface DbConfiguration {
     readonly vpc?: IVpc;
 }
 
+export interface ClusterDbInstanceConfiguration {
+    readonly instanceType: InstanceType;
+    readonly isFromLegacyInstanceProps?: boolean // default false
+}
+
 export interface ClusterConfiguration {
     readonly securityGroupId: string;
-    readonly dbInstanceType: InstanceType;
     readonly snapshotIdentifier?: string;
-    readonly instances: number;
     readonly dbVersion: AuroraPostgresEngineVersion;
-    readonly storageEncrypted?: boolean; /// default true
+
+    readonly writer: ClusterDbInstanceConfiguration;
+    readonly readers: ClusterDbInstanceConfiguration[];
 }
 
 export interface ClusterImportConfiguration {
@@ -164,11 +164,43 @@ export class DbStack extends Stack {
     ): DatabaseClusterProps {
         const secret = Secret.fromSecretCompleteArn(this, "DBSecret", secretArn);
 
+        const defaultDbInstanceProps = {
+            autoMinorVersionUpgrade: true,
+            allowMajorVersionUpgrade: false,
+            enablePerformanceInsights: true,
+            parameterGroup: parameterGroup
+        }
+
+        const writer = ClusterInstance.provisioned("WriterInstance", {
+            ...{
+                instanceType: clusterConfiguration.writer.instanceType,
+                isFromLegacyInstanceProps: clusterConfiguration.writer.isFromLegacyInstanceProps
+            },
+            ...defaultDbInstanceProps
+        });
+
+        const readers = clusterConfiguration.readers.map((reader, index) =>
+            ClusterInstance.provisioned(`ReaderInstance${index}`,
+                {
+                    ...{
+                        instanceType: reader.instanceType,
+                        isFromLegacyInstanceProps: reader.isFromLegacyInstanceProps,
+                    },
+                    ...defaultDbInstanceProps
+                }
+            ));
+
         return {
             engine: DatabaseClusterEngine.auroraPostgres({
                 version: clusterConfiguration.dbVersion,
             }),
-            instances: clusterConfiguration.instances,
+            writer,
+            readers,
+            vpcSubnets: {
+                subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+            },
+            securityGroups: [securityGroup],
+            vpc,
             instanceUpdateBehaviour: InstanceUpdateBehaviour.ROLLING,
             instanceIdentifierBase: instanceName + "-",
             cloudwatchLogsExports: ["postgresql"],
@@ -180,24 +212,11 @@ export class DbStack extends Stack {
             deletionProtection: true,
             removalPolicy: RemovalPolicy.RETAIN,
             port: DbStack.CLUSTER_PORT,
-            instanceProps: {
-                autoMinorVersionUpgrade: true,
-                allowMajorVersionUpgrade: false,
-                enablePerformanceInsights: true,
-                vpc,
-                securityGroups: [securityGroup],
-                vpcSubnets: {
-                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-                },
-                instanceType: clusterConfiguration.dbInstanceType,
-                parameterGroup,
-            },
             credentials: Credentials.fromPassword(
                 secret.secretValueFromJson("db.superuser").unsafeUnwrap(),
                 secret.secretValueFromJson("db.superuser.password"),
             ),
             parameterGroup,
-            //            storageEncrypted: clusterConfiguration.storageEncrypted ?? true,
             monitoringInterval: Duration.seconds(30),
         };
     }
@@ -232,11 +251,11 @@ export class DbStack extends Stack {
         // create cluster from the snapshot or from the scratch
         const cluster = clusterConfiguration.snapshotIdentifier
             ? new DatabaseClusterFromSnapshot(this, instanceName, {
-                  ...parameters,
-                  ...{
-                      snapshotIdentifier: clusterConfiguration.snapshotIdentifier,
-                  },
-              })
+                ...parameters,
+                ...{
+                    snapshotIdentifier: clusterConfiguration.snapshotIdentifier,
+                },
+            })
             : new DatabaseCluster(this, instanceName, parameters);
 
         // this workaround should prevent stack failing on version upgrade
