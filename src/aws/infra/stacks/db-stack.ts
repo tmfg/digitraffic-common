@@ -259,12 +259,15 @@ export class DbStack extends Stack {
             : new DatabaseCluster(this, instanceName, parameters);
 
         // this workaround should prevent stack failing on version upgrade
+        // https://github.com/aws/aws-cdk/issues/21758
+        // https://github.com/aws/aws-cdk/pull/22185
+        // Maybe this could be removed completely as we don't update db with the CDK?
         const cfnInstances = cluster.node.children.filter(
             (child): child is CfnDBInstance => child instanceof CfnDBInstance,
         );
-        if (cfnInstances.length === 0) {
-            throw new Error("Couldn't pull CfnDBInstances from the L1 constructs!");
-        }
+        // if (cfnInstances.length === 0) {
+        //     throw new Error("Couldn't pull CfnDBInstances from the L1 constructs!");
+        // }
         cfnInstances.forEach((cfnInstance) => delete cfnInstance.engineVersion);
 
         return cluster;
