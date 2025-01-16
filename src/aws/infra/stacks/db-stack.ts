@@ -52,6 +52,7 @@ export interface ClusterConfiguration {
 export interface ClusterImportConfiguration {
     readonly clusterReadEndpoint: string;
     readonly clusterWriteEndpoint: string;
+    readonly clusterIdentifier: string,
 }
 
 /**
@@ -130,6 +131,7 @@ export class DbStack extends Stack {
         if (configuration.clusterImport) {
             createParameter(this, "cluster.reader", configuration.clusterImport.clusterReadEndpoint);
             createParameter(this, "cluster.writer", configuration.clusterImport.clusterWriteEndpoint);
+            this.clusterIdentifier = configuration.clusterImport.clusterIdentifier;
         }
     }
 
