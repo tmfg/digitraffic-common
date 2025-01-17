@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2025.1.16-2",
+  "version": "2025.1.17-1",
   "description": "",
   "type": "module",
   "repository": {
@@ -145,7 +145,7 @@
     "@aws-sdk/client-sns": "^3.721.0",
     "@aws-sdk/lib-storage": "^3.721.0",
     "@date-fns/tz": "1.2.0",
-    "@digitraffic/eslint-config": "^3.0.1",
+    "@digitraffic/eslint-config": "^3.1.1",
     "@jest/globals": "^29.7.0",
     "@rushstack/eslint-config": "^3.7.1",
     "@rushstack/heft": "^0.68.11",
@@ -187,7 +187,7 @@
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
     "ts-jest": "^29.2.5",
-    "typescript": "~5.5.4",
+    "typescript": "~5.6.3",
     "velocityjs": "^2.0.6",
     "zod": "~3.24.1"
   }
