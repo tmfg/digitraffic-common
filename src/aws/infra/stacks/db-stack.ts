@@ -133,9 +133,6 @@ export class DbStack extends Stack {
         }
 
         if (configuration.clusterImport) {
-            createParameter(this, "cluster.reader", configuration.clusterImport.clusterReadEndpoint);
-            createParameter(this, "cluster.writer", configuration.clusterImport.clusterWriteEndpoint);
-
             // If clusterIdentifier is provided we use it and otherwise we try to parse it from
             // from clusterWriteEndpoint name that is normally formed stackenv-stackenvxxx-xxx.cluster-xxx.region.rds.amazonaws.com
             // and part before .cluster is clusterIdentifier.
@@ -152,6 +149,10 @@ export class DbStack extends Stack {
                     " Either 'configuration.clusterImport.clusterReadEndpoint' didn't contain '.cluster' or " +
                     "configuration.clusterImport.clusterIdentifier was not defined to override default value.");
             }
+
+            createParameter(this, "cluster.reader", configuration.clusterImport.clusterReadEndpoint);
+            createParameter(this, "cluster.writer", configuration.clusterImport.clusterWriteEndpoint);
+            createParameter(this, "cluster.identifier", this.clusterIdentifier);
         }
     }
 
