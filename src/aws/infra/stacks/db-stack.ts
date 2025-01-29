@@ -44,6 +44,7 @@ export interface ClusterConfiguration {
     readonly securityGroupId: string;
     readonly snapshotIdentifier?: string;
     readonly dbVersion: AuroraPostgresEngineVersion;
+    readonly storageEncrypted?: boolean; // default true
 
     readonly writer: ClusterDbInstanceConfiguration;
     readonly readers: ClusterDbInstanceConfiguration[];
@@ -241,6 +242,7 @@ export class DbStack extends Stack {
             ),
             parameterGroup,
             monitoringInterval: Duration.seconds(30),
+            storageEncrypted: clusterConfiguration.storageEncrypted ?? true
         };
     }
 
