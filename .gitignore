@@ -1,5 +1,6 @@
 *
 
+!/deno.json
 !.husky/
 !.husky/pre-commit
 !/.editorconfig
@@ -9,8 +10,6 @@
 !/.gitignore
 !/.npmignore
 !/.npmrc
-!/.prettierignore
-!/.prettierrc.json
 !/.madgerc
 !/jest.config.mjs
 !/LICENSE
