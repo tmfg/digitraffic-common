@@ -67,12 +67,14 @@ export interface ClusterImportConfiguration {
  * -> <i>stackenv-stackenvxxx-xxx</i>
  * @param clusterImport ClusterImportConfiguration to resolve cluster identifier
  * @param fallbackValue If parse fails return fallback value. If not given will throw error.
+ * @throws Error If not cluster is found and no fallbackValue is given.
  */
 export function parseClusterIdentifier(
-  clusterImport: ClusterImportConfiguration,
+  clusterImport?: ClusterImportConfiguration,
   fallbackValue?: string,
 ): string {
   if (
+    clusterImport &&
     clusterImport.clusterWriteEndpoint.includes(".cluster") &&
     clusterImport.clusterWriteEndpoint.split(".cluster")[0]
   ) {
@@ -83,9 +85,9 @@ export function parseClusterIdentifier(
     return fallbackValue;
   }
   throw new Error(
-    "Could not resolve 'clusterIdentifier' from 'configuration.clusterImport': " +
-      clusterImport.clusterWriteEndpoint +
-      ". 'configuration.clusterImport.clusterWriteEndpoint' didn't contain '.cluster'",
+    [`Could not resolve 'clusterIdentifier' from 'configuration.clusterImport': ${clusterImport?.clusterWriteEndpoint}.,
+     'configuration.clusterImport.clusterWriteEndpoint' didn't contain '.cluster'`]
+      .join(" "),
   );
 }
 
