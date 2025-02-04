@@ -65,10 +65,12 @@ export interface ClusterImportConfiguration {
  * Parse cluster identifier from cluster writer endpoint.
  * i.e. <i>stackenv-stackenvxxx-xxx.cluster-xxx.region.rds.amazonaws.com</i>
  * -> <i>stackenv-stackenvxxx-xxx</i>
- * @param clusterImport
+ * @param clusterImport ClusterImportConfiguration to resolve cluster identifier
+ * @param fallbackValue If parse fails return fallback value. If not given will throw error.
  */
 export function parseClusterIdentifier(
   clusterImport: ClusterImportConfiguration,
+  fallbackValue?: string,
 ): string {
   if (
     clusterImport.clusterWriteEndpoint.includes(".cluster") &&
@@ -76,6 +78,9 @@ export function parseClusterIdentifier(
   ) {
     // @ts-ignore this is checked above
     return clusterImport.clusterWriteEndpoint.split(".cluster")[0];
+  }
+  if (fallbackValue) {
+    return fallbackValue;
   }
   throw new Error(
     "Could not resolve 'clusterIdentifier' from 'configuration.clusterImport': " +
