@@ -194,7 +194,7 @@ describe("integration tests", () => {
     const t = createTemplate(i);
     // body base64-encoded
     expect(t).toEqual({
-      body: "eyBib2R5OiAiJ21vaSIgfQ==",
+      payload: "eyBib2R5OiAiJ21vaSIgfQ==",
     });
   });
 
