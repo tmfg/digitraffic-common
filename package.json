@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2025.3.4-2",
+  "version": "2025.3.10-1",
   "description": "",
   "type": "module",
   "repository": {
@@ -8,7 +8,7 @@
     "url": "https://github.com/tmfg/digitraffic-common.git"
   },
   "engines": {
-    "node": ">=20 <21"
+    "node": ">=22 <23"
   },
   "scripts": {
     "build": "heft build --clean",
