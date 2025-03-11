@@ -39,6 +39,20 @@ describe("dt-logger", () => {
     );
   }
 
+  function assertError<T>(
+    config: LoggerConfiguration,
+    message: LoggableType,
+    expected: NonNullable<T>,
+  ): void {
+    assertWrite(
+      config,
+      (logger: DtLogger) => {
+        logger.error(message);
+      },
+      expected,
+    );
+  }
+
   function assertWrite<T>(
     config: LoggerConfiguration,
     writeFunction: (logger: DtLogger) => void,
@@ -66,11 +80,18 @@ describe("dt-logger", () => {
     if (typeof expected === "object" && "stack" in expected && expected.stack) {
       // eslint-disable-next-line dot-notation
       const stack = loggedLine["stack"];
+
+      expect(stack).toBeDefined();
+      // @ts-ignore // stack should be multiline string
+      const stackLines: string[] = (stack as string).split("\n");
+      expect(stackLines.length).toBeGreaterThanOrEqual(2);
+      expect(stackLines[0]).toEqual(expected.stack);
+      // @ts-ignore
+      expect(stackLines[1].trim().startsWith("at ")).toBe(true);
+
       // eslint-disable-next-line dot-notation
       delete loggedLine["stack"];
       delete expected.stack;
-
-      expect(stack).toBeDefined();
     }
 
     expect(loggedLine).toMatchObject(expected);
@@ -157,5 +178,86 @@ describe("dt-logger", () => {
       },
       level: "DEBUG",
     });
+  });
+
+  test("error - Error string", () => {
+    const error = "FAIL!";
+    assertError(
+      {},
+      {
+        ...LOG_LINE,
+        error,
+      },
+      {
+        ...LOG_LINE,
+        error: "FAIL!",
+        level: "ERROR",
+      },
+    );
+  });
+
+  test("error - Error object", () => {
+    const error = {
+      errorMessage: "FAIL!",
+      errorCode: 123,
+    };
+    assertError(
+      {},
+      {
+        ...LOG_LINE,
+        error,
+      },
+      {
+        ...LOG_LINE,
+        error: '{"errorMessage":"FAIL!","errorCode":123}',
+        level: "ERROR",
+      },
+    );
+  });
+
+  test("error - Error", () => {
+    const error = new Error("FAIL!");
+    assertError(
+      {},
+      {
+        ...LOG_LINE,
+        error,
+      },
+      {
+        ...LOG_LINE,
+        error: "Error: FAIL!",
+        level: "ERROR",
+      },
+    );
+  });
+
+  test("error - Error with stack", () => {
+    let error;
+
+    try {
+      // @ts-ignore
+      console.log(`Result: ${undefined.length}`);
+    } catch (e) {
+      // @ts-ignore
+      console.debug(`Failed message: ${e.message}`);
+      console.debug(`Failed stack: ${(e as Error).stack}`);
+      error = e;
+    }
+
+    assertError(
+      {},
+      {
+        ...LOG_LINE,
+        error,
+      },
+      {
+        ...LOG_LINE,
+        error:
+          "TypeError: Cannot read properties of undefined (reading 'length')",
+        level: "ERROR",
+        stack:
+          "TypeError: Cannot read properties of undefined (reading 'length')",
+      },
+    );
   });
 });

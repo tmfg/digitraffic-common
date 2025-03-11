@@ -164,18 +164,25 @@ export class DtLogger {
    */
   private log(message: LoggableTypeInternal): void {
     const error = message.error
-      ? typeof message.error === "string"
+      ? (message.error instanceof Error)
+        ? `${message.error.name}: ${message.error.message}`
+        : typeof message.error === "string"
         ? message.error
         : JSON.stringify(message.error)
       : undefined;
 
+    const stack = message.stack
+      ? message.stack
+      : message.error
+      ? (message.error instanceof Error) ? message.error.stack : undefined
+      : undefined;
     const logMessage = {
       ...removePrefix("custom", message),
       error,
+      stack,
       lambdaName: this.lambdaName,
       runtime: this.runtime,
     };
-
     this.writeStream.write(JSON.stringify(logMessage) + "\n");
   }
 }
