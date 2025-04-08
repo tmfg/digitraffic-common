@@ -10,6 +10,11 @@ const LOG_LINE: LoggableType = {
   message: "FOO",
 };
 
+const EXPECTED_LOG_LINE: LoggableType = {
+  method: "dt-logger.test",
+  message: "dt-logger.test FOO",
+};
+
 describe("dt-logger", () => {
   function assertLog<T>(
     config: LoggerConfiguration,
@@ -106,7 +111,7 @@ describe("dt-logger", () => {
         customDate: date,
       },
       {
-        ...LOG_LINE,
+        ...EXPECTED_LOG_LINE,
         date: date.toISOString(),
       },
     );
@@ -120,7 +125,7 @@ describe("dt-logger", () => {
         customFooCount: 123,
       },
       {
-        ...LOG_LINE,
+        ...EXPECTED_LOG_LINE,
         fooCount: 123,
       },
     );
@@ -128,8 +133,8 @@ describe("dt-logger", () => {
 
   test("default values", () => {
     assertLog({}, LOG_LINE, {
-      method: LOG_LINE.method,
-      message: LOG_LINE.message,
+      method: EXPECTED_LOG_LINE.method,
+      message: EXPECTED_LOG_LINE.message,
       level: "INFO",
     });
   });
@@ -139,8 +144,8 @@ describe("dt-logger", () => {
 
     assertLog({ lambdaName: LAMBDA_NAME }, LOG_LINE, {
       lambdaName: LAMBDA_NAME,
-      method: LOG_LINE.method,
-      message: LOG_LINE.message,
+      method: EXPECTED_LOG_LINE.method,
+      message: EXPECTED_LOG_LINE.message,
       level: "INFO",
     });
   });
@@ -149,8 +154,8 @@ describe("dt-logger", () => {
     const RUNTIME = "test_runtime";
 
     assertLog({ runTime: RUNTIME }, LOG_LINE, {
-      message: LOG_LINE.message,
-      method: LOG_LINE.method,
+      message: EXPECTED_LOG_LINE.message,
+      method: EXPECTED_LOG_LINE.method,
       level: "INFO",
       runtime: RUNTIME,
     });
@@ -189,7 +194,7 @@ describe("dt-logger", () => {
         error,
       },
       {
-        ...LOG_LINE,
+        ...EXPECTED_LOG_LINE,
         error: "FAIL!",
         level: "ERROR",
       },
@@ -208,7 +213,7 @@ describe("dt-logger", () => {
         error,
       },
       {
-        ...LOG_LINE,
+        ...EXPECTED_LOG_LINE,
         error: '{"errorMessage":"FAIL!","errorCode":123}',
         level: "ERROR",
       },
@@ -224,7 +229,7 @@ describe("dt-logger", () => {
         error,
       },
       {
-        ...LOG_LINE,
+        ...EXPECTED_LOG_LINE,
         error: "Error: FAIL!",
         level: "ERROR",
       },
@@ -251,7 +256,7 @@ describe("dt-logger", () => {
         error,
       },
       {
-        ...LOG_LINE,
+        ...EXPECTED_LOG_LINE,
         error:
           "TypeError: Cannot read properties of undefined (reading 'length')",
         level: "ERROR",

@@ -163,6 +163,14 @@ export class DtLogger {
    * @see {@link LoggableType}
    */
   private log(message: LoggableTypeInternal): void {
+    // Append always method to message
+    if (
+      !message.message || !message.message.length ||
+      !message.message.includes(message.method)
+    ) {
+      message.message = `${message.method} ${message.message ?? ""}`;
+    }
+
     const error = message.error
       ? (message.error instanceof Error)
         ? `${message.error.name}: ${message.error.message}`
