@@ -139,6 +139,14 @@ describe("dt-logger", () => {
     });
   });
 
+  test("method not duplicated", () => {
+    assertLog({}, EXPECTED_LOG_LINE, {
+      method: EXPECTED_LOG_LINE.method,
+      message: EXPECTED_LOG_LINE.message,
+      level: "INFO",
+    });
+  });
+
   test("set lambdaName", () => {
     const LAMBDA_NAME = "test_lambda_name";
 
