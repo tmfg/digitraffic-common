@@ -66,11 +66,20 @@ export function logException(
   // eslint-disable-next-line dot-notation
   const customCode = (error as Record<string, string>)["code"];
 
-  logger.error({
-    type: "Error",
-    method: `${functionName}.logException`,
-    message,
-    customCode,
-    stack,
-  });
+  if (customCode) {
+    logger.error({
+      type: "Error",
+      method: `${functionName}.logException`,
+      message: `error=${message}`,
+      customCode,
+      stack,
+    });
+  } else {
+    logger.error({
+      type: "Error",
+      method: `${functionName}.logException`,
+      message: `error=${message}`,
+      stack,
+    });
+  }
 }
