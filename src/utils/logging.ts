@@ -15,8 +15,7 @@ const functionName = getEnvVariableOrElse("AWS_LAMBDA_FUNCTION_NAME", "test");
  *
  * @param [logger=undefined] - DtLogger to use. If not given, will create a new instance of DtLogger
  * @param [includeStack=false] - Define if the stack trace should be logged.
- * @param error - The error instance to be logged.
- * @returns Logs the error without rethrowing.
+ * @returns Logger that logs the error without rethrowing.
  * @see {@link logException}
  */
 export function createExceptionLogger(
