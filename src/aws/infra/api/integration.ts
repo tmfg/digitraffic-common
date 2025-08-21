@@ -162,7 +162,7 @@ export class DigitrafficIntegration<T extends string> {
       } else if (parameter.type === "multivaluequerystring") {
         // make multivaluequerystring values to array
         parameterAssignments.push(
-          `#set($tmp = $paramMap.put('_${parameter.name}', $util.parseJson($method.request.multivaluequerystring['${parameter.name}'])))`,
+          `#set($tmp = $paramMap.put('_${parameter.name}', $method.request.multivaluequerystring.${parameter.name}))`,
         );
       } else if (parameter.type === "path") {
         parameterAssignments.push(
@@ -179,8 +179,7 @@ export class DigitrafficIntegration<T extends string> {
       }
     });
 
-    // parameters starting with _ will be handled as json, and will not be in quotes
-    // (for example multivalueparameters)
+    // parameters starting with _ will be handled as multivalue querystring
 
     return {
       [MediaType.APPLICATION_JSON]: `
@@ -191,10 +190,10 @@ ${this._passAllQueryParameters ? VELOCITY_ALL_PARAMS : ""}
 ${this._passBody ? VELOCITY_PASS_BODY : ""}
 {
 #foreach($paramName in $paramMap.keySet())
-#if( $paramName[0] != '_')
+#if( $paramName.substring(0, 1) != '_')
     "$paramName":"$paramMap.get($paramName)" #if($foreach.hasNext),\n#end
 #else
-    "$paramName.substring(1)":$paramMap.get($paramName) #if($foreach.hasNext),\n#end
+    "$paramName.substring(1)": [#foreach($val in $paramMap.get($paramName))"$util.escapeJavaScript($val)"#if($foreach.hasNext),#end#end] #if($foreach.hasNext),\n#end
 #end
 #end
 }`,

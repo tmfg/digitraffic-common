@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2025.8.13-1",
+  "version": "2025.8.21-1",
   "description": "",
   "type": "module",
   "repository": {
@@ -139,7 +139,7 @@
     "pg-native": "^3.5.2",
     "pg-promise": "^11.15.0",
     "pg-query-stream": "4.10.3",
-    "zod": "^3.25.75"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@aws-sdk/client-api-gateway": "^3.864.0",
@@ -190,6 +190,6 @@
     "ts-jest": "^29.4.1",
     "typescript": "^5.8.3",
     "velocityjs": "^2.1.5",
-    "zod": "^3.25.75"
+    "zod": "^3.25.76"
   }
 }
