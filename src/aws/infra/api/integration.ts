@@ -20,7 +20,9 @@ interface ApiParameter {
 }
 
 const VELOCITY_ALL_PARAMS = `#foreach($paramName in $params.keySet())
-    #set($tmp = $paramMap.put($paramName, $params[$paramName]))
+    #if( ! $paramMap.containsKey("_$paramName"))
+        #set($tmp = $paramMap.put($paramName, $params[$paramName]))
+    #end
 #end`;
 
 const VELOCITY_PASS_BODY =
@@ -69,8 +71,18 @@ export class DigitrafficIntegration<T extends string> {
     return this;
   }
 
+  addParameter(type: ParameterType, name: string): this {
+    if (name.startsWith("_")) {
+      throw new Error("Parameters can't start with _");
+    }
+
+    this.parameters.push({ type, name });
+
+    return this;
+  }
+
   addPathParameter(...names: T[]): this {
-    names.forEach((name) => this.parameters.push({ type: "path", name }));
+    names.forEach((name) => this.addParameter("path", name));
 
     return this;
   }
@@ -80,16 +92,14 @@ export class DigitrafficIntegration<T extends string> {
       throw new Error("Can't add query parameters with pass all");
     }
 
-    names.forEach((name) =>
-      this.parameters.push({ type: "querystring", name })
-    );
+    names.forEach((name) => this.addParameter("querystring", name));
+
     return this;
   }
 
   addMultiValueQueryParameter(...names: T[]): this {
-    names.forEach((name) =>
-      this.parameters.push({ type: "multivaluequerystring", name })
-    );
+    names.forEach((name) => this.addParameter("multivaluequerystring", name));
+
     return this;
   }
 
@@ -100,7 +110,7 @@ export class DigitrafficIntegration<T extends string> {
    * @returns
    */
   addContextParameter(...names: T[]): this {
-    names.forEach((name) => this.parameters.push({ type: "context", name }));
+    names.forEach((name) => this.addParameter("context", name));
 
     return this;
   }
@@ -111,7 +121,7 @@ export class DigitrafficIntegration<T extends string> {
    * @param names for the headers
    */
   addHeaderParameter(...names: T[]): this {
-    names.forEach((name) => this.parameters.push({ type: "header", name }));
+    names.forEach((name) => this.addParameter("header", name));
 
     return this;
   }
