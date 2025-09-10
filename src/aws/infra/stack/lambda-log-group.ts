@@ -24,7 +24,7 @@ function isCreateLambdaLogGroupParamsForDigitrafficStack(
     | CreateLambdaLogGroupParamsForDigitrafficStack,
 ): params is CreateLambdaLogGroupParamsForDigitrafficStack {
   return !!("configuration" in params.stack &&
-    (params.stack as DigitrafficStack)?.configuration?.shortName);
+    params.stack?.configuration?.shortName);
 }
 
 export function createLambdaLogGroup(
@@ -37,7 +37,7 @@ export function createLambdaLogGroup(
     functionName: string,
     shortName: string,
     retention: RetentionDays,
-  ) => {
+  ): LogGroup => {
     return new LogGroup(stack, `${functionName}-LogGroup`, {
       logGroupName: `/${shortName}/lambda/${functionName}`,
       retention,
@@ -48,7 +48,7 @@ export function createLambdaLogGroup(
     params:
       | CreateLambdaLogGroupParamsForStack
       | CreateLambdaLogGroupParamsForDigitrafficStack,
-  ) => {
+  ): string => {
     if (isCreateLambdaLogGroupParamsForDigitrafficStack(params)) {
       return params.stack.configuration.shortName;
     } else {
