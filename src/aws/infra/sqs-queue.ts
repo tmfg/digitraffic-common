@@ -19,7 +19,7 @@ import {
 } from "@aws-sdk/client-s3";
 import type { NodeJsRuntimeStreamingBlobPayloadInputTypes } from "@smithy/types";
 import { logger } from "../runtime/dt-logger-default.js";
-import {createLambdaLogGroup} from "./stack/lambda-log-group.js";
+import { createLambdaLogGroup } from "./stack/lambda-log-group.js";
 
 const DLQ_LAMBDA_CODE = `
 import type { ObjectCannedACL } from "@aws-sdk/client-s3";
@@ -96,7 +96,10 @@ export class DigitrafficDLQueue {
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
     });
 
-    const dlqLogGroup = createLambdaLogGroup(stack, dlqFunctionName)
+    const dlqLogGroup = createLambdaLogGroup({
+      stack,
+      functionName: dlqFunctionName,
+    });
 
     const lambda = MonitoredFunction.create(stack, dlqFunctionName, {
       runtime: Runtime.NODEJS_22_X,
