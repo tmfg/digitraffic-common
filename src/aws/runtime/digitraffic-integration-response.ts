@@ -6,8 +6,12 @@ import {
 } from "../infra/api/response.js";
 
 export abstract class DigitrafficIntegrationResponse {
-  static ok(mediaType: MediaType, sunset?: string): IntegrationResponse {
-    return this.create("200", mediaType, sunset);
+  static ok(
+    mediaType: MediaType,
+    deprecation = false,
+    sunset?: string,
+  ): IntegrationResponse {
+    return this.create("200", mediaType, deprecation, sunset);
   }
 
   static badRequest(mediaType?: MediaType): IntegrationResponse {
