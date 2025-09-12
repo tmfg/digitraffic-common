@@ -21,12 +21,13 @@ export abstract class DigitrafficIntegrationResponse {
   static create(
     statusCode: string,
     mediaType: MediaType,
+    deprecation = false,
     sunset?: string,
   ): IntegrationResponse {
     return {
       statusCode,
       responseTemplates: {
-        [mediaType]: sunset
+        [mediaType]: deprecation
           ? getDeprecatedDefaultLambdaResponse(sunset)
           : RESPONSE_DEFAULT_LAMBDA,
       },
