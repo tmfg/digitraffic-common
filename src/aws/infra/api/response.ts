@@ -51,7 +51,7 @@ export const getDeprecatedDefaultLambdaResponse = (sunset: string): string => {
   const setDeprecationHeaders =
     `#set ($context.responseOverride.header.Deprecation = 'true')
 #set ($context.responseOverride.header.Sunset = '${
-      dateFromIsoString(sunset).toUTCString()
+      sunset !== "TBD" ? dateFromIsoString(sunset).toUTCString() : sunset
     }')`;
   return RESPONSE_DEFAULT_LAMBDA.concat(setDeprecationHeaders);
 };
