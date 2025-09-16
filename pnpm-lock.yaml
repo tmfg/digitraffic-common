@@ -27,8 +27,8 @@ importers:
         specifier: ^1.4.1
         version: 1.4.1
       '@digitraffic/eslint-config':
-        specifier: ^3.2.3
-        version: 3.2.3(@rushstack/eslint-config@4.4.0(eslint@8.57.1)(typescript@5.9.2))(@typescript-eslint/eslint-plugin@8.43.0(@typescript-eslint/parser@8.43.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2))(@typescript-eslint/parser@8.43.0(eslint@8.57.1)(typescript@5.9.2))(eslint-plugin-deprecation@3.0.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2)
+        specifier: ^3.2.4
+        version: 3.2.4(@rushstack/eslint-config@4.4.0(eslint@8.57.1)(typescript@5.9.2))(@typescript-eslint/eslint-plugin@8.43.0(@typescript-eslint/parser@8.43.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2))(@typescript-eslint/parser@8.43.0(eslint@8.57.1)(typescript@5.9.2))(eslint-plugin-deprecation@3.0.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2)
       '@jest/globals':
         specifier: ^30.1.2
         version: 30.1.2
@@ -527,8 +527,8 @@ packages:
     resolution: {integrity: sha512-Y6+WUMsTFWE5jb20IFP4YGa5IrGY/+a/FbOSjDF/wz9gepU2hwCYSXRHP/vPwBvwcY3SVMASt4yXxbXNXigmZQ==}
     engines: {node: '>=18'}
 
-  '@digitraffic/eslint-config@3.2.3':
-    resolution: {integrity: sha512-tZXA6VOyrskqdfxo9qUQldfyNr8ZaW1T2Kd9uoumAR+P3zOA1zIhTF+lhCIU9aSxbh94FtHKAYsXK3fTrML8Gw==}
+  '@digitraffic/eslint-config@3.2.4':
+    resolution: {integrity: sha512-1mrDBzmMqnGV6MjjB+wdg9AckmrDXvKnSCg/8U11RzrGHqbnQu/Z0mFOnXGG2xOU/vM/+PsusrZGFsMYSAitaQ==}
     peerDependencies:
       '@rushstack/eslint-config': ^4.4.0
       '@typescript-eslint/eslint-plugin': ^8.43.0
@@ -4808,7 +4808,7 @@ snapshots:
       gonzales-pe: 4.3.0
       node-source-walk: 7.0.1
 
-  '@digitraffic/eslint-config@3.2.3(@rushstack/eslint-config@4.4.0(eslint@8.57.1)(typescript@5.9.2))(@typescript-eslint/eslint-plugin@8.43.0(@typescript-eslint/parser@8.43.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2))(@typescript-eslint/parser@8.43.0(eslint@8.57.1)(typescript@5.9.2))(eslint-plugin-deprecation@3.0.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2)':
+  '@digitraffic/eslint-config@3.2.4(@rushstack/eslint-config@4.4.0(eslint@8.57.1)(typescript@5.9.2))(@typescript-eslint/eslint-plugin@8.43.0(@typescript-eslint/parser@8.43.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2))(@typescript-eslint/parser@8.43.0(eslint@8.57.1)(typescript@5.9.2))(eslint-plugin-deprecation@3.0.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2)':
     dependencies:
       '@rushstack/eslint-config': 4.4.0(eslint@8.57.1)(typescript@5.9.2)
       '@typescript-eslint/eslint-plugin': 8.43.0(@typescript-eslint/parser@8.43.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2)
