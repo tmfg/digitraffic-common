@@ -29,6 +29,7 @@ import type { InfraStackConfiguration } from "./intra-stack-configuration.js";
 export interface DbConfiguration {
   readonly cluster?: ClusterConfiguration;
   readonly clusterImport?: ClusterImportConfiguration;
+  readonly storageEncrypted?: boolean; // default true
 
   readonly customParameterGroups: AuroraPostgresEngineVersion[];
   readonly workmem?: number; // default 524288, 512MiB
@@ -51,7 +52,6 @@ export interface ClusterConfiguration {
   readonly securityGroupId: string;
   readonly snapshotIdentifier?: string;
   readonly dbVersion: AuroraPostgresEngineVersion;
-  readonly storageEncrypted?: boolean; // default true
 
   readonly writer: ClusterDbInstanceConfiguration;
   readonly readers: ClusterDbInstanceConfiguration[];
@@ -136,7 +136,7 @@ export class DbStack extends Stack {
     }
 
     const instanceName = isc.environmentName + "-db";
-    const rdsKey = configuration?.cluster?.storageEncrypted
+    const rdsKey = configuration?.storageEncrypted
       ? this.createRDSKey(instanceName, isc.environmentName)
       : undefined;
 
@@ -237,6 +237,7 @@ export class DbStack extends Stack {
     vpc: IVpc,
     securityGroup: ISecurityGroup,
     parameterGroup: IParameterGroup,
+    storageEncrypted: boolean | undefined,
     rdsKey: Key | undefined,
   ): DatabaseClusterProps {
     const secret = Secret.fromSecretCompleteArn(this, "DBSecret", secretArn);
@@ -295,7 +296,7 @@ export class DbStack extends Stack {
       ),
       parameterGroup,
       monitoringInterval: Duration.seconds(30),
-      storageEncrypted: clusterConfiguration.storageEncrypted ?? true,
+      storageEncrypted: storageEncrypted ?? true,
       ...(rdsKey ? { storageEncryptionKey: rdsKey } : {}),
     };
   }
@@ -338,6 +339,7 @@ export class DbStack extends Stack {
       vpc,
       securityGroup,
       parameterGroups[0],
+      configuration.storageEncrypted,
       rdsKey,
     );
 
