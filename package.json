@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2025.10.16-1",
+  "version": "2025.10.16-2",
   "description": "",
   "type": "module",
   "repository": {
@@ -38,6 +38,7 @@
     "./dist/database/cached": "./dist/database/cached.js",
     "./dist/database/models": "./dist/database/models.js",
     "./dist/database/last-updated": "./dist/database/last-updated.js",
+    "./dist/types/geojson": "./dist/types/geojson.js",
     "./dist/types/urn": "./dist/types/urn.js",
     "./dist/types/util-types": "./dist/types/util-types.js",
     "./dist/types/either": "./dist/types/either.js",
