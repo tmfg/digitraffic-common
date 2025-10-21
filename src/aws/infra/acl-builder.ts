@@ -149,6 +149,7 @@ export class AclBuilder {
     isHeaderRequired: boolean,
     isBasedOnIpAndUriPath: boolean,
     customResponseBodyKey?: string,
+    path?: RegExp
   ): this {
     const isBlockRule = !!customResponseBodyKey;
     const rules = isBlockRule ? this._blockRules : this._countRules;
@@ -176,11 +177,13 @@ export class AclBuilder {
         limit,
         isHeaderRequired,
         isBasedOnIpAndUriPath,
+        path
       ),
     });
 
     return this;
   }
+
 
   withCustomResponseBody(
     key: string,
@@ -241,6 +244,22 @@ export class AclBuilder {
       false,
       false,
       customResponseBodyKey,
+    );
+  }
+
+  withThrottleAnonymousUserIpByUriPath(limit: number | undefined, path: RegExp | undefined): AclBuilder {
+    if (limit === undefined || path === undefined) {
+      return this;
+    }
+    const customResponseBodyKey = `IP_THROTTLE_ANONYMOUS_USER_BY_PATH_${limit}`;
+    this._addThrottleResponseBody(customResponseBodyKey, limit);
+    return this.withThrottleRule(
+      "ThrottleRuleWithAnonymousUserByPath",
+      limit,
+      false,
+      false,
+      customResponseBodyKey,
+      path
     );
   }
 
@@ -426,10 +445,12 @@ function notStatement(
     },
   };
 }
+
 function createThrottleStatement(
   limit: number,
   isHeaderRequired: boolean,
   isBasedOnIpAndUriPath: boolean,
+  path?: RegExp
 ): CfnWebACL.StatementProperty {
   // this statement matches empty digitraffic-user -header
   const matchStatement: CfnWebACL.StatementProperty = {
@@ -448,15 +469,38 @@ function createThrottleStatement(
   // header present       -> size > 0
   // header not present   -> NOT(size >= 0)
 
+  let scopeDownStatement = isHeaderRequired
+    ? matchStatement
+    : notStatement(matchStatement);
+
+  if (path) {
+    const pathMatchStatement: CfnWebACL.StatementProperty = {
+      regexMatchStatement: {
+        fieldToMatch: {
+          uriPath: {},
+        },
+        regexString: path.source,
+        textTransformations: [{ priority: 0, type: "NONE" }],
+      },
+    };
+
+    scopeDownStatement = {
+      andStatement: {
+        statements: [scopeDownStatement, pathMatchStatement],
+      },
+    };
+
+  }
+
+
+
   if (isBasedOnIpAndUriPath) {
     return {
       rateBasedStatement: {
         aggregateKeyType: "CUSTOM_KEYS",
         customKeys: CUSTOM_KEYS_IP_AND_URI_PATH,
         limit: limit,
-        scopeDownStatement: isHeaderRequired
-          ? matchStatement
-          : notStatement(matchStatement),
+        scopeDownStatement
       },
     };
   }
@@ -465,9 +509,7 @@ function createThrottleStatement(
     rateBasedStatement: {
       aggregateKeyType: "IP",
       limit: limit,
-      scopeDownStatement: isHeaderRequired
-        ? matchStatement
-        : notStatement(matchStatement),
+      scopeDownStatement
     },
   };
 }
