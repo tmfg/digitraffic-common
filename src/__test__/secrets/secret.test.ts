@@ -18,8 +18,10 @@ const getSecretValueMock = jest.fn<
   (arg: GetSecretValueCommandInput) => Promise<GetSecretValueCommandOutput>
 >();
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-jest.spyOn(SecretsManager.prototype, "getSecretValue").mockImplementation(getSecretValueMock);
+jest.spyOn(SecretsManager.prototype, "getSecretValue").mockImplementation(
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  getSecretValueMock,
+);
 
 // eslint-disable-next-line @rushstack/no-new-null
 function mockSecret<T>(secret: null | T): void {

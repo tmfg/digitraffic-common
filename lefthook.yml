@@ -6,8 +6,13 @@
 pre-commit:
   parallel: false
   commands:
-    deno-fmt:
+    01-sort-package-json:
+      #glob: "*.{ts,yml,yaml,md,json,html}"
+      run: | # Reorder package.json
+        pnpm run sort:package-json;
+        git add package.json || true;
+    02-deno-fmt:
       #glob: "*.{ts,yml,yaml,md,json,html}"
       run: | # Runs even when deno fmt fails with: No target files found.
-        pnpm deno fmt {staged_files} || true;
+        pnpm run run:format -- {staged_files} || true;
         git add {staged_files} || true;

@@ -18,8 +18,10 @@ const getSecretValueMock = jest.fn<
   (arg: GetSecretValueCommandInput) => Promise<GetSecretValueCommandOutput>
 >();
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-jest.spyOn(SecretsManager.prototype, "getSecretValue").mockImplementation(getSecretValueMock);
+jest.spyOn(SecretsManager.prototype, "getSecretValue").mockImplementation(
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  getSecretValueMock,
+);
 
 const { SecretHolder } = await import(
   "../../aws/runtime/secrets/secret-holder.js"
@@ -135,8 +137,7 @@ describe("SecretHolder - tests", () => {
     expect(getSecretValueMock).toHaveBeenCalledTimes(callCount + 1);
 
     // cache expires, fetches secret again
-    const start = Date.now();
-    while (Date.now() < start + 2000);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     await holder.get();
     expect(getSecretValueMock).toHaveBeenCalledTimes(callCount + 2);
