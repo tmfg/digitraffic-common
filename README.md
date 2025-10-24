@@ -32,8 +32,10 @@ Use `pnpm` to build the code i.e.
 
 Format code
 
-    pnpm run:format-changed # Formats stagged files
-    pnpm run:format # Format all files
+    pnpm format:check # Checks all files
+    pnpm format:check-staged # Checks stagged files
+    pnpm format:fix # Format all files
+    pnpm format:fix-staged # Formats stagged files
 
 ## Update deps
 

@@ -1,0 +1,37 @@
+name: Biome Check
+
+on:
+  workflow_dispatch:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    if: github.repository != 'tmfg/digitraffic-common'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install packages
+        run: pnpm install
+
+      - name: Run Biome Check
+        id: biome
+        run: |
+          pnpm biome check --reporter github .
