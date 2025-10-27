@@ -1,6 +1,8 @@
 import type { AwsEnv } from "../types/aws-env.js";
 import type { Either } from "../types/either.js";
 import { EnvKeys } from "../aws/runtime/environment.js";
+import { forIn, isObject } from "es-toolkit/compat";
+
 
 /**
  * Check if arrays have only elements that also exists also in other array.
@@ -191,4 +193,34 @@ export function getErrorMessage(maybeError: unknown): string {
 // eslint-disable-next-line @rushstack/no-new-null
 export function isDefined<T>(value: T | undefined | null): value is T {
   return value !== undefined && value !== null;
+}
+
+/**
+ * Omits a key from an object deeply (also in nested objects). Creates and returns new object.
+ *
+ * @param obj Object to omit from
+ * @param keysToOmit Keys to omit
+ * @returns New same type of object as that was given as input but with the keys omitted.
+ */
+export function omitDeep<T>(obj: T, ...keysToOmit: readonly string[]): T {
+  if (!isObject(obj)) {
+    // primitive values are returned as-is
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    // recursively process arrays
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return obj.map((item) => omitDeep(item, ...keysToOmit)) as unknown as T;
+  }
+
+  const result: Record<string, unknown> = {};
+
+  forIn(obj, (value, key) => {
+    if (!keysToOmit.includes(key)) {
+      result[key] = omitDeep(value, ...keysToOmit);
+    }
+  });
+
+  return result as T;
 }
