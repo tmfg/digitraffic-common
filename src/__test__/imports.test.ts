@@ -240,7 +240,7 @@ test("stackCheckingAspect import ok?", () => {
 });
 
 test("restApis import ok?", () => {
-  const restApis = import("../aws/infra/stack/rest_apis.js");
+  const restApis = import("../aws/infra/stack/rest-api.js");
   return expect(restApis).resolves.toBeDefined();
 });
 

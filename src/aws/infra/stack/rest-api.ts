@@ -48,6 +48,13 @@ export const PUBLIC_REST_API_CORS_CONFIG = {
   },
 } as const satisfies Pick<ResourceOptions, "defaultCorsPreflightOptions">;
 
+export interface ExportParams {
+  /** Set apiKeyId when needed */
+  readonly apiKeyId?: string;
+  /** Override exportName, default is stack shortname */
+  readonly exportName?: string;
+}
+
 export class DigitrafficRestApi extends RestApi {
   readonly apiKeyIds: string[];
   readonly enableDocumentation: boolean;
@@ -96,12 +103,13 @@ export class DigitrafficRestApi extends RestApi {
   }
 
   /** Export end point and api key to Parameter store */
-  exportEndpoint(): void;
+  exportEndpoint(): [StringParameter, StringParameter];
   /** Export end point and given api key to Parameter store */
-  exportEndpoint(apiKeyId: string): void;
+  exportEndpoint(params: ExportParams): [StringParameter, StringParameter];
 
-  exportEndpoint(apiKeyId?: string): void {
+  exportEndpoint(params?: ExportParams): [StringParameter, StringParameter] {
     const firstKey = this.apiKeyIds[0];
+    var apiKeyId = params?.apiKeyId;
 
     if (!apiKeyId) {
       if (this.apiKeyIds.length > 1) {
@@ -115,19 +123,21 @@ export class DigitrafficRestApi extends RestApi {
       apiKeyId = firstKey;
     }
 
-    // eslint-disable-next-line no-new
-    new StringParameter(this._stack, "export.endpoint", {
+    const exportName = params?.exportName ?? this._stack.configuration.shortName;
+
+    const sp1 = new StringParameter(this._stack, `export.endpoint.${exportName}`, {
       parameterName:
-        `/digitraffic/${this._stack.configuration.shortName}/endpointUrl`,
+        `/digitraffic/${exportName}/endpointUrl`,
       stringValue: this.url,
     });
 
-    // eslint-disable-next-line no-new
-    new StringParameter(this._stack, "export.apiKeyId", {
+    const sp2 = new StringParameter(this._stack, `export.apiKeyId.${exportName}`, {
       parameterName:
-        `/digitraffic/${this._stack.configuration.shortName}/apiKeyId`,
+        `/digitraffic/${exportName}/apiKeyId`,
       stringValue: apiKeyId,
     });
+
+    return [sp1, sp2];
   }
 
   /**

@@ -2,7 +2,7 @@ import type { Role } from "aws-cdk-lib/aws-iam";
 import type { ISecret } from "aws-cdk-lib/aws-secretsmanager";
 import { CfnCanary } from "aws-cdk-lib/aws-synthetics";
 import type { LambdaEnvironment } from "../stack/lambda-configs.js";
-import type { DigitrafficRestApi } from "../stack/rest_apis.js";
+import type { DigitrafficRestApi } from "../stack/rest-api.js";
 import type { DigitrafficStack } from "../stack/stack.js";
 import { DigitrafficCanary } from "./canary.js";
 import { ENV_API_KEY, ENV_HOSTNAME, ENV_SECRET } from "./canary-keys.js";
