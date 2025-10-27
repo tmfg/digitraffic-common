@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2025.10.27-1",
+  "version": "2025.10.27-2",
   "private": false,
   "description": "",
   "repository": {
@@ -64,7 +64,7 @@
     "./dist/aws/infra/api/handler-factory": "./dist/aws/infra/api/handler-factory.js",
     "./dist/aws/infra/api/integration": "./dist/aws/infra/api/integration.js",
     "./dist/aws/infra/stack/stack-checking-aspect": "./dist/aws/infra/stack/stack-checking-aspect.js",
-    "./dist/aws/infra/stack/rest_apis": "./dist/aws/infra/stack/rest_apis.js",
+    "./dist/aws/infra/stack/rest-api": "./dist/aws/infra/stack/rest-api.js",
     "./dist/aws/infra/stack/lambda-configs": "./dist/aws/infra/stack/lambda-configs.js",
     "./dist/aws/infra/stack/lambda-log-group": "./dist/aws/infra/stack/lambda-log-group.js",
     "./dist/aws/infra/stack/monitoredfunction": "./dist/aws/infra/stack/monitoredfunction.js",
