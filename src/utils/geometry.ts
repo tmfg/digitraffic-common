@@ -1,7 +1,7 @@
 /**
  * GeoJSON functions and tools
  */
-import type { Feature, FeatureCollection, Geometry, Position } from "geojson";
+import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
 import * as geoJsonValidator from "geojson-validation";
 import { logger } from "../aws/runtime/dt-logger-default.js";
 
@@ -57,21 +57,25 @@ function coordinatePair(coordinate: Position): string {
 }
 
 /**
- * Create a GeoJSON FeatureCollection from a list of GeoJSON features with a 'last updated' property
+ * Create a GeoJSON FeatureCollection from a list of GeoJSON features with a 'last updated' property.
+ * Geometry is nullable. According to the GeoJSON specification, if coordinates are unavailable,
+ * the value of geometry should be null.
  * @param features List of Features
  * @param lastUpdated Last updated date
  */
-export function createFeatureCollection(
-  features: Feature[],
+export function createFeatureCollection<G extends Geometry | null, P extends GeoJsonProperties>(
+  features: Feature<G, P>[],
   // eslint-disable-next-line @rushstack/no-new-null
   lastUpdated: Date | null,
-): FeatureCollection {
+  // eslint-disable-next-line @rushstack/no-new-null
+): FeatureCollection<G, P> & { lastUpdated: Date | null } {
   return {
     type: "FeatureCollection",
     lastUpdated: lastUpdated,
     features: features,
-  } as FeatureCollection;
+  };
 }
+
 
 export function isValidGeoJson<T>(json: T): boolean {
   // Tests complain about this method returning type string[] which is obviously wrong. Therefore, this casting.
