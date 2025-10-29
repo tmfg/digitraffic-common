@@ -74,6 +74,13 @@ export class LambdaResponse {
   }
 
   /**
+   * Create LambdaResponse for HTTP 413
+   */
+  static contentTooLarge(error: string = "Content too large"): LambdaResponse {
+    return this.createForString(413, error);
+  }
+
+  /**
    * Create LambdaResponse for HTTP 501
    */
   static notImplemented(error: string = "Not implemented"): LambdaResponse {
