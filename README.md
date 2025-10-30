@@ -29,6 +29,8 @@ Use `pnpm` to build the code i.e.
     pnpm build
     pnpm test
     pnpm test --test-path-pattern 'dt-logger.test'
+    pnpm test:watch
+    pnpm test:watch --test-path-pattern 'dt-logger.test'
 
 Format code
 

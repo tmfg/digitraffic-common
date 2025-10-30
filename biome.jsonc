@@ -30,6 +30,15 @@
         "noForEach": "off",
         // Conflicts with typescript "noUncheckedIndexedAccess"
         "useLiteralKeys": "warn"
+      },
+      "style": {
+        "useImportType": {
+          "level": "error", // "error", "warn", "off"
+          "options": {
+            // Creates combined import for types and combined import for non types. Can make bundled lambda size smaller.
+            "style": "separatedType" // "inlineType", "separatedType", "auto"
+          }
+        }
       }
     }
   },
@@ -42,6 +51,15 @@
           "style": {
             "noNonNullAssertion": "off"
           }
+        }
+      }
+    },
+    {
+      // Allow heft configs to have comments without jsonc extension.
+      "includes": ["**/config/*.json"],
+      "json": {
+        "parser": {
+          "allowComments": true
         }
       }
     }

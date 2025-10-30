@@ -2,8 +2,6 @@
 
 
 !/.editorconfig
-!/.eslintignore
-!/.eslintrc.cjs
 !/.gitattributes
 !/.gitignore
 !/.git-blame-ignore-revs
@@ -18,7 +16,6 @@
 !/README.md
 !/tsconfig.json
 !/tsconfig.test.json
-!/tsconfig.eslint.json
 !/dependabot.yml
 !/biome.jsonc
 

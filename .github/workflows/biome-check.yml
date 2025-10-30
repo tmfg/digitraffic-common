@@ -8,30 +8,18 @@ permissions:
   contents: read
 
 jobs:
-  lint:
+  biome:
+    name: Biome Lint & Format
     if: github.repository != 'tmfg/digitraffic-common'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
         with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-          cache: "pnpm"
-
-      - name: Install packages
-        run: pnpm install
-
-      - name: Run Biome Check
-        id: biome
-        run: |
-          pnpm biome check --reporter github .
+          version: latest
+      - name: Run Biome
+        run: biome ci --reporter=github --no-errors-on-unmatched .

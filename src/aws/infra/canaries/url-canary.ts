@@ -41,13 +41,15 @@ export class UrlCanary extends DigitrafficCanary {
     super(stack, canaryName, role, params, environmentVariables);
 
     if (params.inVpc && this.node.defaultChild instanceof CfnCanary) {
-      const subnetIds = stack.vpc === undefined
-        ? []
-        : stack.vpc.privateSubnets.map((subnet) => subnet.subnetId);
+      const subnetIds =
+        stack.vpc === undefined
+          ? []
+          : stack.vpc.privateSubnets.map((subnet) => subnet.subnetId);
 
-      const securityGroupIds = stack.lambdaDbSg === undefined
-        ? []
-        : [stack.lambdaDbSg.securityGroupId];
+      const securityGroupIds =
+        stack.lambdaDbSg === undefined
+          ? []
+          : [stack.lambdaDbSg.securityGroupId];
 
       this.node.defaultChild.vpcConfig = {
         vpcId: stack.vpc?.vpcId,
@@ -68,10 +70,9 @@ export class UrlCanary extends DigitrafficCanary {
       stack,
       role,
       {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        handler: `${params.name!}.handler`,
+        handler: `${params.name ?? undefined}.handler`,
         hostname: publicApi.hostname(),
-        apiKeyId: this.getApiKey(publicApi),
+        apiKeyId: UrlCanary.getApiKey(publicApi),
         ...params,
       } as UrlCanaryParameters,
       secret,
@@ -82,12 +83,10 @@ export class UrlCanary extends DigitrafficCanary {
     const apiKeys = publicApi.apiKeyIds;
 
     if (apiKeys.length > 1) {
-      // eslint-disable-next-line no-console
       console.info("rest api has more than one api key");
     }
 
     if (apiKeys.length === 0) {
-      // eslint-disable-next-line no-console
       console.info("rest api has no api keys");
       return undefined;
     }

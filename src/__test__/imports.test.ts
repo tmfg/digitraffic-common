@@ -50,11 +50,6 @@ test("nullable import ok?", () => {
   return expect(nullable).resolves.toBeDefined();
 });
 
-test("awsEnv import ok?", () => {
-  const awsEnv = import("../types/aws-env.js");
-  return expect(awsEnv).resolves.toBeDefined();
-});
-
 test("asyncTimeoutError import ok?", () => {
   const asyncTimeoutError = import("../types/async-timeout-error.js");
   return expect(asyncTimeoutError).resolves.toBeDefined();

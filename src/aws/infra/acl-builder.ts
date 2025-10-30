@@ -1,7 +1,7 @@
 import { CfnIPSet, CfnWebACL } from "aws-cdk-lib/aws-wafv2";
 import type { Construct } from "constructs";
-import { logger } from "../runtime/dt-logger-default.js";
 import { concat, range, zipWith } from "lodash-es";
+import { logger } from "../runtime/dt-logger-default.js";
 
 interface RuleProperty {
   action?: CfnWebACL.RuleActionProperty;
@@ -19,8 +19,10 @@ export type ExcludedAWSRules = {
 };
 
 export type CfnWebAclRuleProperty = {
-  [P in keyof CfnWebACL.RuleProperty as Exclude<P, "priority">]:
-    CfnWebACL.RuleProperty[P];
+  [P in keyof CfnWebACL.RuleProperty as Exclude<
+    P,
+    "priority"
+  >]: CfnWebACL.RuleProperty[P];
 };
 
 /**
@@ -149,22 +151,22 @@ export class AclBuilder {
     isHeaderRequired: boolean,
     isBasedOnIpAndUriPath: boolean,
     customResponseBodyKey?: string,
-    path?: RegExp
+    path?: RegExp,
   ): this {
     const isBlockRule = !!customResponseBodyKey;
     const rules = isBlockRule ? this._blockRules : this._countRules;
     const action = isBlockRule
       ? {
-        block: {
-          customResponse: {
-            responseCode: 429,
-            customResponseBodyKey,
+          block: {
+            customResponse: {
+              responseCode: 429,
+              customResponseBodyKey,
+            },
           },
-        },
-      }
+        }
       : {
-        count: {},
-      };
+          count: {},
+        };
     rules.push({
       name,
       visibilityConfig: {
@@ -177,13 +179,12 @@ export class AclBuilder {
         limit,
         isHeaderRequired,
         isBasedOnIpAndUriPath,
-        path
+        path,
       ),
     });
 
     return this;
   }
-
 
   withCustomResponseBody(
     key: string,
@@ -192,8 +193,7 @@ export class AclBuilder {
     if (key in this._customResponseBodies) {
       logger.warn({
         method: "acl-builder.withCustomResponseBody",
-        message:
-          `Overriding custom response body with key ${key} for distribution ${this._name}`,
+        message: `Overriding custom response body with key ${key} for distribution ${this._name}`,
       });
     }
     this._customResponseBodies[key] = customResponseBody;
@@ -215,9 +215,7 @@ export class AclBuilder {
     );
   }
 
-  withThrottleDigitrafficUserIpAndUriPath(
-    limit: number | undefined,
-  ): this {
+  withThrottleDigitrafficUserIpAndUriPath(limit: number | undefined): this {
     if (limit === undefined) {
       return this;
     }
@@ -247,7 +245,10 @@ export class AclBuilder {
     );
   }
 
-  withThrottleAnonymousUserIpByUriPath(limit: number | undefined, path: RegExp | undefined): AclBuilder {
+  withThrottleAnonymousUserIpByUriPath(
+    limit: number | undefined,
+    path: RegExp | undefined,
+  ): AclBuilder {
     if (limit === undefined || path === undefined) {
       return this;
     }
@@ -259,7 +260,7 @@ export class AclBuilder {
       false,
       false,
       customResponseBodyKey,
-      path
+      path,
     );
   }
 
@@ -359,8 +360,7 @@ export class AclBuilder {
   _addThrottleResponseBody(customResponseBodyKey: string, limit: number): void {
     if (!this._isCustomResponseBodyKeySet(customResponseBodyKey)) {
       this.withCustomResponseBody(customResponseBodyKey, {
-        content:
-          `Request rate is limited to ${limit} requests in a 5 minute window.`,
+        content: `Request rate is limited to ${limit} requests in a 5 minute window.`,
         contentType: "TEXT_PLAIN",
       });
     }
@@ -411,8 +411,8 @@ export class AclBuilder {
   }
 }
 
-const CUSTOM_KEYS_IP_AND_URI_PATH:
-  CfnWebACL.RateBasedStatementCustomKeyProperty[] = [
+const CUSTOM_KEYS_IP_AND_URI_PATH: CfnWebACL.RateBasedStatementCustomKeyProperty[] =
+  [
     {
       uriPath: {
         textTransformations: [
@@ -450,7 +450,7 @@ function createThrottleStatement(
   limit: number,
   isHeaderRequired: boolean,
   isBasedOnIpAndUriPath: boolean,
-  path?: RegExp
+  path?: RegExp,
 ): CfnWebACL.StatementProperty {
   // this statement matches empty digitraffic-user -header
   const matchStatement: CfnWebACL.StatementProperty = {
@@ -489,10 +489,7 @@ function createThrottleStatement(
         statements: [scopeDownStatement, pathMatchStatement],
       },
     };
-
   }
-
-
 
   if (isBasedOnIpAndUriPath) {
     return {
@@ -500,7 +497,7 @@ function createThrottleStatement(
         aggregateKeyType: "CUSTOM_KEYS",
         customKeys: CUSTOM_KEYS_IP_AND_URI_PATH,
         limit: limit,
-        scopeDownStatement
+        scopeDownStatement,
       },
     };
   }
@@ -509,7 +506,7 @@ function createThrottleStatement(
     rateBasedStatement: {
       aggregateKeyType: "IP",
       limit: limit,
-      scopeDownStatement
+      scopeDownStatement,
     },
   };
 }

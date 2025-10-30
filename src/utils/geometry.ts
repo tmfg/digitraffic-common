@@ -1,7 +1,13 @@
 /**
  * GeoJSON functions and tools
  */
-import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
+import type {
+  Feature,
+  FeatureCollection,
+  GeoJsonProperties,
+  Geometry,
+  Position,
+} from "geojson";
 import * as geoJsonValidator from "geojson-validation";
 import { logger } from "../aws/runtime/dt-logger-default.js";
 
@@ -32,7 +38,7 @@ export function createGeometry(geometry: Geometry): string {
 
   logger.error({
     method: "Geometry.createGeometry",
-    message: "Unsupported locationType " + geometry.type,
+    message: `Unsupported locationType ${geometry.type}`,
   });
 
   return "POLYGON EMPTY";
@@ -63,11 +69,12 @@ function coordinatePair(coordinate: Position): string {
  * @param features List of Features
  * @param lastUpdated Last updated date
  */
-export function createFeatureCollection<G extends Geometry | null, P extends GeoJsonProperties>(
+export function createFeatureCollection<
+  G extends Geometry | null,
+  P extends GeoJsonProperties,
+>(
   features: Feature<G, P>[],
-  // eslint-disable-next-line @rushstack/no-new-null
   lastUpdated: Date | null,
-  // eslint-disable-next-line @rushstack/no-new-null
 ): FeatureCollection<G, P> & { lastUpdated: Date | null } {
   return {
     type: "FeatureCollection",
@@ -75,7 +82,6 @@ export function createFeatureCollection<G extends Geometry | null, P extends Geo
     features: features,
   };
 }
-
 
 export function isValidGeoJson<T>(json: T): boolean {
   // Tests complain about this method returning type string[] which is obviously wrong. Therefore, this casting.
@@ -109,7 +115,8 @@ function distanceBetweenWGS84PointsInKm(
   const diffLat = toRadians(toYLat - fromYLat);
   const diffLon = toRadians(toXLon - fromXLon);
 
-  const a = Math.sin(diffLat / 2) * Math.sin(diffLat / 2) +
+  const a =
+    Math.sin(diffLat / 2) * Math.sin(diffLat / 2) +
     Math.cos(toRadians(fromYLat)) *
       Math.cos(toRadians(toYLat)) *
       Math.sin(diffLon / 2) *
@@ -133,7 +140,12 @@ export function distanceBetweenPositionsInKm(
   const [pos10, pos11] = pos1;
   const [pos20, pos21] = pos2;
   if (
-    pos1.length > 3 || pos2.length > 3 || !pos10 || !pos11 || !pos20 || !pos21
+    pos1.length > 3 ||
+    pos2.length > 3 ||
+    !pos10 ||
+    !pos11 ||
+    !pos20 ||
+    !pos21
   ) {
     throw Error(
       `Illegal Positions ${pos1.toString()} and ${pos2.toString()}. Both must have length between 2 or 3.`,
@@ -188,7 +200,7 @@ function createPosList(geometry: Geometry): string {
     return polygonToList(geometry.coordinates);
   }
 
-  throw new Error("unknown geometry type " + JSON.stringify(geometry));
+  throw new Error(`unknown geometry type ${JSON.stringify(geometry)}`);
 }
 
 function polygonToList(positions: Position[][], precision: number = 8): string {

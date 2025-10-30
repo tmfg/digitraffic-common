@@ -17,6 +17,7 @@ pre-commit:
       #glob: "*.{ts,yml,yaml,md,json,html}"
       run: |
         # Run Biome on staged files, auto-fixing issues
-        pnpm format:fix-staged || true;
+        # pnpm format:fix-staged || true; # Errors are ignored to allow commit to proceed even if Biome finds issues
+        pnpm format:fix-staged; # Dont allow errors to be ignored, commit should fail if Biome finds issues
         # Re-add any files that Biome fixed. Sometimes deleted files cause git add to fail, so we ignore errors.
         git add $(git diff --name-only --cached) || true
