@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2025.10.30-2",
+  "version": "2025.10.30-3",
   "private": false,
   "description": "",
   "repository": {
@@ -42,7 +42,7 @@
     "./dist/utils/date-utils": "./dist/utils/date-utils.js",
     "./dist/utils/geojson-types": "./dist/utils/geojson-types.js",
     "./dist/utils/slack": "./dist/utils/slack.js",
-    "./dist/utils/stop-watch": "./dist/utils/stop-watch.ts",
+    "./dist/utils/stop-watch": "./dist/utils/stop-watch.js",
     "./dist/utils/utils": "./dist/utils/utils.js",
     "./dist/utils/retry": "./dist/utils/retry.js",
     "./dist/utils/geometry": "./dist/utils/geometry.js",

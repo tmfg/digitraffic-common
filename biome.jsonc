@@ -56,7 +56,7 @@
     },
     {
       // Allow heft configs to have comments without jsonc extension.
-      "includes": ["**/config/*.json"],
+      "includes": ["**/config/*.json", "tsconfig.json"],
       "json": {
         "parser": {
           "allowComments": true
