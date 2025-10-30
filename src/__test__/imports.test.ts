@@ -130,6 +130,11 @@ test("slack import ok?", () => {
   return expect(slack).resolves.toBeDefined();
 });
 
+test("stopWatch import ok?", () => {
+  const stopWatch = import("../utils/stop-watch.js");
+  return expect(stopWatch).resolves.toBeDefined();
+});
+
 test("utils import ok?", () => {
   const utils = import("../utils/utils.js");
   return expect(utils).resolves.toBeDefined();
