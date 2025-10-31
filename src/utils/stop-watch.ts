@@ -133,10 +133,9 @@ export class StopWatch {
   }
 
   /**
-   * Logs all tasks and their durations. If
+   * Logs all tasks and their durations. If their is also default task, logs that too with <code>task: method</code>.
    * @param method
    * @param level
-   * @param logSummary
    */
   logTasks(
     method: LoggerMethodType,
@@ -152,6 +151,7 @@ export class StopWatch {
     if (this.getTask(StopWatch.DEFAULT_TASK_NAME)) {
       logger[level]({
         method,
+        customTask: method,
         tookMs: this.getDuration(StopWatch.DEFAULT_TASK_NAME),
       } satisfies LoggableType);
     }
