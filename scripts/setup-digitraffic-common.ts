@@ -10,8 +10,8 @@ function setup(): void {
     console.info(
       "[setup-digitraffic-common.ts] 🕵 Standalone repo detected — 🛠 Installing lefthook...",
     );
-    execSync("pnpm add -D lefthook", { stdio: "inherit" });
-    execSync("npx lefthook install", { stdio: "inherit" });
+    // Install Lefthook temporarily without saving to package.json
+    execSync("npx --yes lefthook install", { stdio: "inherit" });
     console.info("[setup-digitraffic-common.ts] 💪 Lefthook installed.");
   } else {
     console.info("🔍 Subtree detected — skipping Lefthook installation.");
