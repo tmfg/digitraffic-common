@@ -2,13 +2,15 @@
 
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 function setup(): void {
-  const isGitRepo: boolean = existsSync(".git");
-  if (isGitRepo) {
+  const gitDir = join(process.cwd(), ".git");
+  if (existsSync(gitDir)) {
     console.info(
       "[setup-digitraffic-common.ts] 🕵 Standalone repo detected — 🛠 Installing lefthook...",
     );
+    execSync("pnpm add -D lefthook", { stdio: "inherit" });
     execSync("npx lefthook install", { stdio: "inherit" });
     console.info("[setup-digitraffic-common.ts] 💪 Lefthook installed.");
   } else {
