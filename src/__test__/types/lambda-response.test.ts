@@ -1,10 +1,25 @@
-import { LambdaResponse } from "../../aws/types/lambda-response.js";
+import {
+  decodeBase64ToString,
+  LambdaResponse,
+  LambdaResponseBuilder,
+} from "../../aws/types/lambda-response.js";
+
+// About 18 MB will be compressed to 2 MB
+export const TEST_BIG_JSON = {
+  items: Array.from({ length: 10 }, (_, i) => ({
+    id: i,
+    name: `Item ${i}`,
+    description: "This is a test description that repeats to allow compression",
+    value: Math.random(),
+  })),
+};
 
 describe("lambda-response", () => {
   const TEST_MESSAGE = "HELLO";
   const TEST_COUNT = 12;
   const TEST_FILENAME = "file.txt";
   const TEST_TIMESTAMP = new Date();
+  const TEST_TIMESTAMP_STR = TEST_TIMESTAMP.toISOString();
 
   const TEST_JSON = {
     message: TEST_MESSAGE,
@@ -19,7 +34,7 @@ describe("lambda-response", () => {
     expectedTimestamp?: Date,
   ): void {
     const body = JSON.parse(
-      Buffer.from(response.body, "base64").toString(),
+      decodeBase64ToString(response.body, response.compressed),
     ) as unknown;
 
     expect(body).toEqual(expectedJson);
@@ -35,7 +50,7 @@ describe("lambda-response", () => {
     expectedFilename?: string,
     expectedTimestamp?: Date,
   ): void {
-    const body = Buffer.from(response.body, "base64").toString();
+    const body = decodeBase64ToString(response.body, response.compressed);
 
     expect(body).toEqual(expectedString);
     expect(response.status).toEqual(expectedStatus);
@@ -95,5 +110,71 @@ describe("lambda-response", () => {
     const response = LambdaResponse.notImplemented();
 
     assertBinary(response, "Not implemented", 501);
+  });
+
+  // Builder
+  test("Builder - okJson - without fileName", () => {
+    const response = LambdaResponseBuilder.create().withBody(TEST_JSON).build();
+
+    assertJson(response, TEST_JSON, 200);
+  });
+
+  test("Builder - okJson - with fileName", () => {
+    const response = LambdaResponseBuilder.create()
+      .withBody(TEST_JSON)
+      .withFileName(TEST_FILENAME)
+      .build();
+
+    assertJson(response, TEST_JSON, 200, TEST_FILENAME);
+  });
+
+  test("Builder - okJson - with fileName and timestamp", () => {
+    const response = LambdaResponseBuilder.create()
+      .withBody(TEST_JSON)
+      .withFileName(TEST_FILENAME)
+      .withTimestamp(TEST_TIMESTAMP)
+      .build();
+
+    const response2 = LambdaResponseBuilder.create()
+      .withBody(TEST_JSON)
+      .withFileName(TEST_FILENAME)
+      .withTimestamp(TEST_TIMESTAMP_STR)
+      .build();
+
+    assertJson(response, TEST_JSON, 200, TEST_FILENAME, TEST_TIMESTAMP);
+    assertJson(response2, TEST_JSON, 200, TEST_FILENAME, TEST_TIMESTAMP);
+  });
+
+  test("Builder - okBinary - with fileName and timestamp", () => {
+    const response = LambdaResponseBuilder.create()
+      .withBody(TEST_MESSAGE)
+      .withFileName(TEST_FILENAME)
+      .withTimestamp(TEST_TIMESTAMP)
+      .build();
+
+    assertBinary(response, TEST_MESSAGE, 200, TEST_FILENAME, TEST_TIMESTAMP);
+  });
+
+  test("Builder - compression uneffective for small json", () => {
+    const response = LambdaResponseBuilder.create()
+      .withBody(TEST_JSON)
+      .withFileName(TEST_FILENAME)
+      .withCompression()
+      .withDebug()
+      .build();
+    expect(response.compressed).toBe(false);
+    assertJson(response, TEST_JSON, 200, TEST_FILENAME);
+  });
+
+  test("Builder - compression effective for large json", () => {
+    const response = LambdaResponseBuilder.create()
+      .withBody(TEST_BIG_JSON)
+      .withFileName(TEST_FILENAME)
+      .withCompression()
+      .withDebug()
+      .build();
+
+    expect(response.compressed).toBe(true);
+    assertJson(response, TEST_BIG_JSON, 200, TEST_FILENAME);
   });
 });

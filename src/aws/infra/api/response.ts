@@ -38,6 +38,10 @@ export const RESPONSE_DEFAULT_LAMBDA = `#set($inputRoot = $input.path('$'))
 #set ($disposition = 'attachment; filename="FN"')
 #set ($context.responseOverride.header.Content-Disposition = $disposition.replaceAll('FN', $inputRoot.fileName))
 #end
+#* Conditionally add Content-Encoding if compressed is true *#
+#if($!inputRoot.compressed == true)
+#set($context.responseOverride.header.Content-Encoding = "gzip")
+#end
 $util.base64Decode($inputRoot.body)`;
 
 /**
