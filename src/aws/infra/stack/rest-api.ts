@@ -23,7 +23,7 @@ import {
 } from "aws-cdk-lib/aws-iam";
 import { StringParameter } from "aws-cdk-lib/aws-ssm";
 import type { Construct } from "constructs";
-import { set } from "lodash-es";
+import { set } from "es-toolkit/compat";
 import { getModelReference } from "../../../utils/api-model.js";
 import { MediaType } from "../../types/mediatypes.js";
 import type { ModelWithReference } from "../../types/model-with-reference.js";

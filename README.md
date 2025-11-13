@@ -107,15 +107,17 @@ Aspects.of(this).add(StackCheckingAspect.create(this));
 Any resource can be whitelisted by giving it as a parameter or in the
 StackConfiguration
 
-### MonitoredFunction
+### FunctionBuilder
 
-MonitoredFunction extends Function with alarms on memory usage and timeouts.
+FunctionBuilder allows you to make lambdas with alarms on memory usage and timeouts.
 
-If you need database access in your Function, you can use MonitoredDBFunction.
-Creating a Function with it is this easy:
+By default, the created function has access to database, but this can of course be controlled.
 
+Creating lambda is easy:
 ```
-const lambda = MonitoredDBFunction.create(stack, 'get-metadata');
+const lambda = FunctionBuilder.create(stack, "get-metadata")
+  .withTimeout(Duration.seconds(2))
+  .build();
 ```
 
 See the documentation for more information.

@@ -7,7 +7,7 @@ import { CfnBucket } from "aws-cdk-lib/aws-s3";
 import { CfnQueue } from "aws-cdk-lib/aws-sqs";
 import { kebabCase } from "change-case";
 import type { IConstruct } from "constructs";
-import { snakeCase } from "lodash-es";
+import { snakeCase } from "es-toolkit";
 import { DigitrafficStack, SOLUTION_KEY } from "./stack.js";
 
 const MAX_CONCURRENCY_LIMIT = 100;
