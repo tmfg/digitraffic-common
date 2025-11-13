@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2025.11.13-2",
+  "version": "2025.11.13-3",
   "private": false,
   "description": "",
   "repository": {
@@ -66,7 +66,7 @@
     "./dist/aws/infra/api/integration": "./dist/aws/infra/api/integration.js",
     "./dist/aws/infra/stack/stack-checking-aspect": "./dist/aws/infra/stack/stack-checking-aspect.js",
     "./dist/aws/infra/stack/rest-api": "./dist/aws/infra/stack/rest-api.js",
-    "./dist/aws/infra/stack/dt-function": "./dist/aws/infra/stack/lamdt-function.js",
+    "./dist/aws/infra/stack/dt-function": "./dist/aws/infra/stack/dt-function.js",
     "./dist/aws/infra/stack/dt-function-alarms": "./dist/aws/infra/stack/dt-function-alarms.js",
     "./dist/aws/infra/stack/lambda-configs": "./dist/aws/infra/stack/lambda-configs.js",
     "./dist/aws/infra/stack/lambda-log-group": "./dist/aws/infra/stack/lambda-log-group.js",
