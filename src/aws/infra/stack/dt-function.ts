@@ -14,7 +14,9 @@ import {
   SystemLogLevel,
 } from "aws-cdk-lib/aws-lambda";
 import { camelCase, startCase } from "es-toolkit";
+import { DatabaseEnvironmentKeys } from "../../../database/database.js";
 import type { TrafficType } from "../../../types/traffictype.js";
+import { EnvKeys } from "../../runtime/environment.js";
 import type { AlarmProps } from "./dt-function-alarms.js";
 import { DtFunctionAlarms } from "./dt-function-alarms.js";
 import type { LambdaEnvironment } from "./lambda-configs.js";
@@ -24,6 +26,7 @@ import type { DigitrafficStack } from "./stack.js";
 type FunctionFeatures = {
   singleLambda: boolean;
   databaseAccess: boolean;
+  secretAccess: boolean;
 };
 
 export class FunctionBuilder {
@@ -50,6 +53,7 @@ export class FunctionBuilder {
   private readonly _features: FunctionFeatures = {
     singleLambda: false,
     databaseAccess: true,
+    secretAccess: true,
   };
 
   constructor(stack: DigitrafficStack, lambdaName: string) {
@@ -57,7 +61,7 @@ export class FunctionBuilder {
     this._stack = stack;
 
     this.functionName = `${stack.configuration.shortName}-${startCase(camelCase(lambdaName)).replace(/\s/g, "")}`;
-    this.environment = stack.createLambdaEnvironment();
+    this.environment = {};
     this.vpc = stack.vpc;
 
     this.withHandler(lambdaName);
@@ -70,6 +74,15 @@ export class FunctionBuilder {
    */
   public static create(stack: DigitrafficStack, lambdaName: string) {
     return new FunctionBuilder(stack, lambdaName);
+  }
+
+  /**
+   * Creates a new builder with defaults, but without database or secret access.
+   */
+  public static plain(stack: DigitrafficStack, lambdaName: string) {
+    return new FunctionBuilder(stack, lambdaName)
+      .withoutDatabaseAccess()
+      .withoutSecretAccess();
   }
 
   /**
@@ -120,6 +133,15 @@ export class FunctionBuilder {
    */
   public withoutDatabaseAccess(): this {
     this._features.databaseAccess = false;
+
+    return this;
+  }
+
+  /**
+   * Do not grant secret access.  Default is with secret access.
+   */
+  public withoutSecretAccess(): this {
+    this._features.secretAccess = false;
 
     return this;
   }
@@ -249,14 +271,37 @@ export class FunctionBuilder {
       memorySize: this.memorySize,
       functionName: this.functionName,
       securityGroups,
-      environment: this.environment,
+      environment: this.getEnvironment(),
     });
 
-    this._stack.grantSecret(createdFunction);
+    if (this._features.secretAccess) {
+      this._stack.grantSecret(createdFunction);
+    }
 
     this.createAlarms(createdFunction);
 
     return createdFunction;
+  }
+
+  private getEnvironment(): LambdaEnvironment {
+    let environment = {};
+
+    if (this._features.secretAccess) {
+      environment = {
+        ...environment,
+        [EnvKeys.SECRET_ID]: this._stack.configuration.secretId,
+      };
+    }
+
+    if (this._features.databaseAccess) {
+      environment = {
+        ...environment,
+        [DatabaseEnvironmentKeys.DB_APPLICATION]:
+          this._stack.configuration.shortName,
+      };
+    }
+
+    return { ...environment, ...this.environment };
   }
 
   private createAlarms(lambda: AwsFunction): void {
