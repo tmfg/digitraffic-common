@@ -1,5 +1,6 @@
 import { App, Duration } from "aws-cdk-lib";
 import { Match, Template } from "aws-cdk-lib/assertions";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Architecture, Code, Runtime } from "aws-cdk-lib/aws-lambda";
 import { FunctionBuilder } from "../../aws/infra/stack/dt-function.js";
 import { DigitrafficStack } from "../../aws/infra/stack/stack.js";
@@ -160,6 +161,125 @@ describe("FunctionBuilder test", () => {
 
     template.hasResourceProperties("AWS::Lambda::Function", {
       Handler: "custom.main",
+    });
+  });
+
+  test("withRolePolicy adds custom policy to lambda role", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder.withRolePolicy(
+        new PolicyStatement({
+          actions: ["s3:GetObject"],
+          resources: ["arn:aws:s3:::my-bucket/*"],
+        }),
+      );
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: "s3:GetObject",
+            Resource: "arn:aws:s3:::my-bucket/*",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("withAllowedActions adds policy with specified actions", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder.withAllowedActions("dynamodb:PutItem", "dynamodb:GetItem");
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: ["dynamodb:PutItem", "dynamodb:GetItem"],
+            Resource: "*",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("withRolePolicy and withAllowedActions can be used together", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder
+        .withRolePolicy(
+          new PolicyStatement({
+            actions: ["s3:GetObject"],
+            resources: ["arn:aws:s3:::my-bucket/*"],
+          }),
+        )
+        .withAllowedActions("dynamodb:PutItem", "dynamodb:GetItem");
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: "s3:GetObject",
+            Resource: "arn:aws:s3:::my-bucket/*",
+          }),
+          Match.objectLike({
+            Action: ["dynamodb:PutItem", "dynamodb:GetItem"],
+            Resource: "*",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("Multiple withRolePolicy calls add multiple policies", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder
+        .withRolePolicy(
+          new PolicyStatement({
+            actions: ["s3:GetObject"],
+            resources: ["arn:aws:s3:::my-bucket/*"],
+          }),
+        )
+        .withRolePolicy(
+          new PolicyStatement({
+            actions: ["sqs:SendMessage"],
+            resources: ["arn:aws:sqs:us-east-1:123456789012:my-queue"],
+          }),
+        );
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: "s3:GetObject",
+            Resource: "arn:aws:s3:::my-bucket/*",
+          }),
+          Match.objectLike({
+            Action: "sqs:SendMessage",
+            Resource: "arn:aws:sqs:us-east-1:123456789012:my-queue",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("Multiple withAllowedActions calls accumulate actions", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder
+        .withAllowedActions("dynamodb:PutItem", "dynamodb:GetItem")
+        .withAllowedActions("s3:ListBucket");
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: ["dynamodb:PutItem", "dynamodb:GetItem", "s3:ListBucket"],
+            Resource: "*",
+          }),
+        ]),
+      },
     });
   });
 });
