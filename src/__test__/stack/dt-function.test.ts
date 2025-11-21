@@ -356,7 +356,7 @@ describe("FunctionBuilder test", () => {
         .withAllowedActions("*")
         .build();
     }).toThrow(
-      'Lambda test-Plain cannot use wildcard action "*" in withAllowedActions',
+      'Lambda test-Test cannot use wildcard action "*" in withAllowedActions',
     );
   });
 
@@ -378,7 +378,7 @@ describe("FunctionBuilder test", () => {
         .withAllowedActions("s3:GetObject", "*", "dynamodb:Query")
         .build();
     }).toThrow(
-      'Lambda test-Plain cannot use wildcard action "*" in withAllowedActions',
+      'Lambda test-Test cannot use wildcard action "*" in withAllowedActions',
     );
   });
 });
