@@ -337,4 +337,48 @@ describe("FunctionBuilder test", () => {
       },
     });
   });
+
+  test("withAllowedActions throws error when wildcard action is used", () => {
+    const app = new App();
+    const stack = new DigitrafficStack(app, "test-stack", {
+      alarmTopicArn: "",
+      production: false,
+      shortName: "test",
+      stackProps: {},
+      secretId: "testSecret",
+      trafficType: TrafficType.ROAD,
+      warningTopicArn: "",
+    });
+
+    expect(() => {
+      FunctionBuilder.plain(stack, "test")
+        .withCode(Code.fromInline("{}"))
+        .withAllowedActions("*")
+        .build();
+    }).toThrow(
+      'Lambda test-Plain cannot use wildcard action "*" in withAllowedActions',
+    );
+  });
+
+  test("withAllowedActions throws error when wildcard action is mixed with other actions", () => {
+    const app = new App();
+    const stack = new DigitrafficStack(app, "test-stack", {
+      alarmTopicArn: "",
+      production: false,
+      shortName: "test",
+      stackProps: {},
+      secretId: "testSecret",
+      trafficType: TrafficType.ROAD,
+      warningTopicArn: "",
+    });
+
+    expect(() => {
+      FunctionBuilder.plain(stack, "test")
+        .withCode(Code.fromInline("{}"))
+        .withAllowedActions("s3:GetObject", "*", "dynamodb:Query")
+        .build();
+    }).toThrow(
+      'Lambda test-Plain cannot use wildcard action "*" in withAllowedActions',
+    );
+  });
 });

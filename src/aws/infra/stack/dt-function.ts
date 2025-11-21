@@ -308,6 +308,8 @@ export class FunctionBuilder {
   }
 
   private attachPolicies(lambda: AwsFunction): void {
+    this.validateNoWildcardActions();
+
     for (const policyStatement of this.policyStatements) {
       lambda.addToRolePolicy(policyStatement);
     }
@@ -319,6 +321,14 @@ export class FunctionBuilder {
           actions: this.allowedActions,
           resources: ["*"],
         }),
+      );
+    }
+  }
+
+  private validateNoWildcardActions(): void {
+    if (this.allowedActions.includes("*")) {
+      throw new Error(
+        `Lambda ${this.functionName} cannot use wildcard action "*" in withAllowedActions. Please specify explicit actions.`,
       );
     }
   }
