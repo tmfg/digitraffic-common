@@ -3,6 +3,7 @@ import type { Metric } from "aws-cdk-lib/aws-cloudwatch";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
 import type { ISecurityGroup, IVpc } from "aws-cdk-lib/aws-ec2";
 import type { IRole } from "aws-cdk-lib/aws-iam";
+import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import {
   ApplicationLogLevel,
   Architecture,
@@ -49,6 +50,8 @@ export class FunctionBuilder {
   private handler: string = "";
 
   private readonly securityGroups: ISecurityGroup[] = [];
+  private readonly policyStatements: PolicyStatement[] = [];
+  private readonly allowedActions: string[] = [];
 
   private readonly _features: FunctionFeatures = {
     singleLambda: false,
@@ -228,6 +231,25 @@ export class FunctionBuilder {
     return this;
   }
 
+  /**
+   * Add a policy statement to the lambda's role.
+   */
+  public withRolePolicies(...policies: PolicyStatement[]): this {
+    this.policyStatements.push(...policies);
+
+    return this;
+  }
+
+  /**
+   * Add allowed actions to the lambda's role. Creates a policy statement that allows
+   * the specified actions on all resources (*).
+   */
+  public withAllowedActions(...actions: string[]): this {
+    this.allowedActions.push(...actions);
+
+    return this;
+  }
+
   private getSecurityGroups(): ISecurityGroup[] {
     if (this._features.databaseAccess) {
       if (!this._stack.lambdaDbSg) {
@@ -278,9 +300,37 @@ export class FunctionBuilder {
       this._stack.grantSecret(createdFunction);
     }
 
+    this.attachPolicies(createdFunction);
+
     this.createAlarms(createdFunction);
 
     return createdFunction;
+  }
+
+  private attachPolicies(lambda: AwsFunction): void {
+    this.validateNoWildcardActions();
+
+    for (const policyStatement of this.policyStatements) {
+      lambda.addToRolePolicy(policyStatement);
+    }
+
+    if (this.allowedActions.length > 0) {
+      lambda.addToRolePolicy(
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: this.allowedActions,
+          resources: ["*"],
+        }),
+      );
+    }
+  }
+
+  private validateNoWildcardActions(): void {
+    if (this.allowedActions.includes("*")) {
+      throw new Error(
+        `Lambda ${this.functionName} cannot use wildcard action "*" in withAllowedActions. Please specify explicit actions.`,
+      );
+    }
   }
 
   private getEnvironment(): LambdaEnvironment {
