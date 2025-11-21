@@ -1,5 +1,6 @@
 import { App, Duration } from "aws-cdk-lib";
 import { Match, Template } from "aws-cdk-lib/assertions";
+import { PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { Architecture, Code, Runtime } from "aws-cdk-lib/aws-lambda";
 import { FunctionBuilder } from "../../aws/infra/stack/dt-function.js";
 import { DigitrafficStack } from "../../aws/infra/stack/stack.js";
@@ -161,5 +162,223 @@ describe("FunctionBuilder test", () => {
     template.hasResourceProperties("AWS::Lambda::Function", {
       Handler: "custom.main",
     });
+  });
+
+  test("withRolePolicies adds custom policy to lambda role", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder.withRolePolicies(
+        new PolicyStatement({
+          actions: ["s3:GetObject"],
+          resources: ["arn:aws:s3:::my-bucket/*"],
+        }),
+      );
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: "s3:GetObject",
+            Resource: "arn:aws:s3:::my-bucket/*",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("withAllowedActions adds policy with specified actions", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder.withAllowedActions("dynamodb:PutItem", "dynamodb:GetItem");
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: ["dynamodb:PutItem", "dynamodb:GetItem"],
+            Resource: "*",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("withRolePolicies and withAllowedActions can be used together", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder
+        .withRolePolicies(
+          new PolicyStatement({
+            actions: ["s3:GetObject"],
+            resources: ["arn:aws:s3:::my-bucket/*"],
+          }),
+        )
+        .withAllowedActions("dynamodb:PutItem", "dynamodb:GetItem");
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: "s3:GetObject",
+            Resource: "arn:aws:s3:::my-bucket/*",
+          }),
+          Match.objectLike({
+            Action: ["dynamodb:PutItem", "dynamodb:GetItem"],
+            Resource: "*",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("Multiple withRolePolicies calls add multiple policies", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder
+        .withRolePolicies(
+          new PolicyStatement({
+            actions: ["s3:GetObject"],
+            resources: ["arn:aws:s3:::my-bucket/*"],
+          }),
+        )
+        .withRolePolicies(
+          new PolicyStatement({
+            actions: ["sqs:SendMessage"],
+            resources: ["arn:aws:sqs:us-east-1:123456789012:my-queue"],
+          }),
+        );
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: "s3:GetObject",
+            Resource: "arn:aws:s3:::my-bucket/*",
+          }),
+          Match.objectLike({
+            Action: "sqs:SendMessage",
+            Resource: "arn:aws:sqs:us-east-1:123456789012:my-queue",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("Multiple withAllowedActions calls accumulate actions", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder
+        .withAllowedActions("dynamodb:PutItem", "dynamodb:GetItem")
+        .withAllowedActions("s3:ListBucket");
+    });
+
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: ["dynamodb:PutItem", "dynamodb:GetItem", "s3:ListBucket"],
+            Resource: "*",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("withRole and withRolePolicies work together", () => {
+    const app = new App();
+    const stack = new DigitrafficStack(app, "test-stack", {
+      alarmTopicArn: "",
+      production: false,
+      shortName: "test",
+      stackProps: {},
+      secretId: "testSecret",
+      trafficType: TrafficType.ROAD,
+      warningTopicArn: "",
+    });
+
+    // Create a custom role
+    const customRole = new Role(stack, "CustomRole", {
+      assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+    });
+
+    FunctionBuilder.plain(stack, "test")
+      .withCode(Code.fromInline("{}"))
+      .withRole(customRole)
+      .withRolePolicies(
+        new PolicyStatement({
+          actions: ["s3:GetObject"],
+          resources: ["arn:aws:s3:::my-bucket/*"],
+        }),
+      )
+      .withAllowedActions("dynamodb:Query")
+      .build();
+
+    const template = Template.fromStack(stack);
+
+    // Verify the custom role is used
+    template.hasResourceProperties("AWS::Lambda::Function", {
+      Role: Match.objectLike({
+        "Fn::GetAtt": Match.arrayWith([Match.stringLikeRegexp("CustomRole")]),
+      }),
+    });
+
+    // Verify the policies are attached
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: "s3:GetObject",
+            Resource: "arn:aws:s3:::my-bucket/*",
+          }),
+          Match.objectLike({
+            Action: "dynamodb:Query",
+            Resource: "*",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("withAllowedActions throws error when wildcard action is used", () => {
+    const app = new App();
+    const stack = new DigitrafficStack(app, "test-stack", {
+      alarmTopicArn: "",
+      production: false,
+      shortName: "test",
+      stackProps: {},
+      secretId: "testSecret",
+      trafficType: TrafficType.ROAD,
+      warningTopicArn: "",
+    });
+
+    expect(() => {
+      FunctionBuilder.plain(stack, "test")
+        .withCode(Code.fromInline("{}"))
+        .withAllowedActions("*")
+        .build();
+    }).toThrow(
+      'Lambda test-Test cannot use wildcard action "*" in withAllowedActions',
+    );
+  });
+
+  test("withAllowedActions throws error when wildcard action is mixed with other actions", () => {
+    const app = new App();
+    const stack = new DigitrafficStack(app, "test-stack", {
+      alarmTopicArn: "",
+      production: false,
+      shortName: "test",
+      stackProps: {},
+      secretId: "testSecret",
+      trafficType: TrafficType.ROAD,
+      warningTopicArn: "",
+    });
+
+    expect(() => {
+      FunctionBuilder.plain(stack, "test")
+        .withCode(Code.fromInline("{}"))
+        .withAllowedActions("s3:GetObject", "*", "dynamodb:Query")
+        .build();
+    }).toThrow(
+      'Lambda test-Test cannot use wildcard action "*" in withAllowedActions',
+    );
   });
 });
