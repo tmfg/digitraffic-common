@@ -234,8 +234,8 @@ export class FunctionBuilder {
   /**
    * Add a policy statement to the lambda's role.
    */
-  public withRolePolicy(policy: PolicyStatement): this {
-    this.policyStatements.push(policy);
+  public withRolePolicies(...policies: PolicyStatement[]): this {
+    this.policyStatements.push(...policies);
 
     return this;
   }

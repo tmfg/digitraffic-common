@@ -1,6 +1,6 @@
 import { App, Duration } from "aws-cdk-lib";
 import { Match, Template } from "aws-cdk-lib/assertions";
-import { PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { Architecture, Code, Runtime } from "aws-cdk-lib/aws-lambda";
 import { FunctionBuilder } from "../../aws/infra/stack/dt-function.js";
 import { DigitrafficStack } from "../../aws/infra/stack/stack.js";
@@ -164,9 +164,9 @@ describe("FunctionBuilder test", () => {
     });
   });
 
-  test("withRolePolicy adds custom policy to lambda role", () => {
+  test("withRolePolicies adds custom policy to lambda role", () => {
     const template = createTemplate((builder: FunctionBuilder) => {
-      builder.withRolePolicy(
+      builder.withRolePolicies(
         new PolicyStatement({
           actions: ["s3:GetObject"],
           resources: ["arn:aws:s3:::my-bucket/*"],
@@ -203,10 +203,10 @@ describe("FunctionBuilder test", () => {
     });
   });
 
-  test("withRolePolicy and withAllowedActions can be used together", () => {
+  test("withRolePolicies and withAllowedActions can be used together", () => {
     const template = createTemplate((builder: FunctionBuilder) => {
       builder
-        .withRolePolicy(
+        .withRolePolicies(
           new PolicyStatement({
             actions: ["s3:GetObject"],
             resources: ["arn:aws:s3:::my-bucket/*"],
@@ -231,16 +231,16 @@ describe("FunctionBuilder test", () => {
     });
   });
 
-  test("Multiple withRolePolicy calls add multiple policies", () => {
+  test("Multiple withRolePolicies calls add multiple policies", () => {
     const template = createTemplate((builder: FunctionBuilder) => {
       builder
-        .withRolePolicy(
+        .withRolePolicies(
           new PolicyStatement({
             actions: ["s3:GetObject"],
             resources: ["arn:aws:s3:::my-bucket/*"],
           }),
         )
-        .withRolePolicy(
+        .withRolePolicies(
           new PolicyStatement({
             actions: ["sqs:SendMessage"],
             resources: ["arn:aws:sqs:us-east-1:123456789012:my-queue"],
@@ -276,6 +276,61 @@ describe("FunctionBuilder test", () => {
         Statement: Match.arrayWith([
           Match.objectLike({
             Action: ["dynamodb:PutItem", "dynamodb:GetItem", "s3:ListBucket"],
+            Resource: "*",
+          }),
+        ]),
+      },
+    });
+  });
+
+  test("withRole and withRolePolicies work together", () => {
+    const app = new App();
+    const stack = new DigitrafficStack(app, "test-stack", {
+      alarmTopicArn: "",
+      production: false,
+      shortName: "test",
+      stackProps: {},
+      secretId: "testSecret",
+      trafficType: TrafficType.ROAD,
+      warningTopicArn: "",
+    });
+
+    // Create a custom role
+    const customRole = new Role(stack, "CustomRole", {
+      assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+    });
+
+    FunctionBuilder.plain(stack, "test")
+      .withCode(Code.fromInline("{}"))
+      .withRole(customRole)
+      .withRolePolicies(
+        new PolicyStatement({
+          actions: ["s3:GetObject"],
+          resources: ["arn:aws:s3:::my-bucket/*"],
+        }),
+      )
+      .withAllowedActions("dynamodb:Query")
+      .build();
+
+    const template = Template.fromStack(stack);
+
+    // Verify the custom role is used
+    template.hasResourceProperties("AWS::Lambda::Function", {
+      Role: Match.objectLike({
+        "Fn::GetAtt": Match.arrayWith([Match.stringLikeRegexp("CustomRole")]),
+      }),
+    });
+
+    // Verify the policies are attached
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: "s3:GetObject",
+            Resource: "arn:aws:s3:::my-bucket/*",
+          }),
+          Match.objectLike({
+            Action: "dynamodb:Query",
             Resource: "*",
           }),
         ]),
