@@ -276,7 +276,7 @@ export function add404Support(restApi: RestApi, stack: Construct): void {
       type: ResponseType.MISSING_AUTHENTICATION_TOKEN,
       statusCode: "404",
       templates: {
-        [MediaType.APPLICATION_JSON]: '{"message": "Not found"}',
+        [MediaType.APPLICATION_JSON]: '{"message": "Not Found"}',
       },
     },
   );

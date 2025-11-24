@@ -1,7 +1,9 @@
-import * as zlib from "node:zlib";
 import etag from "etag";
+import { encodeUtf8ToBase64 } from "../../utils/base64.js";
+import { truncateMiddle } from "../../utils/logging.js";
 import { StopWatch } from "../../utils/stop-watch.js";
 import { logger } from "../runtime/dt-logger-default.js";
+import { MAX_LAMBDA_PAYLOAD_BYTES } from "./lambda-proxy-types.js";
 
 export class LambdaResponse {
   readonly status: number;
@@ -9,14 +11,12 @@ export class LambdaResponse {
   readonly fileName?: string;
   readonly timestamp?: string;
   readonly etag: string;
-  readonly compressed: boolean;
 
   constructor(
     status: number,
     body: string,
     fileName?: string,
     timestamp?: Date,
-    compressed: boolean = false,
     etagValue: string = etag(body),
   ) {
     this.status = status;
@@ -24,22 +24,24 @@ export class LambdaResponse {
     this.fileName = fileName;
     this.timestamp = timestamp?.toUTCString();
     this.etag = etagValue; // create strong etag by default
-    this.compressed = compressed;
   }
 
+  /**
+   * @Deprecated Use LambdaResponseBuilder.create().withTimestamp(...).build() instead.
+   */
   withTimestamp(timestamp: Date): LambdaResponse {
     return new LambdaResponse(
       this.status,
       this.body,
       this.fileName,
       timestamp,
-      this.compressed,
       this.etag,
     );
   }
 
   /**
    * Create LambdaResponse for HTTP 200 from json.
+   * @Deprecated Use LambdaResponseBuilder.create().withBody(...).build() instead.
    */
   static okJson<T>(json: T, fileName?: string): LambdaResponse {
     return LambdaResponse.ok(JSON.stringify(json), fileName);
@@ -47,6 +49,7 @@ export class LambdaResponse {
 
   /**
    * Create LambdaResponse for HTTP 200 from string.
+   * @Deprecated Use LambdaResponseBuilder.create().withBody(...).build() instead.
    */
   static ok(body: string, fileName?: string): LambdaResponse {
     return LambdaResponse.okBinary(toBase64(body), fileName);
@@ -54,6 +57,7 @@ export class LambdaResponse {
 
   /**
    * Create LambdaResponse for HTTP 200 from base64-encoded data.
+   * @Deprecated Use LambdaResponseBuilder.create().withBody(...).build() instead.
    */
   static okBinary(base64: string, fileName?: string): LambdaResponse {
     return LambdaResponse.createForBase64(200, base64, fileName);
@@ -61,27 +65,31 @@ export class LambdaResponse {
 
   /**
    * Create LambdaResponse for HTTP 400
+   * @Deprecated Use LambdaResponseBuilder.badRequest instead.
    */
-  static badRequest(error: string): LambdaResponse {
+  static badRequest(error: string = "Bad Request"): LambdaResponse {
     return LambdaResponse.createForString(400, error);
   }
 
   /**
    * Create LambdaResponse for HTTP 404
+   * @Deprecated Use LambdaResponseBuilder.notFound instead.
    */
-  static notFound(error: string = "Not found"): LambdaResponse {
+  static notFound(error: string = "Not Found"): LambdaResponse {
     return LambdaResponse.createForString(404, error);
   }
 
   /**
    * Create LambdaResponse for HTTP 500
+   * @Deprecated Use LambdaResponseBuilder.internalError instead.
    */
-  static internalError(error: string = "Internal error"): LambdaResponse {
+  static internalError(error: string = "Internal Error"): LambdaResponse {
     return LambdaResponse.createForString(500, error);
   }
 
   /**
    * Create LambdaResponse for HTTP 401
+   * @Deprecated Use LambdaResponseBuilder.unauthorized instead.
    */
   static unauthorized(error: string = "Unauthorized"): LambdaResponse {
     return LambdaResponse.createForString(401, error);
@@ -89,15 +97,17 @@ export class LambdaResponse {
 
   /**
    * Create LambdaResponse for HTTP 413
+   * @Deprecated Use LambdaResponseBuilder.badRequest instead.
    */
-  static contentTooLarge(error: string = "Content too large"): LambdaResponse {
+  static contentTooLarge(error: string = "Content Too Large"): LambdaResponse {
     return LambdaResponse.createForString(413, error);
   }
 
   /**
    * Create LambdaResponse for HTTP 501
+   * @Deprecated Use LambdaResponseBuilder.notImplemented instead.
    */
-  static notImplemented(error: string = "Not implemented"): LambdaResponse {
+  static notImplemented(error: string = "Not Implemented"): LambdaResponse {
     return LambdaResponse.createForString(501, error);
   }
 
@@ -130,11 +140,8 @@ export class LambdaResponseBuilder {
   etag?: string;
   fileName?: string;
   timestamp?: Date;
-  compressBody: boolean = false;
   status: number = 200;
   debug: boolean = false;
-  private sizeUncompressedBase64Bytes?: number;
-  private sizeCompressedBase64Bytes?: number;
 
   static create(body?: object | string): LambdaResponseBuilder {
     const builder = new LambdaResponseBuilder();
@@ -156,6 +163,7 @@ export class LambdaResponseBuilder {
     this.fileName = fileName;
     return this;
   }
+
   withStatus(status: number): LambdaResponseBuilder {
     this.status = status;
     return this;
@@ -173,14 +181,40 @@ export class LambdaResponseBuilder {
     return this;
   }
 
-  withCompression(enabled: boolean = true): LambdaResponseBuilder {
-    this.compressBody = enabled;
-    return this;
-  }
-
   withDebug(enabled: boolean = true): LambdaResponseBuilder {
     this.debug = enabled;
     return this;
+  }
+
+  public static internalError(
+    error: string = "Internal Error",
+  ): LambdaResponse {
+    return LambdaResponseBuilder.create().withError(error, 500).build();
+  }
+
+  public static notImplemented(
+    error: string = "Not Implemented",
+  ): LambdaResponse {
+    return LambdaResponseBuilder.create().withError(error, 501).build();
+  }
+
+  public static badRequest(error: string = "Bad Request"): LambdaResponse {
+    return LambdaResponseBuilder.create().withError(error, 400).build();
+  }
+
+  public static notFound(error: string = "Not Found"): LambdaResponse {
+    return LambdaResponseBuilder.create().withError(error, 404).build();
+  }
+
+  public static unauthorized(error: string = "Unauthorized"): LambdaResponse {
+    return LambdaResponseBuilder.create().withError(error, 401).build();
+  }
+
+  private withError<T extends object | string>(
+    error: T,
+    status: number,
+  ): LambdaResponseBuilder {
+    return this.withStatus(status).withBody(error);
   }
 
   build(): LambdaResponse {
@@ -189,93 +223,52 @@ export class LambdaResponseBuilder {
     }
     const encodedBody = this.encodeBody();
 
-    return new LambdaResponse(
+    const response = new LambdaResponse(
       this.status,
       encodedBody,
       this.fileName,
       this.timestamp,
-      this.compressBody,
       this.etag,
     );
+
+    // Count response size and return bad request if too large
+    const sw = StopWatch.createStarted("countResponseSize");
+    const responseJsonString = JSON.stringify(response);
+    const responseSize = Buffer.byteLength(responseJsonString);
+    sw.stop("countResponseSize");
+
+    if (this.debug) {
+      // Determine log level
+      const logLevel =
+        responseSize > MAX_LAMBDA_PAYLOAD_BYTES ? "error" : "info";
+      logger[logLevel]({
+        method: "LambdaResponseBuilder.build",
+        message: "Built LambdaProxyResponse",
+        customResponse: truncateMiddle(responseJsonString, 1000),
+        customResponseSizeBytes: responseSize,
+        customTooLarge: responseSize > MAX_LAMBDA_PAYLOAD_BYTES,
+      });
+    }
+
+    // Lambda proxy integration max response size is 6 MiB
+    if (responseSize > MAX_LAMBDA_PAYLOAD_BYTES) {
+      return LambdaResponseBuilder.badRequest(
+        "Response too large. Limit response size with parameters.",
+      );
+    }
+
+    return response;
   }
 
   /**
-   * Encodes body to base64 string that is compressed if compression was requested only if
-   * compressed value is smaller than uncompressed.
-   *
+   * Encodes body to base64 string.
    * @private
-   * @return Base64 encoded body string and compressed if compression was requested,
-   *         and it's smaller than uncompressed value.
+   * @return Body as base64 encoded string.
    */
   private encodeBody(): string {
     if (!this.body) {
       throw new Error("Body is required for LambdaResponseBuilder");
     }
-    const rawBuffer = Buffer.from(this.body, "utf8");
-    const sw = StopWatch.createStarted("base64");
-    const uncompressedBase64 = rawBuffer.toString("base64");
-
-    if (!this.compressBody) {
-      return uncompressedBase64;
-    }
-
-    sw.stop("base64").start("compress");
-    const compressed = compressBuffer(rawBuffer);
-    const compressedBase64 = compressed.toString("base64");
-    sw.stop("compress");
-    this.sizeUncompressedBase64Bytes = Buffer.byteLength(uncompressedBase64);
-    this.sizeCompressedBase64Bytes = Buffer.byteLength(compressedBase64);
-
-    const compressionNeeded =
-      this.sizeCompressedBase64Bytes < this.sizeUncompressedBase64Bytes;
-
-    if (this.debug) {
-      const compressionRatio = (
-        this.sizeUncompressedBase64Bytes / this.sizeCompressedBase64Bytes
-      ).toFixed(1);
-      const spaceSavingRatio = (
-        1 -
-        this.sizeCompressedBase64Bytes / this.sizeUncompressedBase64Bytes
-      ).toFixed(1);
-
-      logger.info({
-        method: "LambdaResponseBuilder.build",
-        message: "Compression ratio for LambdaResponse",
-        customCompressedBytes: this.sizeCompressedBase64Bytes,
-        customUncompressedBytes: this.sizeUncompressedBase64Bytes,
-        customCompressionRatio: compressionRatio,
-        customSpaceSavingRatio: spaceSavingRatio,
-        customCompressionEnabled: compressionNeeded,
-        customCompressionTookMs: sw.getDuration("compress"),
-        customBase64TookMs: sw.getDuration("base64"),
-      });
-    }
-    if (!compressionNeeded) {
-      // deactivate compression and retun uncompressed encoded body
-      this.withCompression(false);
-      return uncompressedBase64;
-    }
-
-    // Compression was better than uncompressed
-    return compressedBase64;
+    return encodeUtf8ToBase64(this.body);
   }
-}
-
-export function compressBuffer(buffer: Buffer): Buffer {
-  return zlib.gzipSync(buffer);
-}
-
-/**
- * Just for debugging if needed to decode body.
- * @param base64
- * @param compressed
- */
-export function decodeBase64ToString(
-  base64: string,
-  compressed = false,
-): string {
-  const buffer = Buffer.from(base64, "base64");
-  return compressed
-    ? zlib.gunzipSync(buffer).toString("utf8")
-    : buffer.toString("utf8");
 }

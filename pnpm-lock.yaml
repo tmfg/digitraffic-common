@@ -48,8 +48,8 @@ importers:
         specifier: ^4.9.0
         version: 4.9.0
       '@types/aws-lambda':
-        specifier: 8.10.152
-        version: 8.10.152
+        specifier: 8.10.159
+        version: 8.10.159
       '@types/etag':
         specifier: 1.8.4
         version: 1.8.4
@@ -1130,8 +1130,8 @@ packages:
   '@types/argparse@1.0.38':
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
 
-  '@types/aws-lambda@8.10.152':
-    resolution: {integrity: sha512-soT/c2gYBnT5ygwiHPmd9a1bftj462NWVk2tKCc1PYHSIacB2UwbTS2zYG4jzag1mRDuzg/OjtxQjQ2NKRB6Rw==}
+  '@types/aws-lambda@8.10.159':
+    resolution: {integrity: sha512-SAP22WSGNN12OQ8PlCzGzRCZ7QDCwI85dQZbmpz7+mAk+L7j+wI7qnvmdKh+o7A5LaOp6QnOZ2NJphAZQTTHQg==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -5145,7 +5145,7 @@ snapshots:
 
   '@types/argparse@1.0.38': {}
 
-  '@types/aws-lambda@8.10.152': {}
+  '@types/aws-lambda@8.10.159': {}
 
   '@types/babel__core@7.20.5':
     dependencies:

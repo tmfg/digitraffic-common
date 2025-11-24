@@ -26,18 +26,18 @@ And then run again the setup.
 Use `pnpm` to build the code i.e.
 
     pnpm install
-    pnpm build
-    pnpm test
-    pnpm test --test-path-pattern 'dt-logger.test'
-    pnpm test:watch
-    pnpm test:watch --test-path-pattern 'dt-logger.test'
+    pnpm run build
+    pnpm run test
+    pnpm run test --test-path-pattern 'dt-logger.test'
+    pnpm run test:watch
+    pnpm run test:watch --test-path-pattern 'dt-logger.test'
 
 Format code
 
-    pnpm format:check # Checks all files
-    pnpm format:check-staged # Checks stagged files
-    pnpm format:fix # Format all files
-    pnpm format:fix-staged # Formats stagged files
+    pnpm run format:check # Checks all files
+    pnpm run format:check-staged # Checks stagged files
+    pnpm run format:fix # Format all files
+    pnpm run format:fix-staged # Formats stagged files
 
 ## Update deps
 

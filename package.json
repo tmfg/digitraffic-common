@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2025.11.21-1",
+  "version": "2025.11.23-1b",
   "private": false,
   "description": "",
   "repository": {
@@ -46,6 +46,7 @@
     "./dist/utils/utils": "./dist/utils/utils.js",
     "./dist/utils/retry": "./dist/utils/retry.js",
     "./dist/utils/geometry": "./dist/utils/geometry.js",
+    "./dist/utils/lambda-proxy-event": "./dist/utils/lambda-proxy-event.js",
     "./dist/aws/infra/sqs-integration": "./dist/aws/infra/sqs-integration.js",
     "./dist/aws/infra/stacks/network-stack": "./dist/aws/infra/stacks/network-stack.js",
     "./dist/aws/infra/stacks/db-stack": "./dist/aws/infra/stacks/db-stack.js",
@@ -84,7 +85,7 @@
     "./dist/aws/infra/canaries/url-canary": "./dist/aws/infra/canaries/url-canary.js",
     "./dist/aws/infra/canaries/canary-parameters": "./dist/aws/infra/canaries/canary-parameters.js",
     "./dist/aws/infra/canaries/canary-keys": "./dist/aws/infra/canaries/canary-keys.js",
-    "./dist/aws/types/proxytypes": "./dist/aws/types/proxytypes.js",
+    "./dist/aws/types/lambda-proxy-types": "./dist/aws/types/lambda-proxy-types.js",
     "./dist/aws/types/tags": "./dist/aws/types/tags.js",
     "./dist/aws/types/mediatypes": "./dist/aws/types/mediatypes.js",
     "./dist/aws/types/model-with-reference": "./dist/aws/types/model-with-reference.js",
@@ -136,7 +137,7 @@
     "@rushstack/heft-typescript-plugin": "^0.9.15",
     "@smithy/fetch-http-handler": "^5.3.6",
     "@smithy/types": "^4.9.0",
-    "@types/aws-lambda": "8.10.152",
+    "@types/aws-lambda": "8.10.159",
     "@types/etag": "1.8.4",
     "@types/geojson": "7946.0.16",
     "@types/geojson-validation": "1.0.3",

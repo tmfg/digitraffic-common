@@ -1,12 +1,6 @@
 import etag from "etag";
 import velocity from "velocityjs";
 import { RESPONSE_DEFAULT_LAMBDA } from "../../../aws/infra/api/response.js";
-import type { LambdaResponse } from "../../../aws/types/lambda-response.js";
-import {
-  compressBuffer,
-  decodeBase64ToString,
-} from "../../../aws/types/lambda-response.js";
-import { TEST_BIG_JSON } from "../../types/lambda-response.test.js";
 
 const TEST_BODY = "Hello world!";
 
@@ -31,31 +25,22 @@ describe("response tests", () => {
     status: number,
     fileName?: string,
     timestamp?: Date,
-    compressBody: boolean = false,
-    body: string = TEST_BODY,
   ): [string, VelocityContext] {
     const compile = new velocity.Compile(
       velocity.parse(RESPONSE_DEFAULT_LAMBDA),
     );
-    const rawBuffer = Buffer.from(body, "utf8");
     const output = compile.render({
       input: {
-        path: () =>
-          ({
-            body: (compressBody
-              ? compressBuffer(rawBuffer)
-              : rawBuffer
-            ).toString("base64"),
-            status,
-            fileName,
-            timestamp: timestamp?.toUTCString(),
-            etag: generateEtagValueFromString(body),
-            compressed: compressBody,
-          }) satisfies Omit<LambdaResponse, "withTimestamp">,
+        path: () => ({
+          body: Buffer.from(TEST_BODY).toString("base64"),
+          status,
+          fileName,
+          timestamp: timestamp?.toUTCString(),
+          etag: generateEtagValueFromString(TEST_BODY),
+        }),
       },
       util: {
-        base64Decode: (data: string) =>
-          decodeBase64ToString(data, compressBody),
+        base64Decode: (data: string) => Buffer.from(data, "base64").toString(),
       },
       context: {
         responseOverride: {
@@ -66,7 +51,6 @@ describe("response tests", () => {
             ETag: undefined,
             "Last-Modified": undefined,
             "Content-Disposition": undefined,
-            "Content-Encoding": undefined,
           },
         },
       },
@@ -83,10 +67,8 @@ describe("response tests", () => {
     contentType?: string,
     fileName?: string,
     timestamp?: Date,
-    body: string = TEST_BODY,
-    compressBody: boolean = false,
   ): void {
-    expect(output).toEqual(body);
+    expect(output).toEqual(TEST_BODY);
     expect(context).toMatchObject({
       responseOverride: {
         status,
@@ -95,8 +77,7 @@ describe("response tests", () => {
           "Access-Control-Allow-Origin": "*",
           "Content-Disposition": fileName,
           "Last-Modified": timestamp?.toUTCString(),
-          ETag: generateEtagValueFromString(body),
-          "Content-Encoding": compressBody ? "gzip" : undefined,
+          ETag: generateEtagValueFromString(TEST_BODY),
         },
       },
     });
@@ -137,28 +118,5 @@ describe("response tests", () => {
     const [output, context] = generateResponse(204);
 
     assertOutputAndContext(output, context, 204, "text/plain");
-  });
-
-  test("test 200 - compressed", () => {
-    const now = new Date();
-    const body = JSON.stringify(TEST_BIG_JSON);
-    const [output, context] = generateResponse(
-      200,
-      "test.json",
-      now,
-      true,
-      body,
-    );
-
-    assertOutputAndContext(
-      output,
-      context,
-      undefined,
-      undefined,
-      'attachment; filename="test.json"',
-      now,
-      body,
-      true,
-    );
   });
 });
