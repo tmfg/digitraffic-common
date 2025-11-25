@@ -34,6 +34,7 @@ Use `pnpm` to build the code i.e.
 
 Format code
 
+    pnpm run format:package-json # Format package.json
     pnpm run format:check # Checks all files
     pnpm run format:check-staged # Checks stagged files
     pnpm run format:fix # Format all files
