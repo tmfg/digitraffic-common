@@ -34,6 +34,7 @@ export class FunctionBuilder {
   private readonly _stack: DigitrafficStack;
   private readonly _name: string;
 
+  private description?: string;
   private runtime: Runtime = Runtime.NODEJS_22_X;
   private architecture: Architecture = Architecture.ARM_64;
   private role?: IRole;
@@ -119,8 +120,9 @@ export class FunctionBuilder {
   }
 
   /**
-   * Use given handler(${name}.handler) to run the lambda.  Default value is lambdaname.
+   * Use given handler(${name}.handler) to run the lambda.  Default value is lambdaName.
    * @param name
+   * @param handlerFunctionName
    * @returns
    */
   public withHandler(
@@ -128,6 +130,11 @@ export class FunctionBuilder {
     handlerFunctionName: string = "handler",
   ): this {
     this.handler = `${name}.${handlerFunctionName}`;
+    return this;
+  }
+
+  withDescription(description: string): this {
+    this.description = description;
     return this;
   }
 
@@ -294,6 +301,7 @@ export class FunctionBuilder {
       functionName: this.functionName,
       securityGroups,
       environment: this.getEnvironment(),
+      description: this.description,
     });
 
     if (this._features.secretAccess) {

@@ -10,6 +10,9 @@ import { TrafficType } from "../../types/traffictype.js";
 const TEST_ENV_VAR = "TEST_ENV_VAR" as const;
 const TEST_ENV_VALUE = "testValue" as const;
 
+// AWS::Lambda::Function Template Reference
+// https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-lambda-function.html
+
 describe("FunctionBuilder test", () => {
   function createTemplate(
     tester: (builder: FunctionBuilder) => void,
@@ -111,6 +114,16 @@ describe("FunctionBuilder test", () => {
 
     template.hasResourceProperties("AWS::Lambda::Function", {
       Runtime: Runtime.NODEJS_20_X.name,
+    });
+  });
+
+  test("Lambda description is set", () => {
+    const template = createTemplate((builder: FunctionBuilder) => {
+      builder.withDescription("Does something useful");
+    });
+
+    template.hasResourceProperties("AWS::Lambda::Function", {
+      Description: "Does something useful",
     });
   });
 
