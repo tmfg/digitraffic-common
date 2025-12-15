@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2025.12.15-4",
+  "version": "2025.12.15-5",
   "private": false,
   "description": "",
   "repository": {
@@ -11,7 +11,6 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
-    "./dist/database/database-singleton": "./dist/database/database-singleton.js",
     "./dist/database/database": "./dist/database/database.js",
     "./dist/database/cached": "./dist/database/cached.js",
     "./dist/database/models": "./dist/database/models.js",
