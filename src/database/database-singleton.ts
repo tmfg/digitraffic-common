@@ -13,6 +13,7 @@ export enum DatabaseEnvironmentKeys {
 }
 
 const dbSingletons: Map<string, DTDatabase> = new Map();
+let signalHandlersRegistered = false;
 
 export type DTDatabase = IDatabase<unknown>;
 
@@ -56,6 +57,15 @@ function getDbSingleton(
     );
     dbSingletons.set(key, db);
   }
+
+  // Register signal handlers only once to close all DB singletons on exit
+  if (!signalHandlersRegistered) {
+    process.on("SIGTERM", closeAllDbSingletons);
+    process.on("SIGINT", closeAllDbSingletons);
+    process.on("beforeExit", closeAllDbSingletons);
+    signalHandlersRegistered = true;
+  }
+
   return db;
 }
 
@@ -97,20 +107,15 @@ async function doInDatabase<T>(
     return await fn(db);
   } catch (e) {
     logException(logger, e);
-
     throw e;
-  } finally {
-    await db.$pool.end();
   }
 }
 
-// function convertNullColumnsToUndefined(rows: Record<string, unknown>[]) {
-//   rows.forEach((row) => {
-//     for (const column in row) {
-//       const columnValue = row[column];
-//       if (columnValue === null) {
-//         row[column] = undefined;
-//       }
-//     }
-//   });
-// }
+function closeAllDbSingletons() {
+  for (const db of dbSingletons.values()) {
+    if (db.$pool && typeof db.$pool.end === "function") {
+      db.$pool.end();
+    }
+  }
+  dbSingletons.clear();
+}
