@@ -60,8 +60,12 @@ function getDbSingleton(
 
   // Register signal handlers only once to close all DB singletons on exit
   if (!signalHandlersRegistered) {
-    process.on("SIGTERM", closeAllDbSingletons);
-    process.on("SIGINT", closeAllDbSingletons);
+    process.on("SIGTERM", () =>
+      closeAllDbSingletons().then(() => process.exit(0)),
+    );
+    process.on("SIGINT", () =>
+      closeAllDbSingletons().then(() => process.exit(0)),
+    );
     process.on("beforeExit", closeAllDbSingletons);
     signalHandlersRegistered = true;
   }
@@ -111,10 +115,10 @@ async function doInDatabase<T>(
   }
 }
 
-function closeAllDbSingletons() {
+async function closeAllDbSingletons() {
   for (const db of dbSingletons.values()) {
-    if (db.$pool && typeof db.$pool.end === "function") {
-      db.$pool.end();
+    if (db.$pool && typeof db.$pool.end === "function" && !db.$pool.ended) {
+      await db.$pool.end();
     }
   }
   dbSingletons.clear();
