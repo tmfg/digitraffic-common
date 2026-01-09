@@ -16,7 +16,7 @@ export function zStringToNumber(message?: string) {
   return z
     .string()
     .transform(Number)
-    .refine((vesselId) => !Number.isNaN(vesselId), {
+    .refine((number) => !Number.isNaN(number), {
       message: message ? message : "Not a number",
     });
 }
