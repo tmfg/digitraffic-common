@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2026.01.09-3",
+  "version": "2026.1.9-4",
   "private": false,
   "description": "",
   "repository": {
@@ -47,6 +47,7 @@
     "./dist/utils/retry": "./dist/utils/retry.js",
     "./dist/utils/geometry": "./dist/utils/geometry.js",
     "./dist/utils/lambda-proxy-event": "./dist/utils/lambda-proxy-event.js",
+    "./dist/utils/zod-utils": "./dist/utils/zod-utils.js",
     "./dist/aws/infra/sqs-integration": "./dist/aws/infra/sqs-integration.js",
     "./dist/aws/infra/stacks/network-stack": "./dist/aws/infra/stacks/network-stack.js",
     "./dist/aws/infra/stacks/db-stack": "./dist/aws/infra/stacks/db-stack.js",
