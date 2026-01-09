@@ -7,9 +7,7 @@ import { z } from "zod";
  * Usage:
  * const mySchema = z
  *  .object({
- *    myParameter: z
- *      .zStringToDate("Invalid value of myParameter")
- *      .optional()
+ *    myParameter: zStringToDate("Invalid value of myParameter").optional()
  *  });
  *
  */
