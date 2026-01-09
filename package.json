@@ -1,6 +1,6 @@
 {
   "name": "@digitraffic/common",
-  "version": "2026.01.09-1",
+  "version": "2026.01.09-2",
   "private": false,
   "description": "",
   "repository": {
@@ -144,7 +144,7 @@
     "@types/jest": "30.0.0",
     "@types/lodash-es": "4.17.12",
     "@types/madge": "5.0.3",
-    "@types/node": "22.19.27",
+    "@types/node": "22.19.3",
     "aws-cdk-lib": "2.234.0",
     "change-case": "5.4.4",
     "constructs": "10.4.4",
