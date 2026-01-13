@@ -18,6 +18,7 @@ export class LambdaProxyResponseBuilder {
   etag?: string;
   fileName?: string;
   timestamp?: Date;
+  location?: string;
   compressBody: boolean = false;
   status: number = 200;
   contentType: string = MediaType.APPLICATION_JSON;
@@ -26,7 +27,7 @@ export class LambdaProxyResponseBuilder {
   private sizeCompressedBase64Bytes?: number;
 
   static create(
-    body?: object | string,
+    body: object | string = "",
     isBase64Encoded: boolean = false,
   ): LambdaProxyResponseBuilder {
     const builder = new LambdaProxyResponseBuilder();
@@ -96,6 +97,11 @@ export class LambdaProxyResponseBuilder {
     return this;
   }
 
+  withLocation(location: string): LambdaProxyResponseBuilder {
+    this.location = location;
+    return this;
+  }
+
   public static internalError(
     error: object | string = "Internal Error",
   ): APIGatewayProxyResult {
@@ -140,11 +146,15 @@ export class LambdaProxyResponseBuilder {
   }
 
   build(): APIGatewayProxyResult {
-    if (!this.body) {
+    const bodyNotRequired = [204, 301, 302, 303, 307, 308].includes(
+      this.status,
+    );
+
+    if (!this.body && !bodyNotRequired) {
       throw new Error("Body is required for LambdaResponseBuilder");
     }
     // This needs to be called before building the response as this might modify compressBody value
-    const maybeEncodedBody = this.encodeBody();
+    const maybeEncodedBody = this.body ? this.encodeBody() : "";
 
     const response = {
       statusCode: this.status,
@@ -154,6 +164,7 @@ export class LambdaProxyResponseBuilder {
         ...(this.fileName
           ? { "Content-Disposition": `attachment; filename="${this.fileName}"` }
           : {}),
+        ...(this.location ? { Location: this.location } : {}),
         ...(this.timestamp
           ? { "Last-Modified": this.timestamp.toUTCString() }
           : {}),
