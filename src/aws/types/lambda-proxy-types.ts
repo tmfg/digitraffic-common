@@ -8,6 +8,11 @@ import { MediaType } from "./mediatypes.js";
 
 export const MAX_LAMBDA_PAYLOAD_BYTES = 6 * 1024 * 1024; // 6 MiB
 
+export const REDIRECTION_HTTP_STATUS_CODES = [301, 302, 303, 307, 308] as const;
+
+export type RedirectionStatusCode =
+  (typeof REDIRECTION_HTTP_STATUS_CODES)[number];
+
 /**
  * Used to build APIGatewayProxyResult response for Lambda proxy integration.
  * Default status is 200, compressed = false and contentType is application/json.
@@ -132,6 +137,16 @@ export class LambdaProxyResponseBuilder {
     return LambdaProxyResponseBuilder.create().withError(error, 401).build();
   }
 
+  public static redirect(
+    path: string,
+    status: RedirectionStatusCode = 302,
+  ): APIGatewayProxyResult {
+    return LambdaProxyResponseBuilder.create()
+      .withLocation(path)
+      .withStatus(status)
+      .build();
+  }
+
   private withError<T extends object | string>(
     error: T,
     status: number,
@@ -146,7 +161,7 @@ export class LambdaProxyResponseBuilder {
   }
 
   build(): APIGatewayProxyResult {
-    const bodyNotRequired = [204, 301, 302, 303, 307, 308].includes(
+    const bodyNotRequired = [204, ...REDIRECTION_HTTP_STATUS_CODES].includes(
       this.status,
     );
 
