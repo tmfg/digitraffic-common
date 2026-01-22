@@ -1,3 +1,4 @@
+import { basename } from "node:path";
 import { Duration } from "aws-cdk-lib";
 import type { Metric } from "aws-cdk-lib/aws-cloudwatch";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
@@ -35,7 +36,7 @@ export class FunctionBuilder {
   private readonly _name: string;
 
   private description?: string;
-  private runtime: Runtime = Runtime.NODEJS_22_X;
+  private runtime: Runtime = Runtime.NODEJS_24_X;
   private architecture: Architecture = Architecture.ARM_64;
   private role?: IRole;
   private timeout: Duration = Duration.seconds(60);
@@ -68,8 +69,13 @@ export class FunctionBuilder {
     this.environment = {};
     this.vpc = stack.vpc;
 
-    this.withHandler(lambdaName);
+    // this calls withHandler as well but with full path
     this.withAssetCode(lambdaName);
+    // Remove path from lambda to get module name.
+    // e.g. for lambdaName "api/charging-network/v1/operators",
+    // moduleName becomes "operators" and handler becomes "operators.handler"
+    const moduleName = basename(lambdaName);
+    this.withHandler(moduleName);
   }
 
   /**
@@ -175,7 +181,7 @@ export class FunctionBuilder {
   }
 
   /**
-   * Set runtime for the lambda.  Default is Runtime.NODEJS_22_X.
+   * Set runtime for the lambda.  Default is Runtime.NODEJS_24_X.
    */
   public withRuntime(runtime: Runtime): this {
     this.runtime = runtime;

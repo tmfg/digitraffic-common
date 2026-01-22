@@ -284,7 +284,12 @@ export class LambdaProxyResponseBuilder {
 
 /**
  * Subset of APIGatewayProxyEvent containing only query string parameters.
- * Useful to be used as simple proxy lambda handler parameter.
+ * Useful to be used as simple proxy lambda handler parameter when not full event:
+ * <code>import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";</code>
+ * is not needed.
+ *
+ * Use <code>import type { APIGatewayProxyResult } from "aws-lambda";</code>
+ * as return type for proxy lambda handlers.
  */
 export type APIGatewayProxyEventSubset = Pick<
   APIGatewayProxyEvent,

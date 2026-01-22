@@ -17,6 +17,7 @@ describe("FunctionBuilder test", () => {
   function createTemplate(
     tester: (builder: FunctionBuilder) => void,
     plain: boolean = false,
+    lambdaName: string = "test",
   ): Template {
     const app = new App();
     const stack = new DigitrafficStack(app, "test-stack", {
@@ -34,10 +35,10 @@ describe("FunctionBuilder test", () => {
     };
 
     const builder = plain
-      ? FunctionBuilder.plain(stack, "test")
+      ? FunctionBuilder.plain(stack, lambdaName)
           .withEnvironment(environment)
           .withCode(Code.fromInline("{}"))
-      : FunctionBuilder.create(stack, "test")
+      : FunctionBuilder.create(stack, lambdaName)
           .withoutDatabaseAccess()
           .withEnvironment(environment)
           .withCode(Code.fromInline("{}"));
@@ -85,7 +86,7 @@ describe("FunctionBuilder test", () => {
           [TEST_ENV_VAR]: TEST_ENV_VALUE,
         },
       },
-      Runtime: Runtime.NODEJS_22_X.name,
+      Runtime: Runtime.NODEJS_24_X.name,
       MemorySize: 128,
       Timeout: 60,
       Handler: "test.handler",
@@ -109,11 +110,11 @@ describe("FunctionBuilder test", () => {
 
   test("Lambda runtime is set", () => {
     const template = createTemplate((builder: FunctionBuilder) => {
-      builder.withRuntime(Runtime.NODEJS_20_X);
+      builder.withRuntime(Runtime.NODEJS_24_X);
     });
 
     template.hasResourceProperties("AWS::Lambda::Function", {
-      Runtime: Runtime.NODEJS_20_X.name,
+      Runtime: Runtime.NODEJS_24_X.name,
     });
   });
 
@@ -174,6 +175,32 @@ describe("FunctionBuilder test", () => {
 
     template.hasResourceProperties("AWS::Lambda::Function", {
       Handler: "custom.main",
+    });
+  });
+
+  test("Lambda handler module is resolved from path last element", () => {
+    const template = createTemplate(
+      (_builder: FunctionBuilder) => {},
+      false,
+      "api/charging-network/v1/operators",
+    );
+
+    // const lambdas = template.findResources("AWS::Lambda::Function");
+    // console.debug(JSON.stringify(lambdas, null, 2));
+    template.hasResourceProperties("AWS::Lambda::Function", {
+      Handler: "operators.handler",
+    });
+  });
+
+  test("Lambda handler module is same as lambda name", () => {
+    const template = createTemplate(
+      (_builder: FunctionBuilder) => {},
+      false,
+      "operators",
+    );
+
+    template.hasResourceProperties("AWS::Lambda::Function", {
+      Handler: "operators.handler",
     });
   });
 
