@@ -12,7 +12,6 @@
   "exports": {
     ".": "./dist/index.js",
     "./dist/database/database": "./dist/database/database.js",
-    "./dist/database/cached": "./dist/database/cached.js",
     "./dist/database/models": "./dist/database/models.js",
     "./dist/database/last-updated": "./dist/database/last-updated.js",
     "./dist/types/geojson": "./dist/types/geojson.js",
