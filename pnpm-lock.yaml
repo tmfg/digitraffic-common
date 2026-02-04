@@ -115,7 +115,10 @@ importers:
         version: 3.5.2
       pg-promise:
         specifier: 12.3.0
-        version: 12.3.0(pg-native@3.5.2)
+        version: 12.3.0(pg-native@3.5.2)(pg-query-stream@4.10.3(pg@8.16.3(pg-native@3.5.2)))
+      pg-query-stream:
+        specifier: 4.10.3
+        version: 4.10.3(pg@8.16.3(pg-native@3.5.2))
       rimraf:
         specifier: 6.1.2
         version: 6.1.2
@@ -2621,6 +2624,11 @@ packages:
   pg-connection-string@2.10.1:
     resolution: {integrity: sha512-iNzslsoeSH2/gmDDKiyMqF64DATUCWj3YJ0wP14kqcsf2TUklwimd+66yYojKwZCA7h2yRNLGug71hCBA2a4sw==}
 
+  pg-cursor@2.16.2:
+    resolution: {integrity: sha512-OzGiSg/71d6h3ls//WRBLaCj3hMHBOuAqCNe8FvU4poZu36hR7y4ZKFVu+JfFIEAVr6CibHai5lg53QJlYZAJw==}
+    peerDependencies:
+      pg: ^8
+
   pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
@@ -2645,6 +2653,11 @@ packages:
 
   pg-protocol@1.11.0:
     resolution: {integrity: sha512-pfsxk2M9M3BuGgDOfuy37VNRRX3jmKgMjcvAcWqNDpZSf4cUmv8HSOl5ViRQFsfARFn0KuUQTgLxVMbNq5NW3g==}
+
+  pg-query-stream@4.10.3:
+    resolution: {integrity: sha512-h2utrzpOIzeT9JfaqfvBbVuvCfBjH86jNfVrGGTbyepKAIOyTfDew0lAt8bbJjs9n/I5bGDl7S2sx6h5hPyJxw==}
+    peerDependencies:
+      pg: ^8
 
   pg-types@2.2.0:
     resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
@@ -6844,6 +6857,10 @@ snapshots:
 
   pg-connection-string@2.10.1: {}
 
+  pg-cursor@2.16.2(pg@8.16.3(pg-native@3.5.2)):
+    dependencies:
+      pg: 8.16.3(pg-native@3.5.2)
+
   pg-int8@1.0.1: {}
 
   pg-minify@1.8.0: {}
@@ -6857,16 +6874,22 @@ snapshots:
     dependencies:
       pg: 8.16.3(pg-native@3.5.2)
 
-  pg-promise@12.3.0(pg-native@3.5.2):
+  pg-promise@12.3.0(pg-native@3.5.2)(pg-query-stream@4.10.3(pg@8.16.3(pg-native@3.5.2))):
     dependencies:
       assert-options: 0.8.3
       pg: 8.16.3(pg-native@3.5.2)
       pg-minify: 1.8.0
+      pg-query-stream: 4.10.3(pg@8.16.3(pg-native@3.5.2))
       spex: 4.1.0
     transitivePeerDependencies:
       - pg-native
 
   pg-protocol@1.11.0: {}
+
+  pg-query-stream@4.10.3(pg@8.16.3(pg-native@3.5.2)):
+    dependencies:
+      pg: 8.16.3(pg-native@3.5.2)
+      pg-cursor: 2.16.2(pg@8.16.3(pg-native@3.5.2))
 
   pg-types@2.2.0:
     dependencies:
