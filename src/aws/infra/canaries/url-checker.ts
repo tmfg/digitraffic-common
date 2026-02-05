@@ -19,6 +19,13 @@ const baseHeaders = {
   Accept: "*/*",
 } as Record<string, string>;
 
+function sanitizeStepName(url: string): string {
+  return url
+    .replace(/\//g, " ")
+    .replace(/[?&=]/g, " ")
+    .replace(/auth=.*/, "");
+}
+
 type CheckerFunction = (Res: IncomingMessage) => Promise<void>;
 type JsonCheckerFunction<T> = (
   json: T,
@@ -79,8 +86,9 @@ export class UrlChecker {
       },
     };
 
+    // The step name can only contain letters, numbers, hyphens, underscores, periods, and spaces
     await synthetics.executeHttpStep(
-      `Verify ${statusCode} for ${url.replace(/auth=.*/, "")}`,
+      `Verify ${statusCode} for ${sanitizeStepName(url)}`,
       requestOptions,
       callback,
     );
@@ -106,7 +114,7 @@ export class UrlChecker {
     };
 
     return synthetics.executeHttpStep(
-      `Verify 404 for ${url}`,
+      `Verify 404 for ${sanitizeStepName(url)}`,
       requestOptions,
       validateStatusCodeAndContentType(404, MediaType.TEXT_PLAIN),
     );
@@ -121,7 +129,7 @@ export class UrlChecker {
     };
 
     return synthetics.executeHttpStep(
-      `Verify 400 for ${url}`,
+      `Verify 400 for ${sanitizeStepName(url)}`,
       requestOptions,
       validateStatusCodeAndContentType(400, MediaType.TEXT_PLAIN),
     );
@@ -148,7 +156,7 @@ export class UrlChecker {
     };
 
     return synthetics.executeHttpStep(
-      `Verify 403 for ${url}`,
+      `Verify 403 for ${sanitizeStepName(url)}`,
       requestOptions,
       validateStatusCodeAndContentType(
         403,
