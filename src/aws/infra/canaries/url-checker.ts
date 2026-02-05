@@ -21,9 +21,9 @@ const baseHeaders = {
 
 function sanitizeStepName(url: string): string {
   return url
+    .replace(/auth=.*/, "")
     .replace(/\//g, " ")
-    .replace(/[?&=]/g, " ")
-    .replace(/auth=.*/, "");
+    .replace(/[?&=]/g, " ");
 }
 
 type CheckerFunction = (Res: IncomingMessage) => Promise<void>;
