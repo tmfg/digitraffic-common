@@ -19,11 +19,9 @@ const baseHeaders = {
   Accept: "*/*",
 } as Record<string, string>;
 
+// Step name can only contain letters, numbers, hyphens, underscores, periods, and spaces
 function sanitizeStepName(url: string): string {
-  return url
-    .replace(/auth=.*/, "")
-    .replace(/\//g, " ")
-    .replace(/[?&=]/g, " ");
+  return url.replace(/auth=.*/, "").replace(/[^a-zA-Z0-9\-_. ]/g, " ");
 }
 
 type CheckerFunction = (Res: IncomingMessage) => Promise<void>;
@@ -86,7 +84,6 @@ export class UrlChecker {
       },
     };
 
-    // The step name can only contain letters, numbers, hyphens, underscores, periods, and spaces
     await synthetics.executeHttpStep(
       `Verify ${statusCode} for ${sanitizeStepName(url)}`,
       requestOptions,
