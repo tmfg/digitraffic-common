@@ -8,8 +8,10 @@ This project uses dependency overrides and .npmrc customizations to address secu
 Overrides in the `pnpm.overrides` field of `package.json` are used to force specific versions of transitive dependencies, typically to patch vulnerabilities or work around bugs.
 
 #### Current Overrides
-- `fast-xml-parser`: Locked to `5.3.8` to address a vulnerability in versions `<5.3.8`.
-- `ajv`: Locked to `8.18.0` to address a ReDoS vulnerability in versions `<8.18.0`.
+These overrides use version range selectors to only affect vulnerable versions, leaving safe versions unchanged:
+
+- `ajv@>=7.0.0-alpha.0 <8.18.0` → `8.18.0`: Fix ReDoS vulnerability (GHSA-2g4f-4pwh-qvx6)
+- `fast-xml-parser@<5.3.8` → `5.3.8`: Fix stack overflow and entity bypass vulnerabilities (GHSA-fj3w-jwp8-x2g3, GHSA-m7jm-9gc2-mpf2, GHSA-jmr7-xgp7-cmfj)
 
 ### How to Check If Overrides Can Be Removed
 1. **Check Upstream Dependencies:**
@@ -28,7 +30,7 @@ Overrides in the `pnpm.overrides` field of `package.json` are used to force spec
 The `.npmrc` file may include `minimum-release-age-exclude` entries to allow installation of very recent package versions (e.g., security patches) before the default waiting period (7 days).
 
 #### Current Exclusions
-- `minimum-release-age-exclude[]=fast-xml-parser@5.3.8` allows version 5.3.8 to bypass the minimum release age restriction.
+None. All previously excluded packages are now older than the `minimum-release-age` (7 days).
 
 ### How to Check If Exclusions Can Be Removed
 1. **Check the Age of the Package:**
