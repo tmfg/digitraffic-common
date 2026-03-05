@@ -56,10 +56,13 @@ if ! pnpm whoami &>/dev/null; then
     pnpm login
 fi
 
-echo -e "${GREEN}Step 1/6: Building and testing...${NC}"
+echo -e "${GREEN}Step 1/7: Verifying dependencies...${NC}"
+pnpm install --frozen-lockfile
+
+echo -e "${GREEN}Step 2/7: Building and testing...${NC}"
 pnpm run prepublishOnly
 
-echo -e "${GREEN}Step 2/6: Updating version in package.json...${NC}"
+echo -e "${GREEN}Step 3/7: Updating version in package.json...${NC}"
 # Use sed (gsed on macOS if available, otherwise sed)
 if command -v gsed &>/dev/null; then
     gsed -i "s/\"version\": \".*\"/\"version\": \"${VERSION}\"/" package.json
@@ -67,17 +70,17 @@ else
     sed -i '' "s/\"version\": \".*\"/\"version\": \"${VERSION}\"/" package.json
 fi
 
-echo -e "${GREEN}Step 3/6: Committing version bump...${NC}"
+echo -e "${GREEN}Step 4/7: Committing version bump...${NC}"
 git add package.json
 git commit -m "Version bump to ${VERSION}"
 
-echo -e "${GREEN}Step 4/6: Pushing to remote...${NC}"
+echo -e "${GREEN}Step 5/7: Pushing to remote...${NC}"
 git push
 
-echo -e "${GREEN}Step 5/6: Creating GitHub release...${NC}"
+echo -e "${GREEN}Step 6/7: Creating GitHub release...${NC}"
 gh release create "${VERSION}" --generate-notes
 
-echo -e "${GREEN}Step 6/6: Publishing to npm...${NC}"
+echo -e "${GREEN}Step 7/7: Publishing to npm...${NC}"
 echo -e "${YELLOW}You will be prompted for your npm OTP (one-time password)${NC}"
 pnpm publish --tag latest
 
