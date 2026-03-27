@@ -6,13 +6,13 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+TODAY_VERSION_1=$(date "+%-Y.%-m.%-d-1")
 
 print_usage() {
-    TODAY=$(date "+%-Y.%-m.%-d-1")
     echo "Usage: ./scripts/publish.sh [--beta] <version>"
     echo ""
     echo "Arguments:"
-    echo "  <version>   Version in YYYY.M.D-N format (e.g., ${TODAY})"
+    echo "  <version>   Version in YYYY.M.D-N format (e.g., ${TODAY_VERSION_1})"
     echo ""
     echo "Options:"
     echo "  --beta      Append '-beta' suffix to the version, publish under the 'beta'"
@@ -20,8 +20,8 @@ print_usage() {
     echo "  --help, -h  Print this help message"
     echo ""
     echo "Examples:"
-    echo "  ./scripts/publish.sh ${TODAY}"
-    echo "  ./scripts/publish.sh --beta ${TODAY}"
+    echo "  ./scripts/publish.sh ${TODAY_VERSION_1}"
+    echo "  ./scripts/publish.sh --beta ${TODAY_VERSION_1}"
 }
 
 # Parse arguments
@@ -54,7 +54,7 @@ fi
 # Validate version format (YYYY.M.D-N)
 if ! [[ "$VERSION" =~ ^[0-9]{4}\.[0-9]{1,2}\.[0-9]{1,2}-[0-9]+$ ]]; then
     echo -e "${RED}Error: Invalid version format '${VERSION}'${NC}"
-    echo "Expected format: YYYY.M.D-N (e.g., 2026.3.5-1)"
+    echo "Expected format: YYYY.M.D-N (e.g., ${TODAY_VERSION_1})"
     exit 1
 fi
 
