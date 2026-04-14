@@ -8,6 +8,7 @@ import type { InfraStackConfiguration } from "./intra-stack-configuration.js";
 export interface NetworkConfiguration {
   readonly vpcName: string;
   readonly cidr: string;
+  readonly natGateways?: number;
 }
 
 export class NetworkStack extends Stack {
@@ -68,6 +69,7 @@ export class NetworkStack extends Stack {
       availabilityZones: Stack.of(this).availabilityZones.sort().slice(0, 2), // take two first azs
       enableDnsHostnames: true,
       enableDnsSupport: true,
+      natGateways: configuration.natGateways ?? 2, // one for each AZ
       ipAddresses: IpAddresses.cidr(configuration.cidr),
       subnetConfiguration: [
         {
