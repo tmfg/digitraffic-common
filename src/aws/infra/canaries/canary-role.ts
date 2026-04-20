@@ -41,6 +41,12 @@ export class DigitrafficCanaryRole extends Role {
 
     this.addToPolicy(new PolicyStatement(BASE_POLICY_STATEMENT_PROPS));
     this.addToPolicy(new PolicyStatement(CLOUDWATCH_STATEMENT_PROPS));
+    this.addToPolicy(
+      new PolicyStatement({
+        actions: ["apigateway:GET"],
+        resources: ["arn:aws:apigateway:*::/apikeys/*"],
+      }),
+    );
   }
 
   /**
