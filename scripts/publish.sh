@@ -121,7 +121,11 @@ fi
 
 echo -e "${GREEN}Step 4/7: Committing version bump...${NC}"
 git add package.json
-git commit -m "Version bump to ${VERSION}"
+if git diff --cached --quiet; then
+    echo -e "${YELLOW}No changes to package.json (version already set), skipping commit.${NC}"
+else
+    git commit -m "Version bump to ${VERSION}"
+fi
 
 echo -e "${GREEN}Step 5/7: Pushing to remote...${NC}"
 git push
