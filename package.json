@@ -141,7 +141,7 @@
     "@types/geojson-validation": "1.0.3",
     "@types/madge": "5.0.3",
     "@types/node": "24.12.4",
-    "@vitest/coverage-v8": "4.1.6",
+    "@vitest/coverage-v8": "4.1.9",
     "aws-cdk-lib": "2.254.0",
     "change-case": "5.4.4",
     "constructs": "10.6.0",
@@ -159,7 +159,7 @@
     "sort-package-json": "3.6.1",
     "typescript": "5.9.3",
     "velocityjs": "2.1.6",
-    "vitest": "4.1.6",
+    "vitest": "4.1.9",
     "zod": "4.4.3"
   },
   "peerDependencies": {
