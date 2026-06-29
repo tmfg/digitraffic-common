@@ -36,6 +36,7 @@
     "./dist/marine/id_utils": "./dist/marine/id_utils.js",
     "./dist/index": "./dist/index.js",
     "./dist/utils/api-model": "./dist/utils/api-model.js",
+    "./dist/utils/lead-time-logging": "./dist/utils/lead-time-logging.js",
     "./dist/utils/logging": "./dist/utils/logging.js",
     "./dist/utils/base64": "./dist/utils/base64.js",
     "./dist/utils/date-utils": "./dist/utils/date-utils.js",
