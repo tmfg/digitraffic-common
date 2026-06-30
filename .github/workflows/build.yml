@@ -19,8 +19,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6.0.3
-        with:
-          version: 10
+        # Version is read automatically from "packageManager" field in package.json
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v6
