@@ -109,7 +109,7 @@
     "dist/**/*.d.ts"
   ],
   "scripts": {
-    "build": "heft build --clean && pnpm run format:check",
+    "build": "heft build --clean && node_modules/.bin/biome check --error-on-warnings",
     "build:watch": "heft build-watch",
     "ci:test": "vitest run --coverage --reporter=junit --outputFile=junit.xml",
     "deps:update-all": "node --experimental-strip-types scripts/update-deps-and-peers.ts",
@@ -120,7 +120,7 @@
     "format:package-json": "sort-package-json",
     "prepublishOnly": "pnpm build && pnpm test",
     "setup": "pnpm install; node --experimental-strip-types scripts/setup-digitraffic-common.ts",
-    "test": "vitest run --coverage && pnpm run format:check",
+    "test": "vitest run --coverage && node_modules/.bin/biome check --error-on-warnings",
     "test:watch": "vitest"
   },
   "devDependencies": {
