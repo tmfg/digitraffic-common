@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       - name: Mirror
-        uses: tmfg/digitraffic-actions@mirror/v1
+        uses: tmfg/digitraffic-actions@45f5bd7fc865d63058eb63e8fec0661c1e42489d # mirror/v1
         with:
           mirror-repo: git@github.com:tmfg/digitraffic-common.git
           ssh-private-key: ${{ secrets.SSH_MIRROR_KEY }}
