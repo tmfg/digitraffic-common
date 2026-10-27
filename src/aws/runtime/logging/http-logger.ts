@@ -2,6 +2,7 @@ import type { Dispatcher } from "undici";
 import type { LoggerMethodType } from "./dt-logger.js";
 import { logger } from "./dt-logger-default.js";
 import { WIDE_CONTEXT } from "./wide-context.js";
+import type { AfterResponseState, BeforeErrorState, Hooks } from "ky";
 
 const METHOD: LoggerMethodType = "HttpLogger.logStatus" as const;
 
@@ -28,12 +29,12 @@ export class LoggerFactory {
   }
 
   /** Creates a timer and logger for one outbound HTTP request. */
-  logger(url: string): HttpLogger {
+  logger(url: string, urlTemplate?: string): HttpLogger {
     return new HttpLogger({
       context: this._context,
       url,
       traceId: this._traceId,
-      urlTemplate: this._urlTemplate,
+      urlTemplate: urlTemplate ?? this._urlTemplate,
     });
   }
 }
@@ -79,7 +80,39 @@ export class HttpLogger {
     this.logStatus();
   }
 
-  /** Hook logging into response events */
+/** Create hooks for Ky HTTP client using the provided logger */
+  createKyHooks(logger: HttpLogger): Hooks {
+    return {
+      afterResponse: [
+        async (state: AfterResponseState) => {
+          const contentLengthHeader = state.response.headers.get("content-length");
+
+          // use header when available to determine content length
+          if(contentLengthHeader) {
+            const contentLength = parseInt(contentLengthHeader, 10);
+            logger.end(state.response.status, contentLength);
+            return state.response;
+          }
+          // create clone from the response, so we can read its body without affecting the original response
+          const resp = state.response.clone();
+          const contentLength = (await resp.bytes()).length;          
+
+          logger.end(resp.status, contentLength);
+
+          return state.response;
+        }
+      ],
+      beforeError: [
+        (state: BeforeErrorState) => {
+          logger.error(state.error);
+
+          return state.error;
+        }
+      ]
+    };
+  }
+
+  /** Hook logging into undici response events */
   log(response: Dispatcher.ResponseData<unknown>): void {
     this._statusCode = response.statusCode;
 
