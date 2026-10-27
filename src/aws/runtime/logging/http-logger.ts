@@ -81,7 +81,7 @@ export class HttpLogger {
   }
 
   /** Create hooks for Ky HTTP client using the provided logger */
-  createKyHooks(logger: HttpLogger): Hooks {
+  createKyHooks(): Hooks {
     return {
       afterResponse: [
         async (state: AfterResponseState) => {
@@ -91,21 +91,21 @@ export class HttpLogger {
           // use header when available to determine content length
           if (contentLengthHeader) {
             const contentLength = parseInt(contentLengthHeader, 10);
-            logger.end(state.response.status, contentLength);
+            this.end(state.response.status, contentLength);
             return state.response;
           }
           // create clone from the response, so we can read its body without affecting the original response
           const resp = state.response.clone();
           const contentLength = (await resp.bytes()).length;
 
-          logger.end(resp.status, contentLength);
+          this.end(resp.status, contentLength);
 
           return state.response;
         },
       ],
       beforeError: [
         (state: BeforeErrorState) => {
-          logger.error(state.error);
+          this.error(state.error);
 
           return state.error;
         },
