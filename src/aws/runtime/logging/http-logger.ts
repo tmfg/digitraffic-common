@@ -1,8 +1,8 @@
+import type { AfterResponseState, BeforeErrorState, Hooks } from "ky";
 import type { Dispatcher } from "undici";
 import type { LoggerMethodType } from "./dt-logger.js";
 import { logger } from "./dt-logger-default.js";
 import { WIDE_CONTEXT } from "./wide-context.js";
-import type { AfterResponseState, BeforeErrorState, Hooks } from "ky";
 
 const METHOD: LoggerMethodType = "HttpLogger.logStatus" as const;
 
@@ -80,35 +80,36 @@ export class HttpLogger {
     this.logStatus();
   }
 
-/** Create hooks for Ky HTTP client using the provided logger */
+  /** Create hooks for Ky HTTP client using the provided logger */
   createKyHooks(logger: HttpLogger): Hooks {
     return {
       afterResponse: [
         async (state: AfterResponseState) => {
-          const contentLengthHeader = state.response.headers.get("content-length");
+          const contentLengthHeader =
+            state.response.headers.get("content-length");
 
           // use header when available to determine content length
-          if(contentLengthHeader) {
+          if (contentLengthHeader) {
             const contentLength = parseInt(contentLengthHeader, 10);
             logger.end(state.response.status, contentLength);
             return state.response;
           }
           // create clone from the response, so we can read its body without affecting the original response
           const resp = state.response.clone();
-          const contentLength = (await resp.bytes()).length;          
+          const contentLength = (await resp.bytes()).length;
 
           logger.end(resp.status, contentLength);
 
           return state.response;
-        }
+        },
       ],
       beforeError: [
         (state: BeforeErrorState) => {
           logger.error(state.error);
 
           return state.error;
-        }
-      ]
+        },
+      ],
     };
   }
 
