@@ -33,7 +33,7 @@ describe("HttpLogger", () => {
     });
 
     vi.advanceTimersByTime(1250);
-    httpLogger.end(200, 512);
+    httpLogger.logResponse(200, 512);
 
     expect(infoSpy).toHaveBeenCalledWith({
       method: "HttpLogger.logStatus",
@@ -57,14 +57,14 @@ describe("HttpLogger", () => {
       url: "https://example.test",
     });
 
-    httpLogger.error(new TypeError("request failed"));
+    httpLogger.logError(new TypeError("request failed"));
 
     expect(infoSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         method: "HttpLogger.logStatus",
         [WIDE_CONTEXT.CONTEXT]: "Test",
         [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: "TypeError",
-        [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: -1,
+        [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: undefined,
         [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: undefined,
       }),
     );
@@ -82,7 +82,7 @@ describe("HttpLogger", () => {
       url: "https://example.test",
     });
 
-    httpLogger.error(error);
+    httpLogger.logError(error);
 
     expect(infoSpy).toHaveBeenCalledWith(
       expect.objectContaining({

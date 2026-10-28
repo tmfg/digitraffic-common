@@ -1,4 +1,3 @@
-import type { AfterResponseState, BeforeErrorState, Hooks } from "ky";
 import type { Dispatcher } from "undici";
 import type { LoggerMethodType } from "./dt-logger.js";
 import { logger } from "./dt-logger-default.js";
@@ -40,7 +39,7 @@ export class LoggerFactory {
 }
 
 /**
- * Logs the outcome and duration of one outbound HTTP request.
+ * Logs the outcome and duration of HTTP requests. Usually one, but in case of retries there may be multiple logs for the same logical request.
  *
  * Call {@link end} when a response status is available. Call {@link error}
  * when the request fails before a response is received. Each terminal method
@@ -51,12 +50,9 @@ export class HttpLogger {
   private readonly _context: string;
   private readonly _url: string;
   private readonly _urlTemplate?: string;
-  private readonly _startTime: number;
   private readonly _traceId?: string;
 
-  private _errorType?: string;
-  private _contentLength?: number;
-  private _statusCode: number = -1;
+  private _startTime: number;
 
   constructor(parameters: {
     context: string;
@@ -72,63 +68,31 @@ export class HttpLogger {
     this._startTime = Date.now();
   }
 
-  /** Records a received HTTP response and writes the request log entry. */
-  end(statusCode: number, contentLength?: number): void {
-    this._statusCode = statusCode;
-    this._contentLength = contentLength;
-
-    this.logStatus();
-  }
-
-  /** Create hooks for Ky HTTP client using the provided logger */
-  createKyHooks(): Hooks {
-    return {
-      afterResponse: [
-        async (state: AfterResponseState) => {
-          const contentLengthHeader =
-            state.response.headers.get("content-length");
-
-          // use header when available to determine content length
-          if (contentLengthHeader) {
-            const contentLength = parseInt(contentLengthHeader, 10);
-            this.end(state.response.status, contentLength);
-            return state.response;
-          }
-          // create clone from the response, so we can read its body without affecting the original response
-          const resp = state.response.clone();
-          const contentLength = (await resp.bytes()).length;
-
-          this.end(resp.status, contentLength);
-
-          return state.response;
-        },
-      ],
-      beforeError: [
-        (state: BeforeErrorState) => {
-          this.error(state.error);
-
-          return state.error;
-        },
-      ],
-    };
+  start(): void {
+    this._startTime = Date.now();
   }
 
   /** Hook logging into undici response events */
   log(response: Dispatcher.ResponseData<unknown>): void {
-    this._statusCode = response.statusCode;
-
     const contentLengthHeader = response.headers["content-length"] as string;
     const contentLength = contentLengthHeader
       ? parseInt(contentLengthHeader, 10)
       : undefined;
 
     response.body.on("error", (err: unknown) => {
-      this.error(err);
+      this.logError(err);
     });
 
     response.body.on("end", () => {
-      this.end(response.statusCode, contentLength);
+      this.logResponse(response.statusCode, contentLength);
     });
+  }
+
+  /** Records a received HTTP response and writes the request log entry. */
+  logResponse(statusCode: number, contentLength?: number): void {
+    const endTime = Date.now();
+
+    this.logStatus({ endTime, statusCode, contentLength });
   }
 
   /**
@@ -136,33 +100,44 @@ export class HttpLogger {
    *
    * Errors are represented by their name, strings are kept as-is, and
    * other values are recorded as `Unknown`. Since no response was received,
-   * the status code remains `-1`.
+   * the status code is left undefined.
    */
-  error(error: unknown): void {
+  logError(error: unknown): void {
+    let errorType: string;
+
     if (typeof error === "string") {
-      this._errorType = error;
+      errorType = error;
     } else if (error instanceof Error) {
-      this._errorType = error.name;
+      errorType = error.name;
     } else {
-      this._errorType = "Unknown";
+      errorType = "Unknown";
     }
 
-    this.logStatus();
-  }
-
-  private logStatus(): void {
     const endTime = Date.now();
 
+    this.logStatus({
+      endTime,
+      errorType,
+    });
+  }
+
+  private logStatus(parameters: {
+    endTime: number;
+    statusCode?: number;
+    contentLength?: number;
+    errorType?: string;
+  }): void {
     logger.info({
       method: METHOD,
       [WIDE_CONTEXT.CONTEXT]: this._context,
       [WIDE_CONTEXT.TRACE_ID]: this._traceId,
       [WIDE_CONTEXT.HTTP_KEYS.URL]: this._url,
       [WIDE_CONTEXT.HTTP_KEYS.URL_TEMPLATE]: this._urlTemplate,
-      [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: this._errorType,
-      [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: this._statusCode,
-      [WIDE_CONTEXT.HTTP_KEYS.DURATION]: (endTime - this._startTime) / 1000,
-      [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: this._contentLength,
+      [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: parameters.errorType,
+      [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: parameters.statusCode,
+      [WIDE_CONTEXT.HTTP_KEYS.DURATION]:
+        (parameters.endTime - this._startTime) / 1000,
+      [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: parameters.contentLength,
     });
   }
 }
