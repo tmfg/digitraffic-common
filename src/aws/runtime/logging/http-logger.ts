@@ -1,4 +1,4 @@
-import type { Dispatcher } from "undici";
+import { snakeCase } from "es-toolkit";
 import type { LoggerMethodType } from "./dt-logger.js";
 import { logger } from "./dt-logger-default.js";
 import { WIDE_CONTEXT } from "./wide-context.js";
@@ -41,6 +41,9 @@ export class LoggerFactory {
 /**
  * Logs the outcome and duration of HTTP requests. Usually one, but in case of retries there may be multiple logs for the same logical request.
  *
+ * Given context will be reduced to snake_case.
+ * Given URL templates will have their scheme and host stripped.
+ *
  * Call {@link end} when a response status is available. Call {@link error}
  * when the request fails before a response is received. Each terminal method
  * writes one info-level log entry containing the request context, URL, status
@@ -60,32 +63,19 @@ export class HttpLogger {
     traceId?: string;
     urlTemplate?: string;
   }) {
-    this._context = parameters.context;
+    this._context = snakeCase(parameters.context);
     this._url = parameters.url;
     this._traceId = parameters.traceId;
-    this._urlTemplate = parameters.urlTemplate;
+    this._urlTemplate = parameters.urlTemplate?.replace(
+      /^https?:\/\/[^/?#]+/i,
+      "",
+    );
 
     this._startTime = Date.now();
   }
 
   start(): void {
     this._startTime = Date.now();
-  }
-
-  /** Hook logging into undici response events */
-  log(response: Dispatcher.ResponseData<unknown>): void {
-    const contentLengthHeader = response.headers["content-length"] as string;
-    const contentLength = contentLengthHeader
-      ? parseInt(contentLengthHeader, 10)
-      : undefined;
-
-    response.body.on("error", (err: unknown) => {
-      this.logError(err);
-    });
-
-    response.body.on("end", () => {
-      this.logResponse(response.statusCode, contentLength);
-    });
   }
 
   /** Records a received HTTP response and writes the request log entry. */
@@ -129,8 +119,8 @@ export class HttpLogger {
   }): void {
     logger.info({
       method: METHOD,
-      [WIDE_CONTEXT.CONTEXT]: this._context,
       [WIDE_CONTEXT.TRACE_ID]: this._traceId,
+      [WIDE_CONTEXT.LOGGING.CONTEXT]: this._context,
       [WIDE_CONTEXT.HTTP_KEYS.URL]: this._url,
       [WIDE_CONTEXT.HTTP_KEYS.URL_TEMPLATE]: this._urlTemplate,
       [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: parameters.errorType,

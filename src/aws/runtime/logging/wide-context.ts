@@ -1,6 +1,9 @@
 export const WIDE_CONTEXT = {
   TRACE_ID: "customTrace_id",
-  CONTEXT: "customContext",
+
+  LOGGING: {
+    CONTEXT: "customLogging.context",
+  },
 
   HTTP_KEYS: {
     DURATION: "customHttp.client.request.duration",

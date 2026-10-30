@@ -1,4 +1,3 @@
-import { EventEmitter } from "node:events";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { logger } from "../../aws/runtime/logging/dt-logger-default.js";
 import {
@@ -37,15 +36,71 @@ describe("HttpLogger", () => {
 
     expect(infoSpy).toHaveBeenCalledWith({
       method: "HttpLogger.logStatus",
-      [WIDE_CONTEXT.CONTEXT]: "Port-call",
+      [WIDE_CONTEXT.LOGGING.CONTEXT]: "port_call",
       [WIDE_CONTEXT.TRACE_ID]: "trace-123",
       [WIDE_CONTEXT.HTTP_KEYS.URL]: "https://example.test/visits/1",
-      [WIDE_CONTEXT.HTTP_KEYS.URL_TEMPLATE]: "https://example.test/visits/{id}",
+      [WIDE_CONTEXT.HTTP_KEYS.URL_TEMPLATE]: "/visits/{id}",
       [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: undefined,
       [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: 200,
       [WIDE_CONTEXT.HTTP_KEYS.DURATION]: 1.25,
       [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: 512,
     });
+  });
+
+  test.each([
+    ["https://example.test/visits/{id}", "/visits/{id}"],
+    ["http://example.test:8080/visits/{id}?a=1", "/visits/{id}?a=1"],
+    ["HTTPS://example.test/visits/{id}", "/visits/{id}"],
+    ["https://example.test", ""],
+    ["https://example.test?a=1", "?a=1"],
+    ["/visits/{id}", "/visits/{id}"],
+    ["/redirect/https://other.test/{id}", "/redirect/https://other.test/{id}"],
+  ])("strips scheme and host from url template %s", (template, expected) => {
+    const infoSpy = vi
+      .spyOn(logger, "info")
+      .mockImplementation(() => undefined);
+
+    new HttpLogger({
+      context: "Test",
+      url: "https://example.test/visits/1",
+      urlTemplate: template,
+    }).logResponse(200);
+
+    expect(infoSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WIDE_CONTEXT.HTTP_KEYS.URL]: "https://example.test/visits/1",
+        [WIDE_CONTEXT.HTTP_KEYS.URL_TEMPLATE]: expected,
+      }),
+    );
+  });
+
+  test("strips host from factory and per-request url templates", () => {
+    const infoSpy = vi
+      .spyOn(logger, "info")
+      .mockImplementation(() => undefined);
+    infoSpy.mockClear();
+    const factory = new LoggerFactory({
+      context: "Test",
+      urlTemplate: "https://example.test/default/{id}",
+    });
+
+    factory.logger("https://example.test/default/1").logResponse(200);
+    factory
+      .logger("https://example.test/other/1", "https://example.test/other/{id}")
+      .logResponse(200);
+
+    expect(infoSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        [WIDE_CONTEXT.HTTP_KEYS.URL_TEMPLATE]: "/default/{id}",
+      }),
+    );
+    expect(infoSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        [WIDE_CONTEXT.HTTP_KEYS.URL_TEMPLATE]: "/other/{id}",
+      }),
+    );
   });
 
   test("logs error name and keeps status code unset when request fails", () => {
@@ -62,7 +117,7 @@ describe("HttpLogger", () => {
     expect(infoSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         method: "HttpLogger.logStatus",
-        [WIDE_CONTEXT.CONTEXT]: "Test",
+        [WIDE_CONTEXT.LOGGING.CONTEXT]: "test",
         [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: "TypeError",
         [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: undefined,
         [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: undefined,
@@ -88,31 +143,6 @@ describe("HttpLogger", () => {
       expect.objectContaining({
         [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]:
           typeof error === "string" ? error : "Unknown",
-      }),
-    );
-  });
-
-  test("logs response status and content length from header", () => {
-    const infoSpy = vi
-      .spyOn(logger, "info")
-      .mockImplementation(() => undefined);
-    const body = new EventEmitter();
-    const response = {
-      statusCode: 204,
-      headers: { "content-length": "5" },
-      body,
-    } as unknown as Parameters<HttpLogger["log"]>[0];
-    const httpLogger = new LoggerFactory({ context: "Test" }).logger(
-      "https://example.test",
-    );
-
-    httpLogger.log(response);
-    body.emit("end");
-
-    expect(infoSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: 204,
-        [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: 5,
       }),
     );
   });
