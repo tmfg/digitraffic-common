@@ -110,24 +110,17 @@ export function createKyHooks(httpLogger: HttpLogger): Hooks {
       },
     ],
     afterResponse: [
-      async (state: AfterResponseState) => {
-        const contentLengthFromHeader = parseContentLengthFromHeader(
-          state.response.headers.get("content-length"),
+      (state: AfterResponseState) => {
+        // Content length is taken from the header only. When the header is
+        // missing, for example with chunked responses, the length is left
+        // unknown: reading the body here would buffer the whole payload in
+        // memory and block streaming consumers until EOF.
+        httpLogger.logResponse(
+          state.response.status,
+          parseContentLengthFromHeader(
+            state.response.headers.get("content-length"),
+          ),
         );
-
-        // use header when available to determine content length
-        if (contentLengthFromHeader !== undefined) {
-          httpLogger.logResponse(
-            state.response.status,
-            contentLengthFromHeader,
-          );
-          return state.response;
-        }
-        // create clone from the response, so we can read its body without affecting the original response
-        const resp = state.response.clone();
-        const contentLength = (await resp.bytes()).length;
-
-        httpLogger.logResponse(resp.status, contentLength);
 
         return state.response;
       },

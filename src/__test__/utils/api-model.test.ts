@@ -101,12 +101,25 @@ describe("convertJsonSchemaNullableToOneOfDeep", () => {
 
   test("keeps null allowed when nullable schema is only a reference", () => {
     const schema = convertJsonSchemaNullableToOneOfDeep({
-      ref: "#/definitions/Vessel",
-      nullable: true,
+      type: "object",
+      definitions: {
+        Vessel: { type: "object" },
+      },
+      properties: {
+        vessel: { ref: "#/definitions/Vessel", nullable: true },
+      },
     } as JsonSchema);
 
     expect(schema).toEqual({
-      anyOf: [{ ref: "#/definitions/Vessel" }, { type: "null" }],
+      type: "object",
+      definitions: {
+        Vessel: { type: "object" },
+      },
+      properties: {
+        vessel: {
+          anyOf: [{ ref: "#/definitions/Vessel" }, { type: "null" }],
+        },
+      },
     });
   });
 
@@ -317,6 +330,143 @@ describe("convertJsonSchemaNullableToOneOfDeep", () => {
         { type: "null" },
       ],
     });
+  });
+
+  test("throws when a sibling reference points inside a wrapped schema", () => {
+    // The reference target moves under oneOf[0] when address is wrapped,
+    // so the pointer would be left dangling
+    expect(() =>
+      convertJsonSchemaNullableToOneOfDeep({
+        type: "object",
+        properties: {
+          address: {
+            type: "object",
+            nullable: true,
+            properties: { code: { type: "string" } },
+          },
+          billingCode: { ref: "#/properties/address/properties/code" },
+        },
+      } as JsonSchema),
+    ).toThrow(/#\/properties\/address\/properties\/code/);
+  });
+
+  test("throws when a definitions reference points inside a wrapped schema", () => {
+    expect(() =>
+      convertJsonSchemaNullableToOneOfDeep({
+        type: "object",
+        definitions: {
+          Shortcut: { ref: "#/properties/address/properties/code" },
+        },
+        properties: {
+          address: {
+            type: "object",
+            nullable: true,
+            properties: { code: { type: "string" } },
+          },
+          link: { ref: "#/definitions/Shortcut" },
+        },
+      } as JsonSchema),
+    ).toThrow(/#\/properties\/address\/properties\/code/);
+  });
+
+  test("allows references whose target does not move", () => {
+    // address is wrapped, but the reference points to plain, which stays put
+    const schema = convertJsonSchemaNullableToOneOfDeep({
+      type: "object",
+      properties: {
+        plain: { type: "string" },
+        address: { type: "object", nullable: true },
+        copy: { ref: "#/properties/plain" },
+      },
+    } as JsonSchema);
+
+    expect(schema).toEqual({
+      type: "object",
+      properties: {
+        plain: { type: "string" },
+        address: { oneOf: [{ type: "object" }, { type: "null" }] },
+        copy: { ref: "#/properties/plain" },
+      },
+    });
+  });
+
+  test("accepts percent-encoded references", () => {
+    // "#/definitions/Postal%20Code" is a valid URI fragment pointer to
+    // a definition named "Postal Code"
+    const schema = {
+      type: "object",
+      definitions: {
+        "Postal Code": { type: "string" },
+      },
+      properties: {
+        code: { ref: "#/definitions/Postal%20Code" },
+        name: { type: "string", nullable: true },
+      },
+    } as JsonSchema;
+
+    expect(() => convertJsonSchemaNullableToOneOfDeep(schema)).not.toThrow();
+  });
+
+  test("rejects an array index with a leading zero", () => {
+    // "01" is not a valid JSON Pointer array index, so the reference
+    // cannot be resolved even though Number("01") is 1
+    expect(() =>
+      convertJsonSchemaNullableToOneOfDeep({
+        type: "object",
+        properties: {
+          choice: { anyOf: [{ type: "string" }, { type: "number" }] },
+          copy: { ref: "#/properties/choice/anyOf/01" },
+          name: { type: "string", nullable: true },
+        },
+      } as JsonSchema),
+    ).toThrow(/#\/properties\/choice\/anyOf\/01/);
+  });
+
+  test("rejects references to inherited object properties", () => {
+    // toString exists on Object.prototype but not in the JSON document
+    expect(() =>
+      convertJsonSchemaNullableToOneOfDeep({
+        type: "object",
+        definitions: {},
+        properties: {
+          bad: { ref: "#/definitions/toString" },
+          name: { type: "string", nullable: true },
+        },
+      } as JsonSchema),
+    ).toThrow(/#\/definitions\/toString/);
+  });
+
+  test("treats an encoded slash as a separator per RFC 6901", () => {
+    // RFC 6901 section 6: the whole fragment is percent-decoded first and
+    // then tokenized, so %2F becomes a separator. A slash inside a key must
+    // be escaped as ~1 instead.
+    expect(() =>
+      convertJsonSchemaNullableToOneOfDeep({
+        type: "object",
+        definitions: {
+          "a/b": { type: "string" },
+        },
+        properties: {
+          bad: { ref: "#/definitions/a%2Fb" },
+          name: { type: "string", nullable: true },
+        },
+      } as JsonSchema),
+    ).toThrow(/#\/definitions\/a%2Fb/);
+  });
+
+  test("resolves a slash in a key escaped as ~1", () => {
+    expect(() =>
+      convertJsonSchemaNullableToOneOfDeep({
+        type: "object",
+        definitions: {
+          "a/b": { type: "string" },
+        },
+        properties: {
+          good: { ref: "#/definitions/a~1b" },
+          name: { type: "string", nullable: true },
+        },
+      } as JsonSchema),
+    ).not.toThrow();
   });
 
   test("creates an API Gateway schema from Zod", () => {

@@ -201,13 +201,17 @@ describe("createKyHooks", () => {
     expect(cloneSpy).not.toHaveBeenCalled();
   });
 
-  test("afterResponse measures body length when header is missing and keeps body readable", async () => {
+  test("afterResponse leaves length unknown when header is missing and keeps body readable", async () => {
     const { httpLogger, fn } = hook("afterResponse");
     const response = new Response("hello", { status: 201 });
+    const cloneSpy = vi.spyOn(response, "clone");
 
     const result = (await fn({ response })) as Response;
 
-    expect(httpLogger.logResponse).toHaveBeenCalledWith(201, 5);
+    // The body must not be read just for logging. Buffering it would hold
+    // the whole payload in memory and block streaming consumers.
+    expect(httpLogger.logResponse).toHaveBeenCalledWith(201, undefined);
+    expect(cloneSpy).not.toHaveBeenCalled();
     expect(await result.text()).toBe("hello");
   });
 

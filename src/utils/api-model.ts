@@ -117,28 +117,84 @@ function findLocalReferences(schema: unknown): string[] {
 }
 
 /**
+ * Checks whether a local JSON Pointer such as "#/definitions/Code" resolves
+ * to a value in the document. The pointer is a URI fragment: per RFC 6901
+ * section 6 the whole fragment is percent-decoded first and then tokenized,
+ * so an encoded slash (%2F) is a separator. A slash inside a key must be
+ * escaped as ~1.
+ */
+function resolvesInDocument(root: unknown, pointer: string): boolean {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pointer.slice(1));
+  } catch {
+    // malformed percent-encoding cannot resolve
+    return false;
+  }
+
+  const parts = decoded
+    .slice(1)
+    .split("/")
+    .map((part) => part.replace(/~1/g, "/").replace(/~0/g, "~"));
+
+  let current: unknown = root;
+  for (const part of parts) {
+    if (Array.isArray(current)) {
+      // RFC 6901: an array index is "0" or digits without a leading zero
+      if (!/^(0|[1-9][0-9]*)$/.test(part)) {
+        return false;
+      }
+      const index = Number(part);
+      if (index >= current.length) {
+        return false;
+      }
+      current = current[index];
+    } else if (isObject(current)) {
+      // own property only: inherited ones such as toString are not
+      // members of the JSON document
+      if (!Object.hasOwn(current, part)) {
+        return false;
+      }
+      current = current[part];
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Throws if the converted schema contains local references that no longer
+ * resolve. Wrapping nullable schemas moves their content under oneOf/anyOf,
+ * which can leave references pointing at the old location. Failing at synth
+ * time is safer than deploying a model with dangling references.
+ *
+ * This is an existence check only. In the unlikely case that a reference
+ * path stays occupied but its content changes, for example "#/oneOf/1"
+ * pointing at a union that gets a null alternative inserted, the change is
+ * not detected. Do not reference union alternatives by index.
+ */
+function assertLocalReferencesResolve(schema: unknown): void {
+  const broken = findLocalReferences(schema).filter(
+    (reference) => !resolvesInDocument(schema, reference),
+  );
+  if (broken.length > 0) {
+    throw new Error(
+      `Converting nullable schemas broke local references: ${broken.join(", ")}. Restructure the schema, for example move the referenced schema to definitions.`,
+    );
+  }
+}
+
+/**
  * Wraps a schema and a null alternative into a union. Definitions are kept at
  * the root, otherwise local references like "#/definitions/X" would point to
  * nothing after wrapping.
- *
- * Throws if the schema contains local references to other locations, such as
- * "#/properties/...". Wrapping would silently break them, so failing at synth
- * time is safer than deploying a broken model.
  */
 function wrapSchemaWithNull(
   schema: Record<string, unknown>,
   unionKeyword: "oneOf" | "anyOf",
 ): Record<string, unknown> {
   const { definitions, ...rest } = schema;
-
-  const brokenReferences = findLocalReferences(rest).filter(
-    (reference) => !reference.startsWith("#/definitions/"),
-  );
-  if (brokenReferences.length > 0) {
-    throw new Error(
-      `Cannot convert nullable schema: wrapping would break local references: ${brokenReferences.join(", ")}. Only #/definitions/ references are supported.`,
-    );
-  }
 
   const wrapped: Record<string, unknown> = {
     [unionKeyword]: [rest, { type: "null" }],
@@ -231,19 +287,20 @@ function removePatternKeyword(
  * allowed. The conversion is applied recursively to nested schemas. Field
  * names and literal values such as defaults are left untouched.
  *
- * Limitation: when a nullable schema is wrapped, only references to
- * `#/definitions/...` stay valid. If the schema contains local references to
- * other locations, such as `#/properties/...`, an error is thrown instead of
- * producing a model with broken references. Zod output never contains such
+ * Limitation: wrapping moves schema content under oneOf/anyOf, which can
+ * break local references such as `#/properties/...` pointing at the old
+ * location. After conversion every local reference is checked against the
+ * result, and an error is thrown instead of producing a model with dangling
+ * references. References to `#/definitions/...` targets stay valid because
+ * definitions are kept at the root. Zod output never contains such
  * references, so this only matters for hand-written schemas.
  */
 export function convertJsonSchemaNullableToOneOfDeep(
   schema: JsonSchemaWithNullable,
 ): JsonSchemaWithNullable {
-  return transformSchemaDeep(
-    schema,
-    convertNullableSchema,
-  ) as JsonSchemaWithNullable;
+  const converted = transformSchemaDeep(schema, convertNullableSchema);
+  assertLocalReferencesResolve(converted);
+  return converted as JsonSchemaWithNullable;
 }
 
 /**
@@ -280,9 +337,11 @@ export function toApiGatewayJsonSchema(schema: ZodType): JsonSchema {
     unrepresentable: "any",
   });
 
-  return transformSchemaDeep(jsonSchema, (schemaObject) =>
+  const converted = transformSchemaDeep(jsonSchema, (schemaObject) =>
     convertNullableSchema(removePatternKeyword(schemaObject)),
-  ) as JsonSchema;
+  );
+  assertLocalReferencesResolve(converted);
+  return converted as JsonSchema;
 }
 
 /**
