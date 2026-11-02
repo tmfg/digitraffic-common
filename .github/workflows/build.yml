@@ -46,8 +46,10 @@ jobs:
       - name: Install madge
         run: npm -g install madge
 
-      - name: Setup Graphviz
-        uses: ts-graphviz/setup-graphviz@b1de5da23ed0a6d14e0aeee8ed52fdd87af2363c # v2.0.2
+      - name: Install Graphviz
+        # Plain apt install instead of ts-graphviz/setup-graphviz: the action
+        # has no release targeting Node 24 and triggers a deprecation warning.
+        run: sudo apt-get install -y --no-install-recommends graphviz
 
       - name: Run madge
         id: run-madge
