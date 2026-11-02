@@ -8,6 +8,11 @@ permissions:
   actions: read
   checks: write
   id-token: write
+# GitHub Pages allows only one deployment at a time. Queue runs instead of
+# failing when two pushes publish their reports almost simultaneously.
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
 jobs:
   build:
     if: github.repository != 'tmfg/digitraffic-common'
