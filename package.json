@@ -97,6 +97,7 @@
     "./dist/aws/runtime/logging/http-logger": "./dist/aws/runtime/logging/http-logger.js",
     "./dist/aws/runtime/logging/wide-context": "./dist/aws/runtime/logging/wide-context.js",
     "./dist/aws/runtime/logging/http-interceptors": "./dist/aws/runtime/logging/http-interceptors.js",
+    "./dist/aws/runtime/logging/maintenance-logger": "./dist/aws/runtime/logging/maintenance-logger.js",
     "./dist/aws/runtime/secrets/secret": "./dist/aws/runtime/secrets/secret.js",
     "./dist/aws/runtime/secrets/proxy-holder": "./dist/aws/runtime/secrets/proxy-holder.js",
     "./dist/aws/runtime/secrets/dbsecret": "./dist/aws/runtime/secrets/dbsecret.js",
