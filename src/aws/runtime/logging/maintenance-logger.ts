@@ -7,13 +7,8 @@ const METHOD_CLEANUP: LoggerMethodType =
 const METHOD_ERROR: LoggerMethodType = "MaintenanceLogger.logError" as const;
 
 export class MaintenanceLogger {
-  private static _maintenanceLogger?: MaintenanceLogger;
-
   public static instance(): MaintenanceLogger {
-    if (!MaintenanceLogger._maintenanceLogger) {
-      MaintenanceLogger._maintenanceLogger = new MaintenanceLogger();
-    }
-    return MaintenanceLogger._maintenanceLogger;
+    return new MaintenanceLogger();
   }
 
   /**

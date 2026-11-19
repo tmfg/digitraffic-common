@@ -54,17 +54,20 @@ export class StopWatch {
   }
 
   /**
-   * Returns the duration of the specified task in seconds, formatted to the specified number of decimal places.
+   * Returns the duration of the specified task in seconds.
    *
    * @param taskName The name of the task to get the duration for.
-   * @param digits The number of decimal places to include in the result.
-   * @returns The duration of the task in seconds, formatted to the specified number of decimal places.
+   * @param precision The number of decimal places to include in the result.
+   * @returns The duration of the task in seconds.
    */
   getDurationInSeconds(
     taskName: string = StopWatch.DEFAULT_TASK_NAME,
-    digits: number = 2,
+    precision: number = 2,
   ): number {
-    return (this.getDuration(taskName) / 1000).toFixed(digits);
+    const num = this.getDuration(taskName) / 1000;
+    const factor = 10 ** precision; // for specified decimal places
+
+    return Math.round((num + Number.EPSILON) * factor) / factor;
   }
 
   getDuration(taskName: string = StopWatch.DEFAULT_TASK_NAME): number {
