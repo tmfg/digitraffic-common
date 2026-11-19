@@ -25,9 +25,25 @@ export type ReadonlyTaskRecord = Readonly<{
   isRunning: boolean;
 }>;
 
+/**
+ * Utility class for measuring and recording task durations.
+ */
 export class StopWatch {
   private tasks: Map<string, TaskRecord> = new Map();
   private static readonly DEFAULT_TASK_NAME: string = "DEFAULT_INTERNAL_TASK";
+
+  /**
+   * Creates and starts a new StopWatch instance with
+   * the default task name.
+   * @returns A new StopWatch instance with the default task started.
+   */
+  static createStarted(): StopWatch;
+  /**
+   * Creates and starts a new StopWatch instance with the given task name.
+   * @param taskName The name of the task to start.
+   * @returns A new StopWatch instance with the task started.
+   */
+  static createStarted(taskName: string): StopWatch;
 
   static createStarted(
     taskName: string = StopWatch.DEFAULT_TASK_NAME,
@@ -35,6 +51,20 @@ export class StopWatch {
     const sw = new StopWatch();
     sw.start(taskName);
     return sw;
+  }
+
+  /**
+   * Returns the duration of the specified task in seconds, formatted to the specified number of decimal places.
+   *
+   * @param taskName The name of the task to get the duration for.
+   * @param digits The number of decimal places to include in the result.
+   * @returns The duration of the task in seconds, formatted to the specified number of decimal places.
+   */
+  getDurationInSeconds(
+    taskName: string = StopWatch.DEFAULT_TASK_NAME,
+    digits: number = 2,
+  ): number {
+    return (this.getDuration(taskName) / 1000).toFixed(digits);
   }
 
   getDuration(taskName: string = StopWatch.DEFAULT_TASK_NAME): number {
