@@ -185,3 +185,47 @@ const lambda = FunctionBuilder.create(stack, "get-metadata")
 ```
 
 See the documentation for more information.
+
+### HTTP request logging
+
+`HttpLogger` (`dist/aws/runtime/logging/http-logger`) writes one info log per outbound HTTP request attempt. The
+field names follow OpenTelemetry where possible (the `custom` prefix is removed when the log is written):
+
+| Field | Value |
+| --- | --- |
+| `context` | Integration name in snake_case, e.g. `ocpi` |
+| `trace_id` | Optional id that joins the attempts and requests of one run, e.g. a correlation id |
+| `url_full`, `url_template` | The full URL, and an optional template without variable values (scheme and host removed) for aggregations |
+| `http.response.status_code` | Status code, missing when no response was received |
+| `http.client.request.duration` | Duration of the attempt in seconds |
+| `http.response.body.size` | From the `content-length` header, missing when unknown |
+| `http.request.resend_count` | 1 for the first retry, 2 for the second etc. Missing for the first attempt (OpenTelemetry: set if and only if the request was retried) |
+| `error_type` | OpenTelemetry `error.type`: the error name when no response was received (e.g. `TypeError`), or the status code of a status of 400 or more (e.g. `503`). Missing on success |
+| `outcome` | `success` or `error` of this attempt, the same as whether `error_type` is set |
+
+Fields without a value are left out. The outcome of a request is the outcome of its last attempt.
+
+Use it with ky through `createKyHooks` (`dist/aws/runtime/logging/http-interceptors`):
+
+```ts
+const response = await ky.get(url, {
+  hooks: createKyHooks(
+    new HttpLogger({
+      context: "ocpi",
+      url,
+      traceId: correlationId,
+      urlTemplate: url.split("?")[0],
+    }),
+  ),
+  retry: 2,
+});
+```
+
+- Every attempt is logged once, also retries: a response in `afterResponse`, an attempt that failed without a response
+  (network error, timeout) in `beforeRetry`, and the last failed attempt in `beforeError`.
+- The duration of a failed attempt ends when the request failed. Ky runs `beforeRetry` only after the retry delay, so
+  the hooks wrap `fetch` in an `init` hook to record the failure time, and the delay is not counted.
+- Create the hooks and the `HttpLogger` for each request. They keep the timer and the failure time of one request, so
+  sharing them between concurrent requests (e.g. with `ky.extend`) would mix the timings.
+
+For undici, `createLoggingInterceptor(httpLogger)` logs the status, duration and body size of a request with an undici interceptor, without the resend count.

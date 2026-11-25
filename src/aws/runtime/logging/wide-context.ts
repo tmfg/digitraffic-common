@@ -13,6 +13,8 @@ export const WIDE_CONTEXT = {
     DURATION: "customHttp.client.request.duration",
     STATUS_CODE: "customHttp.response.status_code",
     CONTENT_LENGTH: "customHttp.response.body.size",
+    /** OpenTelemetry http.request.resend_count: 1 for the first retry etc., not set for the first attempt */
+    RESEND_COUNT: "customHttp.request.resend_count",
   } as const,
 
   OUTCOME: {

@@ -44,6 +44,8 @@ describe("HttpLogger", () => {
       [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: 200,
       [WIDE_CONTEXT.HTTP_KEYS.DURATION]: 1.25,
       [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: 512,
+      [WIDE_CONTEXT.HTTP_KEYS.RESEND_COUNT]: undefined,
+      [WIDE_CONTEXT.OUTCOME.KEY]: WIDE_CONTEXT.OUTCOME.VALUE_SUCCESS,
     });
   });
 
@@ -119,9 +121,10 @@ describe("HttpLogger", () => {
         method: "HttpLogger.logStatus",
         [WIDE_CONTEXT.CONTEXT]: "test",
         [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: "TypeError",
-        [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: undefined,
-        [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: undefined,
       }),
+    );
+    expect(Object.keys(infoSpy.mock.lastCall?.[0] ?? {})).not.toContain(
+      WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE,
     );
   });
 
@@ -143,6 +146,77 @@ describe("HttpLogger", () => {
       expect.objectContaining({
         [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]:
           typeof error === "string" ? error : "Unknown",
+      }),
+    );
+  });
+
+  test("leaves out the fields without a value, also resend count of the first attempt", () => {
+    const infoSpy = vi
+      .spyOn(logger, "info")
+      .mockImplementation(() => undefined);
+
+    new HttpLogger({
+      context: "Test",
+      url: "https://example.test",
+    }).logResponse(200, undefined, 0);
+
+    // A key with an undefined value would be written as "key=undefined" in the message
+    expect(Object.keys(infoSpy.mock.lastCall?.[0] ?? {}).sort()).toEqual(
+      [
+        "method",
+        WIDE_CONTEXT.CONTEXT,
+        WIDE_CONTEXT.HTTP_KEYS.URL,
+        WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE,
+        WIDE_CONTEXT.HTTP_KEYS.DURATION,
+        WIDE_CONTEXT.OUTCOME.KEY,
+      ].sort(),
+    );
+  });
+
+  test("logs error type, resend count and error outcome for an HTTP error status", () => {
+    const infoSpy = vi
+      .spyOn(logger, "info")
+      .mockImplementation(() => undefined);
+
+    new HttpLogger({
+      context: "Test",
+      url: "https://example.test",
+    }).logResponse(503, undefined, 2);
+
+    expect(infoSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: 503,
+        [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: "503",
+        [WIDE_CONTEXT.HTTP_KEYS.RESEND_COUNT]: 2,
+        [WIDE_CONTEXT.OUTCOME.KEY]: WIDE_CONTEXT.OUTCOME.VALUE_ERROR,
+      }),
+    );
+  });
+
+  test("logError uses the given end time and resend count", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+    const infoSpy = vi
+      .spyOn(logger, "info")
+      .mockImplementation(() => undefined);
+    const httpLogger = new HttpLogger({
+      context: "Test",
+      url: "https://example.test",
+    });
+    const failedAt = Date.now() + 200;
+
+    vi.advanceTimersByTime(5000);
+    httpLogger.logError(new TypeError("fetch failed"), {
+      endTime: failedAt,
+      resendCount: 1,
+    });
+
+    expect(infoSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WIDE_CONTEXT.HTTP_KEYS.DURATION]: 0.2,
+        [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: "TypeError",
+        [WIDE_CONTEXT.HTTP_KEYS.RESEND_COUNT]: 1,
+        [WIDE_CONTEXT.OUTCOME.KEY]: WIDE_CONTEXT.OUTCOME.VALUE_ERROR,
       }),
     );
   });

@@ -1,11 +1,11 @@
-import { HTTPError } from "ky";
+import ky, { HTTPError } from "ky";
 import type { Dispatcher } from "undici";
 import { describe, expect, test, vi } from "vitest";
 import {
   createKyHooks,
   createLoggingInterceptor,
 } from "../../aws/runtime/logging/http-interceptors.js";
-import type { HttpLogger } from "../../aws/runtime/logging/http-logger.js";
+import { HttpLogger } from "../../aws/runtime/logging/http-logger.js";
 
 type AnyFn = (...args: unknown[]) => unknown;
 
@@ -186,6 +186,35 @@ describe("createKyHooks", () => {
     },
   );
 
+  test("beforeRetry logs the failed attempt without a response before starting the timer again", () => {
+    const { httpLogger, fn } = hook("beforeRetry");
+    const request = new Request("https://example.com");
+    const error = new TypeError("fetch failed");
+
+    expect(fn({ request, error, retryCount: 1 })).toBe(request);
+    expect(httpLogger.logError).toHaveBeenCalledWith(error, {
+      endTime: undefined,
+      resendCount: 0,
+    });
+    expect(httpLogger.logError.mock.invocationCallOrder[0]).toBeLessThan(
+      httpLogger.start.mock.invocationCallOrder[0] ?? 0,
+    );
+  });
+
+  test("beforeRetry does not log a retried HTTPError again after afterResponse logged it", () => {
+    const { httpLogger, fn } = hook("beforeRetry");
+    const request = new Request("https://example.com");
+    const error = new HTTPError(
+      new Response(null, { status: 503 }),
+      request,
+      {} as never,
+    );
+
+    expect(fn({ request, error })).toBe(request);
+    expect(httpLogger.logError).not.toHaveBeenCalled();
+    expect(httpLogger.start).toHaveBeenCalledTimes(1);
+  });
+
   test("afterResponse uses content-length header without reading the body", async () => {
     const { httpLogger, fn } = hook("afterResponse");
     const response = new Response("hello", {
@@ -194,10 +223,10 @@ describe("createKyHooks", () => {
     });
     const cloneSpy = vi.spyOn(response, "clone");
 
-    const result = await fn({ response });
+    const result = await fn({ response, retryCount: 0 });
 
     expect(result).toBe(response);
-    expect(httpLogger.logResponse).toHaveBeenCalledWith(200, 5);
+    expect(httpLogger.logResponse).toHaveBeenCalledWith(200, 5, 0);
     expect(cloneSpy).not.toHaveBeenCalled();
   });
 
@@ -206,11 +235,11 @@ describe("createKyHooks", () => {
     const response = new Response("hello", { status: 201 });
     const cloneSpy = vi.spyOn(response, "clone");
 
-    const result = (await fn({ response })) as Response;
+    const result = (await fn({ response, retryCount: 1 })) as Response;
 
     // The body must not be read just for logging. Buffering it would hold
     // the whole payload in memory and block streaming consumers.
-    expect(httpLogger.logResponse).toHaveBeenCalledWith(201, undefined);
+    expect(httpLogger.logResponse).toHaveBeenCalledWith(201, undefined, 1);
     expect(cloneSpy).not.toHaveBeenCalled();
     expect(await result.text()).toBe("hello");
   });
@@ -219,8 +248,11 @@ describe("createKyHooks", () => {
     const { httpLogger, fn } = hook("beforeError");
     const error = new Error("failed");
 
-    expect(fn({ error })).toBe(error);
-    expect(httpLogger.logError).toHaveBeenCalledWith(error);
+    expect(fn({ error, retryCount: 2 })).toBe(error);
+    expect(httpLogger.logError).toHaveBeenCalledWith(error, {
+      endTime: undefined,
+      resendCount: 2,
+    });
   });
 
   test("beforeError does not log HTTPError again after afterResponse logged it", () => {
@@ -233,5 +265,94 @@ describe("createKyHooks", () => {
 
     expect(fn({ error })).toBe(error);
     expect(httpLogger.logError).not.toHaveBeenCalled();
+  });
+});
+
+describe("createKyHooks with ky", () => {
+  const URL = "https://example.com/visits/1";
+  const networkError = () => Promise.reject(new TypeError("fetch failed"));
+
+  function request(fetch: () => Promise<Response>) {
+    const httpLogger = mockHttpLogger();
+    const promise = ky.get(URL, {
+      fetch,
+      hooks: createKyHooks(asHttpLogger(httpLogger)),
+      retry: { limit: 2, delay: () => 0 },
+    });
+    return { httpLogger, promise };
+  }
+
+  test("logs a network error and the successful retry, one log per attempt", async () => {
+    const fetch = vi
+      .fn<() => Promise<Response>>()
+      .mockImplementationOnce(networkError)
+      .mockResolvedValueOnce(new Response("ok", { status: 200 }));
+    const { httpLogger, promise } = request(fetch);
+
+    await promise;
+
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(httpLogger.logError).toHaveBeenCalledTimes(1);
+    expect(httpLogger.logError.mock.calls[0]?.[1]).toMatchObject({
+      resendCount: 0,
+    });
+    expect(httpLogger.logResponse).toHaveBeenCalledTimes(1);
+    expect(httpLogger.logResponse).toHaveBeenCalledWith(200, undefined, 1);
+  });
+
+  test("logs every failed attempt when the retries run out", async () => {
+    const fetch = vi.fn<() => Promise<Response>>(networkError);
+    const { httpLogger, promise } = request(fetch);
+
+    await expect(promise).rejects.toThrow();
+
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(
+      httpLogger.logError.mock.calls.map(
+        (c) => (c[1] as { resendCount?: number }).resendCount,
+      ),
+    ).toEqual([0, 1, 2]);
+    expect(httpLogger.logResponse).not.toHaveBeenCalled();
+  });
+
+  test("logs a retried HTTP status once per attempt", async () => {
+    const fetch = vi
+      .fn<() => Promise<Response>>()
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResolvedValueOnce(new Response("ok", { status: 200 }));
+    const { httpLogger, promise } = request(fetch);
+
+    await promise;
+
+    expect(httpLogger.logResponse.mock.calls.map((c) => [c[0], c[2]])).toEqual([
+      [503, 0],
+      [200, 1],
+    ]);
+    expect(httpLogger.logError).not.toHaveBeenCalled();
+  });
+
+  test("leaves the retry delay out of the duration of a failed attempt", async () => {
+    const RETRY_DELAY_MS = 300;
+    const fetch = vi
+      .fn<() => Promise<Response>>()
+      .mockImplementationOnce(networkError)
+      .mockResolvedValueOnce(new Response("ok", { status: 200 }));
+    const httpLogger = new HttpLogger({ context: "Test", url: URL });
+    const logErrorSpy = vi.spyOn(httpLogger, "logError");
+    const startedAt = Date.now();
+
+    await ky.get(URL, {
+      fetch,
+      hooks: createKyHooks(httpLogger),
+      retry: { limit: 1, delay: () => RETRY_DELAY_MS },
+    });
+
+    const options = logErrorSpy.mock.calls[0]?.[1] as
+      | { endTime?: number }
+      | undefined;
+    const endTime = options?.endTime;
+    expect(Date.now() - startedAt).toBeGreaterThanOrEqual(RETRY_DELAY_MS);
+    expect(endTime).toBeDefined();
+    expect((endTime ?? 0) - startedAt).toBeLessThan(RETRY_DELAY_MS);
   });
 });

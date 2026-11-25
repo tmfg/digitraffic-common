@@ -4,8 +4,9 @@ import type {
   BeforeRequestState,
   BeforeRetryState,
   Hooks,
+  Options,
 } from "ky";
-import { HTTPError } from "ky";
+import { HTTPError, isForceRetryError, isHTTPError } from "ky";
 import type { Dispatcher } from "undici";
 import { DecoratorHandler } from "undici";
 import type { IncomingHttpHeaders } from "undici/types/header.js";
@@ -94,18 +95,61 @@ export function createLoggingInterceptor(
   };
 }
 
-/** Create hooks for Ky HTTP client using the provided logger */
+/**
+ * Create hooks for Ky HTTP client using the provided logger. Every attempt, including retries, is logged once:
+ * - afterResponse: an attempt that got a response, also an HTTP error status that is retried
+ * - beforeRetry: an attempt that failed without a response (network error, timeout) and is retried
+ * - beforeError: the last attempt that failed without a response
+ *
+ * The resend count is ky's retry count (not logged for the first attempt). The duration of a failed attempt ends
+ * when the request failed, not after the retry delay: ky runs beforeRetry only after the delay, so the init hook
+ * wraps fetch to record the failure time.
+ *
+ * Create the hooks and the logger for each request. They keep the timer and the failure time of one request,
+ * so sharing them between concurrent requests (e.g. with ky.extend) would mix the timings.
+ */
 export function createKyHooks(httpLogger: HttpLogger): Hooks {
+  // When the current attempt failed without a response. Ky runs beforeRetry only after the retry delay,
+  // so the failure is timed here to leave the delay out of the attempt duration.
+  let failedAt: number | undefined;
+
+  const startAttempt = (): void => {
+    failedAt = undefined;
+    httpLogger.start();
+  };
+
   return {
+    init: [
+      (options: Options) => {
+        const fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
+        options.fetch = async (input, init) => {
+          try {
+            return await fetch(input, init);
+          } catch (error) {
+            failedAt = Date.now();
+            throw error;
+          }
+        };
+      },
+    ],
     beforeRequest: [
       (state: BeforeRequestState) => {
-        httpLogger.start();
+        startAttempt();
         return state.request;
       },
     ],
     beforeRetry: [
       (state: BeforeRetryState) => {
-        httpLogger.start();
+        // An attempt that failed without a response (e.g. a network error or a timeout) is logged here, as
+        // beforeError runs only for the last attempt. A response, also a retried HTTPError, was logged in afterResponse.
+        if (!isHTTPError(state.error) && !isForceRetryError(state.error)) {
+          httpLogger.logError(state.error, {
+            endTime: failedAt,
+            // retryCount is the retry that is about to start
+            resendCount: state.retryCount - 1,
+          });
+        }
+        startAttempt();
         return state.request;
       },
     ],
@@ -120,6 +164,7 @@ export function createKyHooks(httpLogger: HttpLogger): Hooks {
           parseContentLengthFromHeader(
             state.response.headers.get("content-length"),
           ),
+          state.retryCount,
         );
 
         return state.response;
@@ -129,7 +174,10 @@ export function createKyHooks(httpLogger: HttpLogger): Hooks {
       (state: BeforeErrorState) => {
         // afterResponse has already logged the HTTP status of this attempt
         if (!(state.error instanceof HTTPError)) {
-          httpLogger.logError(state.error);
+          httpLogger.logError(state.error, {
+            endTime: failedAt,
+            resendCount: state.retryCount,
+          });
         }
 
         return state.error;

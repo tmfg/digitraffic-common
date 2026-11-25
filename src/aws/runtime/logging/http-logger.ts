@@ -1,4 +1,4 @@
-import { snakeCase } from "es-toolkit";
+import { isUndefined, omitBy, snakeCase } from "es-toolkit";
 import type { LoggerMethodType } from "./dt-logger.js";
 import { logger } from "./dt-logger-default.js";
 import { WIDE_CONTEXT } from "./wide-context.js";
@@ -81,10 +81,14 @@ export class HttpLogger {
   }
 
   /** Records a received HTTP response and writes the request log entry. */
-  logResponse(statusCode: number, contentLength?: number): void {
+  logResponse(
+    statusCode: number,
+    contentLength?: number,
+    resendCount?: number,
+  ): void {
     const endTime = Date.now();
 
-    this.logStatus({ endTime, statusCode, contentLength });
+    this.logStatus({ endTime, statusCode, contentLength, resendCount });
   }
 
   /**
@@ -94,7 +98,14 @@ export class HttpLogger {
    * other values are recorded as `Unknown`. Since no response was received,
    * the status code is left undefined.
    */
-  logError(error: unknown): void {
+  logError(
+    error: unknown,
+    options?: {
+      /** When the attempt failed, defaults to now. E.g. a retry may log the failure after the retry delay. */
+      readonly endTime?: number;
+      readonly resendCount?: number;
+    },
+  ): void {
     let errorType: string;
 
     if (typeof error === "string") {
@@ -105,11 +116,10 @@ export class HttpLogger {
       errorType = "Unknown";
     }
 
-    const endTime = Date.now();
-
     this.logStatus({
-      endTime,
+      endTime: options?.endTime ?? Date.now(),
       errorType,
+      resendCount: options?.resendCount,
     });
   }
 
@@ -118,18 +128,39 @@ export class HttpLogger {
     statusCode?: number;
     contentLength?: number;
     errorType?: string;
+    resendCount?: number;
   }): void {
-    logger.info({
-      method: METHOD,
-      [WIDE_CONTEXT.TRACE_ID]: this._traceId,
-      [WIDE_CONTEXT.CONTEXT]: this._context,
-      [WIDE_CONTEXT.HTTP_KEYS.URL]: this._url,
-      [WIDE_CONTEXT.HTTP_KEYS.URL_TEMPLATE]: this._urlTemplate,
-      [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: parameters.errorType,
-      [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: parameters.statusCode,
-      [WIDE_CONTEXT.HTTP_KEYS.DURATION]:
-        (parameters.endTime - this._startTime) / 1000,
-      [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: parameters.contentLength,
-    });
+    // OpenTelemetry error.type: the error, or the status code of an HTTP error status. Not set on success.
+    const errorType =
+      parameters.errorType ??
+      (parameters.statusCode !== undefined && parameters.statusCode >= 400
+        ? String(parameters.statusCode)
+        : undefined);
+
+    // Fields without a value are left out, otherwise the message text would have "key=undefined"
+    const fields = omitBy(
+      {
+        [WIDE_CONTEXT.TRACE_ID]: this._traceId,
+        [WIDE_CONTEXT.CONTEXT]: this._context,
+        [WIDE_CONTEXT.HTTP_KEYS.URL]: this._url,
+        [WIDE_CONTEXT.HTTP_KEYS.URL_TEMPLATE]: this._urlTemplate,
+        [WIDE_CONTEXT.HTTP_KEYS.ERROR_TYPE]: errorType,
+        [WIDE_CONTEXT.HTTP_KEYS.STATUS_CODE]: parameters.statusCode,
+        [WIDE_CONTEXT.HTTP_KEYS.DURATION]:
+          (parameters.endTime - this._startTime) / 1000,
+        [WIDE_CONTEXT.HTTP_KEYS.CONTENT_LENGTH]: parameters.contentLength,
+        // OpenTelemetry: set if and only if the request was retried
+        [WIDE_CONTEXT.HTTP_KEYS.RESEND_COUNT]:
+          parameters.resendCount || undefined,
+        // Outcome of this attempt. The last attempt of a request tells the outcome of the request.
+        [WIDE_CONTEXT.OUTCOME.KEY]:
+          errorType === undefined
+            ? WIDE_CONTEXT.OUTCOME.VALUE_SUCCESS
+            : WIDE_CONTEXT.OUTCOME.VALUE_ERROR,
+      },
+      isUndefined,
+    );
+
+    logger.info({ method: METHOD, ...fields });
   }
 }
